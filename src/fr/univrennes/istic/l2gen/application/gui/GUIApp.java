@@ -1,7 +1,6 @@
 package fr.univrennes.istic.l2gen.application.gui;
 
 import fr.univrennes.istic.l2gen.application.core.CoreApp;
-import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.core.services.TableService;
 import fr.univrennes.istic.l2gen.application.gui.main.MainView;
 
@@ -41,7 +40,7 @@ public final class GUIApp extends CoreApp<GUIController> {
         }
 
         SwingUtilities.invokeLater(() -> {
-            TableService.load();
+            TableService.loadRecents();
 
             MainView view = new MainView(controller);
             view.setVisible(true);
@@ -52,7 +51,7 @@ public final class GUIApp extends CoreApp<GUIController> {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             this.controller.onStop();
-            TableService.save();
+            TableService.saveRecents();
         }));
     }
 }

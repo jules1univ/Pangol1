@@ -19,7 +19,6 @@ import org.duckdb.DuckDBConnection;
 import fr.univrennes.istic.l2gen.application.VectorReport;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterType;
-import fr.univrennes.istic.l2gen.application.core.services.ConverterService;
 import fr.univrennes.istic.l2gen.application.core.services.FileService;
 
 public final class DataTable {
@@ -29,7 +28,7 @@ public final class DataTable {
     private final LinkedHashMap<Integer, Object[][]> blockCache;
     private final ExecutorService prefetchExecutor;
 
-    private DuckDBConnection sharedConnection;
+    private DuckDBConnection connection;
 
     private final String tableName;
     private final File tablePath;
@@ -45,22 +44,21 @@ public final class DataTable {
     private final List<Filter> filters = new ArrayList<>();
 
     public static DataTable of(File file) throws IOException {
-        if (!FileService.isParquetFile(file)) {
-            return ConverterService.convert(file, FileService.getProcessedFile(file));
+        if (!file.canRead() || !file.isFile() || file.length() == 0 || FileService.getExtension(file) != "parquet") {
+            return null;
         }
 
-        String absolutePath = file.getAbsolutePath().replace("\\", "/");
-
+        String tablePath = file.getAbsolutePath().replace("\\", "/");
         try (DuckDBConnection connection = (DuckDBConnection) DriverManager.getConnection("jdbc:duckdb:")) {
             try (Statement statement = connection.createStatement()) {
 
                 ResultSet rowCountResult = statement.executeQuery(
-                        String.format("SELECT COUNT(*) FROM '%s'", absolutePath));
+                        String.format("SELECT COUNT(*) FROM '%s'", tablePath));
                 rowCountResult.next();
                 long rowCount = rowCountResult.getLong(1);
 
                 ResultSet columnResult = statement.executeQuery(
-                        String.format("DESCRIBE SELECT * FROM '%s'", absolutePath));
+                        String.format("DESCRIBE SELECT * FROM '%s'", tablePath));
 
                 List<String> columnNames = new ArrayList<>();
                 List<DataType> columnTypes = new ArrayList<>();
@@ -110,7 +108,7 @@ public final class DataTable {
         });
 
         try {
-            this.sharedConnection = (DuckDBConnection) DriverManager.getConnection("jdbc:duckdb:");
+            this.connection = (DuckDBConnection) DriverManager.getConnection("jdbc:duckdb:");
         } catch (Exception e) {
             throw new IOException("Failed to open DuckDB connection", e);
         }
@@ -267,8 +265,8 @@ public final class DataTable {
         prefetchExecutor.shutdownNow();
         this.invalidateCache();
         try {
-            if (sharedConnection != null && !sharedConnection.isClosed()) {
-                sharedConnection.close();
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
             }
         } catch (Exception ignored) {
         }
@@ -340,8 +338,8 @@ public final class DataTable {
 
     private void refreshRowCountFromQuery() throws Exception {
         String countQuery = buildCountQuery();
-        synchronized (sharedConnection) {
-            try (Statement statement = sharedConnection.createStatement()) {
+        synchronized (connection) {
+            try (Statement statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(countQuery);
                 resultSet.next();
                 this.rowCount = resultSet.getLong(1);
@@ -438,8 +436,8 @@ public final class DataTable {
         String query = buildQuery(limitCount, offsetRow);
         try {
             Object[][] blockData;
-            synchronized (sharedConnection) {
-                try (Statement statement = sharedConnection.createStatement()) {
+            synchronized (connection) {
+                try (Statement statement = connection.createStatement()) {
                     ResultSet resultSet = statement.executeQuery(query);
                     ResultSetMetaData metaData = resultSet.getMetaData();
                     int fetchedColumnCount = metaData.getColumnCount();

@@ -1,13 +1,10 @@
 package fr.univrennes.istic.l2gen.application.core.services;
 
 import java.io.*;
-import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import fr.univrennes.istic.l2gen.application.VectorReport;
-import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 
 public final class FileService {
 
@@ -26,6 +23,21 @@ public final class FileService {
         return appDataDir;
     }
 
+    public static File getDownloadDirectory() {
+        String userHome = System.getProperty("user.home");
+        File downloadDir = new File(userHome, "Downloads");
+        if (!downloadDir.exists()) {
+            try {
+                downloadDir.mkdirs();
+            } catch (Exception e) {
+                if (VectorReport.DEBUG_MODE) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return downloadDir;
+    }
+
     public static File getAppDataFile(String fileName) {
         return new File(getAppDataDirectory(), fileName);
     }
@@ -36,108 +48,38 @@ public final class FileService {
         return (i > 0) ? name.substring(i + 1) : "";
     }
 
-    public static boolean isParquetFile(File file) {
-        return file.isFile() && file.canRead() && getExtension(file).equals("parquet");
-    }
+    public static String getRemoteFileName(HttpURLConnection connection, URL url) {
+        String disposition = connection.getHeaderField("Content-Disposition");
 
-    public static boolean isAlreadyProcessed(File file) {
-        return getAppDataFile(file.getName() + ".parquet").exists();
-    }
+        if (disposition != null && disposition.contains("filename=")) {
+            return disposition
+                    .split("filename=")[1]
+                    .replace("\"", "")
+                    .trim();
+        }
 
-    public static File getProcessedFile(File file) {
-        return getAppDataFile(file.getName() + ".parquet");
-    }
+        String path = url.getPath();
+        String name = path.substring(path.lastIndexOf('/') + 1);
 
-    public static List<DataTable> process(File file) {
-        if (!file.exists())
-            return List.of();
-
-        try {
-            if (file.isDirectory()) {
-                return processDirectory(file);
-            }
-
-            if (isAlreadyProcessed(file)) {
-                file = getProcessedFile(file);
-            }
-
-            if (file.isFile() && file.canRead()) {
-                String ext = getExtension(file);
-
-                switch (ext) {
-                    case "zip":
-                        return processZip(file);
-                    case "csv":
-                    case "tsv":
-                    case "txt": {
-                        DataTable table = DataTable.of(file);
-                        if (table != null) {
-                            return List.of(table);
-                        } else {
-                            return List.of();
-                        }
-                    }
-                    case "parquet": {
-                        DataTable table = DataTable.of(file);
-                        if (table != null) {
-                            return List.of(table);
-                        } else {
-                            return List.of();
-                        }
-                    }
-                    default:
-                        return List.of();
+        if (!name.contains(".")) {
+            String contentType = connection.getContentType();
+            if (contentType != null) {
+                if (contentType.contains("csv")) {
+                    return name + ".csv";
+                }
+                if (contentType.contains("txt")) {
+                    return name + ".txt";
+                }
+                if (contentType.contains("parquet")) {
+                    return name + ".parquet";
+                }
+                if (contentType.contains("zip")) {
+                    return name + ".zip";
                 }
             }
-
-        } catch (Exception e) {
         }
 
-        return List.of();
-    }
-
-    private static List<DataTable> processDirectory(File dir) {
-        File[] files = dir.listFiles();
-        if (files == null) {
-            return List.of();
-        }
-
-        List<DataTable> result = new ArrayList<>();
-        for (File f : files) {
-            result.addAll(process(f));
-        }
-        return result;
-    }
-
-    private static List<DataTable> processURL(String url) {
-        return List.of();
-    }
-
-    private static List<DataTable> processZip(File zipFile) throws IOException {
-
-        Path dir = getAppDataDirectory().toPath().resolve(zipFile.getName());
-        List<DataTable> result = new ArrayList<>();
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-
-                File newFile = new File(dir.toFile(), entry.getName());
-                if (entry.isDirectory()) {
-                    newFile.mkdirs();
-                    continue;
-                }
-
-                new File(newFile.getParent()).mkdirs();
-
-                try (FileOutputStream fos = new FileOutputStream(newFile)) {
-                    zis.transferTo(fos);
-                }
-
-                result.addAll(process(newFile));
-            }
-        }
-
-        return result;
+        return name.isEmpty() ? "downloaded_file" : name;
     }
 
 }

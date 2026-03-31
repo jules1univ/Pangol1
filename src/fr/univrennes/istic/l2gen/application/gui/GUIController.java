@@ -2,17 +2,10 @@ package fr.univrennes.istic.l2gen.application.gui;
 
 import java.awt.Desktop;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.concurrent.ExecutionException;
@@ -25,7 +18,6 @@ import com.formdev.flatlaf.util.SystemFileChooser;
 
 import fr.univrennes.istic.l2gen.application.VectorReport;
 import fr.univrennes.istic.l2gen.application.core.CoreController;
-import fr.univrennes.istic.l2gen.application.core.services.FileService;
 import fr.univrennes.istic.l2gen.application.core.services.StatisticOp;
 import fr.univrennes.istic.l2gen.application.core.services.StatisticService;
 import fr.univrennes.istic.l2gen.application.core.services.TableService;
@@ -201,8 +193,18 @@ public final class GUIController extends CoreController {
         }
     }
 
+    public void onOpenExceptionDialog(Exception e) {
+        Throwable rootCause = e.getCause() != null ? e.getCause() : e;
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(
+                    mainView,
+                    rootCause.getClass().getSimpleName() + ": " + rootCause.getMessage(),
+                    "Processing Error",
+                    JOptionPane.ERROR_MESSAGE);
+        });
+    }
+
     public void onOpenFilterDialog() {
-        // TODO:
     }
 
     public void onOpenFileDialog() {
@@ -215,102 +217,54 @@ public final class GUIController extends CoreController {
         }
 
         File[] files = chooser.getSelectedFiles();
-        if (files.length == 1) {
-            try {
-                DataTable table = DataTable.of(files[0]);
-                if (table == null) {
-                    throw new IOException("Failed to load the selected file.");
-                }
-                TableService.addTable(table);
-                getMainView().getTablePanel().open(table);
-
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(mainView, "Failed to load Parquet file.\n" + e.getMessage(),
-                        "Load Error", JOptionPane.ERROR_MESSAGE);
-            }
-
-            return;
-        }
-
-        Map<File, Boolean> useCachedDecisions = new HashMap<>();
-        for (File file : files) {
-            if (FileService.isAlreadyProcessed(file) || FileService.isParquetFile(file)) {
-                int option = JOptionPane.showOptionDialog(
-                        mainView,
-                        "A cached Parquet file already exists for " + file.getName() + ".\n"
-                                + "Do you want to use the cached version or reprocess the original file?",
-                        "File Already Processed",
-                        JOptionPane.DEFAULT_OPTION,
-                        JOptionPane.QUESTION_MESSAGE,
-                        null,
-                        new String[] { "Use Cached", "Reprocess" },
-                        "Use Cached");
-                useCachedDecisions.put(file, option != 1);
-            }
-        }
 
         setLoading(true);
-        setStatus("Processing " + files.length + " files...");
+        setStatus("Loading " + files.length + " files...");
 
         new SwingWorker<List<DataTable>, Void>() {
             @Override
             protected List<DataTable> doInBackground() throws Exception {
+                List<DataTable> loaded = new ArrayList<>();
+
                 long startTime = System.currentTimeMillis();
-                List<DataTable> processed = new ArrayList<>();
-
                 for (File file : files) {
-                    boolean useCached = useCachedDecisions.getOrDefault(file, false);
-
-                    if (useCached) {
-                        File parquetFile = FileService.getProcessedFile(file);
-                        DataTable table = DataTable.of(parquetFile);
-                        if (table != null) {
-                            processed.add(table);
-                            continue;
-                        }
-                    } else if (FileService.isAlreadyProcessed(file)) {
-                        FileService.getProcessedFile(file).delete();
+                    List<DataTable> loadedFiles = TableService.load(file);
+                    if (loadedFiles.isEmpty()) {
+                        continue;
                     }
 
-                    processed.addAll(FileService.process(file));
+                    TableService.addRecent(file);
+                    loaded.addAll(loadedFiles);
                 }
-
                 long endTime = System.currentTimeMillis();
-                setStatus("Processed " + processed.size() + "/" + files.length
-                        + " files in " + (endTime - startTime) + " ms");
-                TableService.addTables(processed);
-                return processed;
+
+                setStatus("Loaded " + loaded.size() + "/" + files.length + " files in " + (endTime - startTime)
+                        + " ms");
+                return loaded;
             }
 
             @Override
             protected void done() {
                 try {
-                    List<DataTable> processedFiles = get();
+                    List<DataTable> loaded = get();
                     SwingUtilities.invokeLater(() -> {
-                        if (processedFiles.size() == 1) {
-                            mainView.getTablePanel().open(processedFiles.get(0));
+                        if (loaded.size() == 1) {
+                            mainView.getTablePanel().open(loaded.get(0));
                         } else {
                             getMainView().getTablePanel().refresh();
                         }
                     });
-                } catch (InterruptedException | ExecutionException e) {
-                    Throwable rootCause = e.getCause() != null ? e.getCause() : e;
-                    SwingUtilities.invokeLater(() -> {
-                        JOptionPane.showMessageDialog(
-                                mainView,
-                                rootCause.getClass().getSimpleName() + ": " + rootCause.getMessage(),
-                                "Processing Error",
-                                JOptionPane.ERROR_MESSAGE);
-                        getMainView().getTablePanel().refresh();
-                    });
+                } catch (Exception e) {
+                    onOpenExceptionDialog(e);
+                } finally {
+                    setLoading(false);
                 }
-                setLoading(false);
             }
         }.execute();
     }
 
     public void onOpenUrlDialog() {
-        String input = JOptionPane.showInputDialog(mainView, "Parquet URL:");
+        String input = JOptionPane.showInputDialog(mainView, "URL:");
         if (input == null || input.isBlank()) {
             return;
         }
@@ -325,26 +279,32 @@ public final class GUIController extends CoreController {
         }
 
         setLoading(true);
-        new SwingWorker<File, Void>() {
+        new SwingWorker<List<DataTable>, Void>() {
             @Override
-            protected File doInBackground() throws Exception {
-                return downloadFile(uri.toURL());
+            protected List<DataTable> doInBackground() throws Exception {
+
+                long startTime = System.currentTimeMillis();
+                List<DataTable> loaded = TableService.load(uri);
+                long endTime = System.currentTimeMillis();
+
+                setStatus("Loaded " + loaded.size() + " files in " + (endTime - startTime)
+                        + " ms");
+                return loaded;
             }
 
             @Override
             protected void done() {
                 try {
-                    File file = get();
-                    DataTable table = DataTable.of(file);
-                    if (table == null) {
-                        throw new IOException("Failed to load the downloaded file.");
-                    }
-
-                    TableService.addTable(table);
-                    SwingUtilities.invokeLater(() -> mainView.getTablePanel().open(table));
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(mainView, "Failed to download Parquet file.\n" + ex.getMessage(),
-                            "Download Error", JOptionPane.ERROR_MESSAGE);
+                    List<DataTable> loaded = get();
+                    SwingUtilities.invokeLater(() -> {
+                        if (loaded.size() == 1) {
+                            mainView.getTablePanel().open(loaded.get(0));
+                        } else {
+                            getMainView().getTablePanel().refresh();
+                        }
+                    });
+                } catch (Exception e) {
+                    onOpenExceptionDialog(e);
                 } finally {
                     setLoading(false);
                 }
@@ -370,24 +330,6 @@ public final class GUIController extends CoreController {
             JOptionPane.showMessageDialog(mainView, "Unable to open documentation.", "Documentation",
                     JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    private File downloadFile(URL url) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setConnectTimeout(10_000);
-        connection.setReadTimeout(30_000);
-        connection.setInstanceFollowRedirects(true);
-
-        // File dir = FileService
-        File dir;
-        File tempFile = Files.createTempFile(dir.toPath(), "file-", "").toFile();
-        tempFile.deleteOnExit();
-
-        try (InputStream input = connection.getInputStream();
-                FileOutputStream output = new FileOutputStream(tempFile)) {
-            input.transferTo(output);
-        }
-        return tempFile;
     }
 
     public void onOpenAboutDialog() {

@@ -46,7 +46,7 @@ public final class TableListView extends JPanel {
                     int selectedRow = tableList.getSelectedRow();
                     if (selectedRow != -1) {
                         File path = (File) listModel.getValueAt(selectedRow, 0);
-                        DataTable table = TableService.getTable(path);
+                        DataTable table = TableService.get(path);
                         if (table == null) {
                             refresh();
                             return;
@@ -63,7 +63,7 @@ public final class TableListView extends JPanel {
     public void refresh() {
         listModel.setRowCount(0);
 
-        for (DataTable table : TableService.getTables()) {
+        for (DataTable table : TableService.get()) {
             listModel.addRow(new Object[] {
                     table.getPath(),
                     table.getAlias(),
