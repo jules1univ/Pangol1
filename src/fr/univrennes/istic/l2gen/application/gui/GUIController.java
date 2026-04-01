@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
@@ -15,6 +16,7 @@ import com.formdev.flatlaf.util.SystemFileChooser;
 
 import fr.univrennes.istic.l2gen.application.VectorReport;
 import fr.univrennes.istic.l2gen.application.core.CoreController;
+import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.services.StatisticOp;
 import fr.univrennes.istic.l2gen.application.core.services.StatisticService;
 import fr.univrennes.istic.l2gen.application.core.services.TableService;
@@ -334,6 +336,24 @@ public final class GUIController extends CoreController {
 
         JOptionPane.showMessageDialog(mainView, sb.toString(), Lang.get("about.title"),
                 JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void onLanguageChange(Locale locale) {
+        if (locale.equals(Lang.getLocale())) {
+            return;
+        }
+
+        Lang.setLocale(locale);
+        Config.get().put("language", locale.toLanguageTag());
+        SwingUtilities.invokeLater(() -> {
+
+            MainView oldView = mainView;
+            oldView.dispose();
+
+            MainView newView = new MainView(this);
+            setMainView(newView);
+            newView.setVisible(true);
+        });
     }
 
     public void onComputeSummaryRequested(int columnIndex) {

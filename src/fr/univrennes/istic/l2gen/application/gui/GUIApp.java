@@ -1,11 +1,13 @@
 package fr.univrennes.istic.l2gen.application.gui;
 
 import fr.univrennes.istic.l2gen.application.core.CoreApp;
+import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.core.services.TableService;
 import fr.univrennes.istic.l2gen.application.gui.main.MainView;
 
 import java.time.LocalTime;
+import java.util.Locale;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -28,6 +30,12 @@ public final class GUIApp extends CoreApp<GUIController> {
                     Lang.get("error.initfl_message"),
                     Lang.get("error.initfl_title"),
                     JOptionPane.ERROR_MESSAGE);
+        }
+
+        String langTag = Config.get().get("language", Lang.getDefaultLocale().toLanguageTag());
+        Locale locale = Locale.forLanguageTag(langTag);
+        if (Lang.isSupported(locale)) {
+            Lang.setLocale(locale);
         }
 
         int hour = LocalTime.now().getHour();
