@@ -47,15 +47,24 @@ public final class GUIController extends CoreController {
         if (!targetDir.exists()) {
             targetDir.mkdirs();
         }
-        System.out.println("Target dir: " + targetDir.getAbsolutePath());
-        File ouputFile = new File(targetDir, "ValeursFoncieres-2024.txt.parquet");
-        if (!ouputFile.exists()) {
+
+        File outputRawFile = new File(targetDir, "ValeursFoncieres-2024.txt");
+        File ouputParquetFile = new File(targetDir, "ValeursFoncieres-2024.txt.parquet");
+
+        if (!outputRawFile.exists()) {
             TableService.load(
                     URI.create("https://www.data.gouv.fr/api/1/datasets/r/af812b0e-a898-4226-8cc8-5a570b257326"),
                     targetDir);
+        } else if (!ouputParquetFile.exists()) {
+            TableService.load(
+                    outputRawFile,
+                    targetDir);
         }
-        mainView.getTablePanel().open(TableService.get(ouputFile));
-        /////
+
+        DataTable table = TableService.get(ouputParquetFile);
+        if (table != null) {
+            setTable(table);
+        }
         /////
 
     }
@@ -90,6 +99,7 @@ public final class GUIController extends CoreController {
 
     public void setTable(DataTable table) {
         currentTable = table;
+        mainView.getTablePanel().open(table);
 
         SwingUtilities.invokeLater(() -> {
             mainView.getBottomBar().setTableInfo(
@@ -310,7 +320,7 @@ public final class GUIController extends CoreController {
                 try {
                     List<DataTable> loadedTables = get();
                     if (loadedTables.size() == 1) {
-                        mainView.getTablePanel().open(loadedTables.get(0));
+                        setTable(loadedTables.get(0));
                     } else {
                         getMainView().getTablePanel().refresh();
                     }
@@ -376,7 +386,7 @@ public final class GUIController extends CoreController {
                 try {
                     List<DataTable> loadedTables = get();
                     if (loadedTables.size() == 1) {
-                        mainView.getTablePanel().open(loadedTables.get(0));
+                        setTable(loadedTables.get(0));
                     } else {
                         getMainView().getTablePanel().refresh();
                     }

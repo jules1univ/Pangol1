@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -108,49 +110,124 @@ public final class TableService {
     }
 
     private static DataTable convert(File inputPath, File outputPath) {
-        String formatIn = inputPath.getAbsolutePath().replace("\\", "/");
-        String formatOut = outputPath.getAbsolutePath().replace("\\", "/");
+        String tableIn = inputPath.getAbsolutePath().replace("\\", "/");
+        String tableOut = outputPath.getAbsolutePath().replace("\\", "/");
 
         try (DuckDBConnection connection = (DuckDBConnection) DriverManager.getConnection("jdbc:duckdb:")) {
+
+            List<String> columnNames = new ArrayList<>();
+            List<DataType> columnTypes = new ArrayList<>();
+            float castSensitivity = Config.get().getFloat("table.cast_sensitivity", 0.95f);
+
             try (Statement statement = connection.createStatement()) {
-
                 statement.execute(String.format(
-                        "COPY ("
-                                + "SELECT * FROM read_csv('%s', "
-                                + "header=true, "
-                                + "all_varchar=true, "
-                                + "ignore_errors=true, "
-                                + "null_padding=true,"
-                                + "nullstr=['',' ']"
-                                + ")"
-                                + ") TO '%s' (FORMAT PARQUET, CODEC 'SNAPPY')",
-                        formatIn,
-                        formatOut));
+                        "CREATE TEMP TABLE staging AS " +
+                                "SELECT * FROM read_csv('%s', header=true, all_varchar=true, nullstr=['',' '])",
+                        tableIn));
 
-                ResultSet countResult = statement.executeQuery(
-                        String.format("SELECT COUNT(*) FROM '%s'", formatOut));
-                countResult.next();
-                long rowCount = countResult.getLong(1);
-
-                ResultSet columnResult = statement.executeQuery(
-                        String.format("DESCRIBE SELECT * FROM '%s'", formatOut));
-
-                List<String> columnNames = new ArrayList<>();
-                long columnCount = 0;
-                while (columnResult.next()) {
-                    columnCount++;
-
-                    columnNames.add(columnResult.getString("column_name"));
+                try (ResultSet columnResult = statement.executeQuery("DESCRIBE staging")) {
+                    while (columnResult.next()) {
+                        columnNames.add(columnResult.getString("column_name"));
+                    }
                 }
 
-                List<DataType> columnTypes = TypeInferenceService.inferColumnTypes(statement, formatOut, columnNames);
+                String statsQuery = "SELECT " + IntStream.range(0, columnNames.size())
+                        .mapToObj(index -> {
+                            String columnName = columnNames.get(index);
+                            return String.format(
+                                    "COUNT(\"%s\") AS col_%d_non_null, " +
+                                            "COUNT(TRY_CAST(\"%s\" AS INTEGER)) AS col_%d_int, " +
+                                            "COUNT(TRY_CAST(REPLACE(\"%s\", ',', '.') AS DOUBLE)) AS col_%d_double, " +
+                                            "COUNT(TRY_CAST(\"%s\" AS BOOLEAN)) AS col_%d_boolean, " +
+                                            "COUNT(COALESCE(" +
+                                            "TRY_STRPTIME(\"%s\", '%%d/%%m/%%Y')," +
+                                            "TRY_STRPTIME(\"%s\", '%%Y-%%m-%%d')," +
+                                            "TRY_STRPTIME(\"%s\", '%%m/%%d/%%Y')" +
+                                            ")) AS col_%d_date",
+                                    columnName, index,
+                                    columnName, index,
+                                    columnName, index,
+                                    columnName, index,
+                                    columnName, columnName, columnName, index);
+                        })
+                        .collect(Collectors.joining(", "))
+                        + " FROM staging";
+
+                List<Map<String, Long>> columnStats = new ArrayList<>();
+                try (ResultSet statsResult = statement.executeQuery(statsQuery)) {
+                    statsResult.next();
+                    for (int index = 0; index < columnNames.size(); index++) {
+                        Map<String, Long> stats = new HashMap<>();
+                        stats.put("non_null", statsResult.getLong("col_" + index + "_non_null"));
+                        stats.put("int", statsResult.getLong("col_" + index + "_int"));
+                        stats.put("double", statsResult.getLong("col_" + index + "_double"));
+                        stats.put("boolean", statsResult.getLong("col_" + index + "_boolean"));
+                        stats.put("date", statsResult.getLong("col_" + index + "_date"));
+                        columnStats.add(stats);
+                    }
+                }
+
+                for (Map<String, Long> stats : columnStats) {
+                    long nonNull = stats.get("non_null");
+                    if (nonNull == 0) {
+                        columnTypes.add(DataType.STRING);
+                        continue;
+                    }
+                    if (stats.get("boolean") >= nonNull * castSensitivity) {
+                        columnTypes.add(DataType.BOOLEAN);
+                    } else if (stats.get("int") >= nonNull * castSensitivity) {
+                        columnTypes.add(DataType.INTEGER);
+                    } else if (stats.get("double") >= nonNull * castSensitivity) {
+                        columnTypes.add(DataType.DOUBLE);
+                    } else if (stats.get("date") >= nonNull * castSensitivity) {
+                        columnTypes.add(DataType.DATE);
+                    } else {
+                        columnTypes.add(DataType.STRING);
+                    }
+                }
+
+                String castSelectClause = IntStream.range(0, columnNames.size())
+                        .mapToObj(index -> {
+                            String columnName = columnNames.get(index);
+                            DataType columnType = columnTypes.get(index);
+                            return switch (columnType) {
+                                case INTEGER ->
+                                    String.format("TRY_CAST(\"%s\" AS INTEGER) AS \"%s\"", columnName, columnName);
+                                case DOUBLE ->
+                                    String.format("TRY_CAST(REPLACE(\"%s\", ',', '.')  AS DOUBLE) AS \"%s\"",
+                                            columnName, columnName);
+                                case BOOLEAN ->
+                                    String.format("TRY_CAST(\"%s\" AS BOOLEAN) AS \"%s\"", columnName, columnName);
+                                case DATE -> String.format(
+                                        "COALESCE(" +
+                                                "TRY_STRPTIME(\"%s\", '%%d/%%m/%%Y')," +
+                                                "TRY_STRPTIME(\"%s\", '%%Y-%%m-%%d')," +
+                                                "TRY_STRPTIME(\"%s\", '%%m/%%d/%%Y')" +
+                                                ") AS \"%s\"",
+                                        columnName, columnName, columnName, columnName);
+                                default -> String.format("\"%s\"", columnName);
+                            };
+                        })
+                        .collect(Collectors.joining(", "));
+
+                statement.execute(String.format(
+                        "COPY (SELECT %s FROM staging) TO '%s' (FORMAT PARQUET, CODEC 'SNAPPY')",
+                        castSelectClause, tableOut));
+
+                long rowCount;
+                try (ResultSet countResult = statement.executeQuery(
+                        String.format("SELECT COUNT(*) FROM '%s'", tableOut))) {
+                    countResult.next();
+                    rowCount = countResult.getLong(1);
+                }
 
                 String alias = inputPath.getName().replaceFirst("[.][^.]+$", "");
-                return new DataTable(outputPath, alias, columnNames, columnTypes, rowCount, columnCount);
+                return new DataTable(outputPath, alias, columnNames, columnTypes, rowCount, columnNames.size());
             }
-        } catch (Exception e) {
+
+        } catch (Exception exception) {
             if (VectorReport.DEBUG_MODE) {
-                e.printStackTrace();
+                exception.printStackTrace();
             }
             return null;
         }

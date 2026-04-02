@@ -25,34 +25,6 @@ public enum DataType {
         return this == STRING || this == BOOLEAN;
     }
 
-    public String toCastSQL(String columnName) {
-        String col = "\"" + columnName + "\"";
-
-        return switch (this) {
-            case EMPTY ->
-                col + " IS NULL";
-
-            case INTEGER ->
-                "(TRY_CAST(" + col + " AS BIGINT) IS NOT NULL OR " + col + " IS NULL)";
-
-            case DOUBLE ->
-                "(TRY_CAST(REPLACE(" + col + ", ',', '.') AS DOUBLE) IS NOT NULL OR " + col + " IS NULL)";
-
-            case BOOLEAN ->
-                "(" +
-                        "TRY_CAST(" + col + " AS BOOLEAN) IS NOT NULL " +
-                        "OR " + col + " IN ('0','1','true','false','TRUE','FALSE') " +
-                        "OR " + col + " IS NULL" +
-                        ")";
-
-            case DATE ->
-                "(TRY_CAST(" + col + " AS DATE) IS NOT NULL OR " + col + " IS NULL)";
-
-            default ->
-                "TRUE";
-        };
-    }
-
     public static DataType fromSQL(String type) {
         type = type.toUpperCase();
 

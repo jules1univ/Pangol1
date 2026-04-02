@@ -113,6 +113,24 @@ public final class DataTable {
         } catch (Exception e) {
             throw new IOException("Failed to open DuckDB connection", e);
         }
+
+        for (int i = 0; i < columnNames.size(); i++) {
+            String query = String.format("SELECT COUNT(*) FROM '%s' WHERE \"%s\" IS NOT NULL",
+                    tableName, columnNames.get(i).replace("\"", "\"\""));
+
+            try (Statement statement = connection.createStatement()) {
+                ResultSet resultSet = statement.executeQuery(query);
+                resultSet.next();
+                long nonNullCount = resultSet.getLong(1);
+                if (nonNullCount == 0) {
+                    columnTypes.set(i, DataType.EMPTY);
+                }
+            } catch (Exception e) {
+                if (VectorReport.DEBUG_MODE) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public File getPath() {

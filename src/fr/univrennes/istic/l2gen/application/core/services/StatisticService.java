@@ -21,23 +21,21 @@ public final class StatisticService {
         return String.format("%,.2f", value);
     }
 
-    private static String numericExpr(DataTable table, int columnIndex) {
-        String col = table.getSQLColumnName(columnIndex);
-        return String.format("TRY_CAST(REPLACE(%s, ',', '.') AS DOUBLE)", col);
-    }
-
     public static Optional<String> computeBase(DataTable table, int columnIndex, StatisticOp action) {
         String query;
 
         switch (table.getColumnType(columnIndex)) {
-            case DOUBLE, INTEGER -> {
-                String expr = numericExpr(table, columnIndex);
+            case DOUBLE, INTEGER, BOOLEAN -> {
                 query = String.format(
                         "SELECT %s(val) FROM (" +
                                 "SELECT %s AS val FROM '%s') WHERE val IS NOT NULL",
-                        action.name(), expr, table.getSQLName());
+                        action.name(), table.getSQLColumnName(columnIndex), table.getSQLName());
             }
             case DATE -> {
+                if (action != StatisticOp.MIN && action != StatisticOp.MAX) {
+                    return Optional.empty();
+                }
+
                 query = String.format(
                         "SELECT %s(%s) FROM '%s'",
                         action.name(),
@@ -72,29 +70,25 @@ public final class StatisticService {
             return OptionalDouble.empty();
         }
 
-        String exprX = numericExpr(table, columnIndexX);
-        String exprY = numericExpr(table, columnIndexY);
-
         String query = String.format(
                 "SELECT CORR(x, y) FROM (" +
                         "SELECT %s AS x, %s AS y FROM '%s') " +
                         "WHERE x IS NOT NULL AND y IS NOT NULL",
-                exprX, exprY, table.getSQLName());
+                table.getSQLColumnName(columnIndexX), table.getSQLColumnName(columnIndexY), table.getSQLName());
 
         return executeDoubleQuery(query);
     }
 
     public static OptionalDouble computeCoefficientOfVariation(DataTable table, int columnIndex) {
-        if (!table.getColumnType(columnIndex).isNumeric())
+        if (!table.getColumnType(columnIndex).isNumeric()) {
             return OptionalDouble.empty();
-
-        String expr = numericExpr(table, columnIndex);
+        }
 
         String query = String.format(
                 "SELECT CASE WHEN AVG(val) = 0 THEN NULL " +
                         "ELSE STDDEV_SAMP(val) / AVG(val) END " +
                         "FROM (SELECT %s AS val FROM '%s') WHERE val IS NOT NULL",
-                expr, table.getSQLName());
+                table.getSQLColumnName(columnIndex), table.getSQLName());
 
         return executeDoubleQuery(query);
     }
@@ -103,12 +97,10 @@ public final class StatisticService {
         if (!table.getColumnType(columnIndex).isNumeric())
             return OptionalDouble.empty();
 
-        String expr = numericExpr(table, columnIndex);
-
         String query = String.format(
                 "SELECT SKEWNESS(val) FROM (" +
                         "SELECT %s AS val FROM '%s') WHERE val IS NOT NULL",
-                expr, table.getSQLName());
+                table.getSQLColumnName(columnIndex), table.getSQLName());
 
         return executeDoubleQuery(query);
     }
@@ -117,12 +109,10 @@ public final class StatisticService {
         if (!table.getColumnType(columnIndex).isNumeric())
             return OptionalDouble.empty();
 
-        String expr = numericExpr(table, columnIndex);
-
         String query = String.format(
                 "SELECT QUANTILE_CONT(val, 0.75) - QUANTILE_CONT(val, 0.25) " +
                         "FROM (SELECT %s AS val FROM '%s') WHERE val IS NOT NULL",
-                expr, table.getSQLName());
+                table.getSQLColumnName(columnIndex), table.getSQLName());
 
         return executeDoubleQuery(query);
     }

@@ -36,8 +36,6 @@ public final class TablePanel extends JPanel {
     }
 
     public boolean open(DataTable table) {
-        controller.setTable(table);
-
         tableDataView.open(table);
         cardLayout.show(TablePanel.this, TableViewState.TABLE.name());
         return true;
