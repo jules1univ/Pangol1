@@ -98,8 +98,32 @@ public final class GUIController extends CoreController {
     }
 
     public void setTable(DataTable table) {
+        setLoading(true);
+        if (table == null) {
+            if (VectorReport.DEBUG_MODE) {
+                System.out.println("Attempted to set current table to null.");
+            }
+            setLoading(false);
+            return;
+        }
+
+        if (currentTable != null) {
+            currentTable.close();
+        }
+
+        if (table.isClosed()) {
+            if (!table.open()) {
+                if (VectorReport.DEBUG_MODE) {
+                    System.out.println("Failed to open table: " + table.getAlias());
+                }
+                setLoading(false);
+                return;
+            }
+        }
+
         currentTable = table;
         mainView.getTablePanel().open(table);
+        mainView.getTablePanel().refresh();
 
         SwingUtilities.invokeLater(() -> {
             mainView.getBottomBar().setTableInfo(
@@ -108,7 +132,9 @@ public final class GUIController extends CoreController {
                     (int) table.getColumnCount());
 
             setStatus(Lang.get("status.opening_table", table.getAlias()));
+            setLoading(false);
         });
+
     }
 
     public void onCloseTable() {

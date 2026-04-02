@@ -51,7 +51,7 @@ public final class TableListView extends JPanel {
                             refresh();
                             return;
                         }
-                        panel.open(table);
+                        controller.setTable(table);
                     }
                 }
             }
@@ -62,7 +62,6 @@ public final class TableListView extends JPanel {
 
     public void refresh() {
         listModel.setRowCount(0);
-
         for (DataTable table : TableService.get()) {
             listModel.addRow(new Object[] {
                     table.getPath(),

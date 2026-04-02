@@ -51,9 +51,9 @@ public final class TablePanel extends JPanel {
     }
 
     public void refresh() {
-        if (controller.getTable().isEmpty()) {
-            tableListView.refresh();
+        tableListView.refresh();
 
+        if (controller.getTable().isEmpty()) {
             if (tableListView.isEmpty()) {
                 cardLayout.show(this, TableViewState.EMPTY.name());
                 return;

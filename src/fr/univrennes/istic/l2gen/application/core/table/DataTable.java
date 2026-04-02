@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 import org.duckdb.DuckDBConnection;
 
@@ -26,7 +27,7 @@ public final class DataTable {
     private static final int MAX_CACHED_BLOCKS = 8;
 
     private final LinkedHashMap<Integer, Object[][]> blockCache;
-    private final ExecutorService prefetchExecutor;
+    private ExecutorService prefetchExecutor;
 
     private DuckDBConnection connection;
 
@@ -115,6 +116,10 @@ public final class DataTable {
         }
 
         for (int i = 0; i < columnNames.size(); i++) {
+            if (columnTypes.get(i) != DataType.STRING && columnTypes.get(i) != DataType.EMPTY) {
+                continue;
+            }
+
             String query = String.format("SELECT COUNT(*) FROM '%s' WHERE \"%s\" IS NOT NULL",
                     tableName, columnNames.get(i).replace("\"", "\"\""));
 
@@ -260,6 +265,9 @@ public final class DataTable {
     }
 
     public void prefetch(int startRow, int endRow) {
+        if (prefetchExecutor.isShutdown() || prefetchExecutor.isTerminated()) {
+            return;
+        }
         int firstBlock = startRow / BLOCK_SIZE;
         int lastBlock = Math.max(0, (endRow - 1)) / BLOCK_SIZE;
 
@@ -270,14 +278,51 @@ public final class DataTable {
                     continue;
                 }
             }
-            prefetchExecutor.submit(() -> loadBlock(blockToFetch));
+            try {
+                prefetchExecutor.submit(() -> loadBlock(blockToFetch));
+            } catch (RejectedExecutionException e) {
+                if (VectorReport.DEBUG_MODE) {
+                    e.printStackTrace();
+                }
+                return;
+            }
         }
 
         int nextBlock = lastBlock + 1;
         if (nextBlock < blockCount) {
             final int aheadBlock = nextBlock;
-            prefetchExecutor.submit(() -> loadBlock(aheadBlock));
+            try {
+                prefetchExecutor.submit(() -> loadBlock(aheadBlock));
+            } catch (RejectedExecutionException e) {
+                if (VectorReport.DEBUG_MODE) {
+                    e.printStackTrace();
+                }
+                return;
+            }
         }
+    }
+
+    public boolean open() {
+        if (!this.isClosed()) {
+            return true;
+        }
+
+        prefetchExecutor = Executors.newSingleThreadExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "DataTable-Prefetch");
+            thread.setDaemon(true);
+            return thread;
+        });
+
+        try {
+            this.connection = (DuckDBConnection) DriverManager.getConnection("jdbc:duckdb:");
+        } catch (Exception e) {
+            if (VectorReport.DEBUG_MODE) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        return true;
     }
 
     public void close() {
@@ -287,7 +332,25 @@ public final class DataTable {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            if (VectorReport.DEBUG_MODE) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean isClosed() {
+        if (prefetchExecutor.isShutdown() || prefetchExecutor.isTerminated()) {
+            return true;
+        }
+
+        try {
+            return connection == null || connection.isClosed();
+        } catch (Exception e) {
+            if (VectorReport.DEBUG_MODE) {
+                e.printStackTrace();
+            }
+            return true;
         }
     }
 
