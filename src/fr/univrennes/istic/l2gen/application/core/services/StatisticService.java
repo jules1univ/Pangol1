@@ -1,6 +1,6 @@
 package fr.univrennes.istic.l2gen.application.core.services;
 
-import fr.univrennes.istic.l2gen.application.VectorReport;
+import fr.univrennes.istic.l2gen.application.Pangolin;
 import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.core.table.DataType;
 
@@ -148,7 +148,7 @@ public final class StatisticService {
             }
 
         } catch (Exception e) {
-            if (VectorReport.DEBUG_MODE)
+            if (Pangolin.DEBUG_MODE)
                 e.printStackTrace();
         }
         return OptionalDouble.empty();
@@ -165,7 +165,7 @@ public final class StatisticService {
             }
 
         } catch (Exception e) {
-            if (VectorReport.DEBUG_MODE)
+            if (Pangolin.DEBUG_MODE)
                 e.printStackTrace();
         }
         return Optional.empty();

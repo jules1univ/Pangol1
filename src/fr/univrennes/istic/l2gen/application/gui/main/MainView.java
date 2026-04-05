@@ -2,7 +2,11 @@ package fr.univrennes.istic.l2gen.application.gui.main;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Taskbar;
+import java.net.URL;
+
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
@@ -40,6 +44,18 @@ public final class MainView extends JFrame {
         setMinimumSize(new Dimension(700, 450));
         setLocationRelativeTo(null);
         setJMenuBar(topBar);
+
+        URL logo = getClass().getResource("/icons/logo.png");
+        if (logo != null) {
+            setIconImage(new ImageIcon(logo).getImage());
+
+            if (Taskbar.isTaskbarSupported()) {
+                Taskbar taskbar = Taskbar.getTaskbar();
+                if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE)) {
+                    taskbar.setIconImage(new ImageIcon(logo).getImage());
+                }
+            }
+        }
 
         this.tablePanel.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Separator.foreground")));
         this.reportPanel.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Separator.foreground")));

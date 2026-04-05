@@ -25,7 +25,7 @@ import java.util.zip.ZipInputStream;
 
 import org.duckdb.DuckDBConnection;
 
-import fr.univrennes.istic.l2gen.application.VectorReport;
+import fr.univrennes.istic.l2gen.application.Pangolin;
 import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.core.table.DataType;
@@ -102,7 +102,7 @@ public final class TableService {
             URL url = uri.toURL();
             return processURL(targetDir, url);
         } catch (Exception e) {
-            if (VectorReport.DEBUG_MODE) {
+            if (Pangolin.DEBUG_MODE) {
                 e.printStackTrace();
             }
             return List.of();
@@ -226,7 +226,7 @@ public final class TableService {
             }
 
         } catch (Exception exception) {
-            if (VectorReport.DEBUG_MODE) {
+            if (Pangolin.DEBUG_MODE) {
                 exception.printStackTrace();
             }
             return null;
@@ -259,7 +259,7 @@ public final class TableService {
             }
             return load(file, targetDir);
         } catch (Exception e) {
-            if (VectorReport.DEBUG_MODE) {
+            if (Pangolin.DEBUG_MODE) {
                 e.printStackTrace();
             }
         }

@@ -1,12 +1,12 @@
-# 📊 VectorReport
+# 📊 Pangolin
 
 > Generate SVG charts from CSV files.
 
-![C](https://img.shields.io/github/languages/top/jules1univ/VectorReport?label=Java%20🔥)
+![C](https://img.shields.io/github/languages/top/jules1univ/Pangolin?label=Java%20🔥)
 ![Platform](https://img.shields.io/badge/Platform%20🌍-Windows%20|%20Linux%20|%20MacOS-purple)
-![Charts](https://img.shields.io/badge/Charts%20📊-VectorReport-green)
-[![Build](https://github.com/jules1univ/VectorReport/actions/workflows/build-jar.yml/badge.svg)](https://github.com/jules1univ/VectorReport/actions/workflows/build-jar.yml)
-[![Test](https://github.com/jules1univ/VectorReport/actions/workflows/test-junit.yml/badge.svg)](https://github.com/jules1univ/VectorReport/actions/workflows/test-junit.yml)
+![Charts](https://img.shields.io/badge/Charts%20📊-Pangolin-green)
+[![Build](https://github.com/jules1univ/Pangolin/actions/workflows/build-jar.yml/badge.svg)](https://github.com/jules1univ/Pangolin/actions/workflows/build-jar.yml)
+[![Test](https://github.com/jules1univ/Pangolin/actions/workflows/test-junit.yml/badge.svg)](https://github.com/jules1univ/Pangolin/actions/workflows/test-junit.yml)
 
 <!-- > Preview 🎥 -->
 <!-- TODO: ajouter des images du projet ici -->
@@ -25,13 +25,13 @@
 ### Cloner le dépôt
 
 ```bash
-git clone https://github.com/jules1univ/VectorReport.git
-cd VectorReport
+git clone https://github.com/jules1univ/Pangolin.git
+cd Pangolin
 ```
 
 ### Ouvrir le projet
 
-- Ouvrir le dossier `VectorReport` dans **VS Code**
+- Ouvrir le dossier `Pangolin` dans **VS Code**
 - Vérifier que le JDK est bien configuré (`java --version`)
 
 ## Libraries
@@ -60,13 +60,13 @@ cd VectorReport
 Après avoir cloné et ouvert le projet :
 
 ```bash
-javac -cp "lib/*" application/VectorReport.java
+javac -cp "lib/*" application/Pangolin.java
 ```
 
 Ou, si un JAR est construit via le workflow :
 
 ```bash
-java -jar VectorReport.jar
+java -jar Pangolin.jar
 ```
 
 ## Contribution

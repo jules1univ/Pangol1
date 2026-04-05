@@ -14,7 +14,7 @@ import javax.swing.SwingWorker;
 
 import com.formdev.flatlaf.util.SystemFileChooser;
 
-import fr.univrennes.istic.l2gen.application.VectorReport;
+import fr.univrennes.istic.l2gen.application.Pangolin;
 import fr.univrennes.istic.l2gen.application.core.CoreController;
 import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.services.FileService;
@@ -43,7 +43,7 @@ public final class GUIController extends CoreController {
 
         ///// REMOVE THIS LATER !!!
         ///// SUPPRIMER CE CODE UNIQUEMENT POUR LE "PROJET DE GEN" PAS POUR APPLICATION
-        File targetDir = new File(System.getProperty("user.home"), ".VectorReport");
+        File targetDir = new File(System.getProperty("user.home"), ".Pangolin");
         if (!targetDir.exists()) {
             targetDir.mkdirs();
         }
@@ -100,7 +100,7 @@ public final class GUIController extends CoreController {
     public void setTable(DataTable table) {
         setLoading(true);
         if (table == null) {
-            if (VectorReport.DEBUG_MODE) {
+            if (Pangolin.DEBUG_MODE) {
                 System.out.println("Attempted to set current table to null.");
             }
             setLoading(false);
@@ -113,7 +113,7 @@ public final class GUIController extends CoreController {
 
         if (table.isClosed()) {
             if (!table.open()) {
-                if (VectorReport.DEBUG_MODE) {
+                if (Pangolin.DEBUG_MODE) {
                     System.out.println("Failed to open table: " + table.getAlias());
                 }
                 setLoading(false);
@@ -251,7 +251,7 @@ public final class GUIController extends CoreController {
     }
 
     public void onOpenExceptionDialog(Exception e) {
-        if (VectorReport.DEBUG_MODE) {
+        if (Pangolin.DEBUG_MODE) {
             e.printStackTrace();
         }
 

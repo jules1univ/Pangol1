@@ -1,9 +1,10 @@
 package fr.univrennes.istic.l2gen.application.core.lang;
 
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import fr.univrennes.istic.l2gen.application.VectorReport;
+import fr.univrennes.istic.l2gen.application.Pangolin;
 
 public final class Lang {
     private static Lang instance = new Lang();
@@ -13,7 +14,7 @@ public final class Lang {
 
     private Lang() {
         this.locale = getDefaultLocale();
-        this.bundle = ResourceBundle.getBundle("languages.vectoreport", locale);
+        this.bundle = ResourceBundle.getBundle("languages.pangolin", locale);
     }
 
     public static void setLocale(Locale locale) {
@@ -22,7 +23,7 @@ public final class Lang {
         } else {
             instance.locale = locale;
         }
-        instance.bundle = ResourceBundle.getBundle("languages.vectoreport", instance.locale);
+        instance.bundle = ResourceBundle.getBundle("languages.pangolin", instance.locale);
     }
 
     public static Locale getLocale() {
@@ -33,7 +34,7 @@ public final class Lang {
         try {
             return instance.bundle.getString(key);
         } catch (Exception e) {
-            if (VectorReport.DEBUG_MODE) {
+            if (Pangolin.DEBUG_MODE) {
                 e.printStackTrace();
             }
             return "<" + key + ">";
@@ -45,12 +46,8 @@ public final class Lang {
     }
 
     public static boolean isSupported(Locale locale) {
-        try {
-            ResourceBundle bundle = ResourceBundle.getBundle("languages.vectoreport", locale);
-            return bundle.getLocale().getLanguage().equals(locale.getLanguage());
-        } catch (Exception e) {
-            return false;
-        }
+        String resourcePath = "/languages/pangolin_" + locale.getLanguage() + ".properties";
+        return Lang.class.getResourceAsStream(resourcePath) != null;
     }
 
     public static Locale getDefaultLocale() {

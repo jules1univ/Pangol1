@@ -1,4 +1,4 @@
-# 📚 Documentation du Projet VectorReport
+# 📚 Documentation du Projet Pangolin
 
 > Guide complet avec explications de chaque module
 

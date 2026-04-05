@@ -1,6 +1,6 @@
 # 📚 Guide des Annotations Java
 
-> Un guide complet pour comprendre comment les annotations fonctionnent et comment elles sont utilisées dans le projet VectorReport
+> Un guide complet pour comprendre comment les annotations fonctionnent et comment elles sont utilisées dans le projet Pangolin
 
 **Table of Contents**
 
@@ -9,7 +9,7 @@
 - [Syntaxe des annotations](#syntaxe-des-annotations)
 - [Créer sa propre annotation](#créer-sa-propre-annotation)
 - [La réflexion en Java](#la-réflexion-en-java)
-- [Annotations du projet VectorReport](#annotations-du-projet-geometry)
+- [Annotations du projet Pangolin](#annotations-du-projet-geometry)
 - [Cas d'usage réel: Export SVG](#cas-dusage-réel-export-svg)
 - [Cas d'usage réel: Import SVG](#cas-dusage-réel-import-svg)
 - [Exercices pratiques](#exercices-pratiques)
@@ -149,7 +149,7 @@ CLASS         // ← Gardée dans le .class, perdue au runtime
 RUNTIME       // ← Gardée au runtime (on peut la lire à l'exécution!)
 ```
 
-**Pour le projet VectorReport**, on utilise `RUNTIME` car on veut **lire les annotations pendant l'exécution** du programme pour faire l'export/import SVG.
+**Pour le projet Pangolin**, on utilise `RUNTIME` car on veut **lire les annotations pendant l'exécution** du programme pour faire l'export/import SVG.
 
 #### `@Target(ElementType.XXX)`
 
@@ -165,7 +165,7 @@ ElementType.CONSTRUCTOR       // Constructeurs
 ElementType.ANNOTATION_TYPE   // Autres annotations
 ```
 
-**Pour le projet VectorReport** :
+**Pour le projet Pangolin** :
 
 - `@SVGTag` s'applique aux **classes** (`ElementType.TYPE`)
 - `@SVGField` s'applique aux **champs** (`ElementType.FIELD`)
@@ -306,7 +306,7 @@ Champ center a @SVGField avec valeurs: [cx, cy]
 Champ style a @SVGField avec valeurs: []
 ```
 
-## Annotations du projet VectorReport
+## Annotations du projet Pangolin
 
 ### 1️⃣ @SVGTag - Marquer une classe comme élément SVG
 
@@ -761,7 +761,7 @@ validate(p);  // Lance une IllegalArgumentException!
 
 ✅ **Les annotations avec réflexion = automatisation puissante**
 
-✅ **Dans VectorReport**, elles mappent automatiquement Java → XML SVG
+✅ **Dans Pangolin**, elles mappent automatiquement Java → XML SVG
 
 ✅ **Exemple**: `@SVGField("r")` sur `radius` → export `r="50"` en XML
 

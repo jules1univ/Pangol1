@@ -17,7 +17,7 @@ import java.util.concurrent.RejectedExecutionException;
 
 import org.duckdb.DuckDBConnection;
 
-import fr.univrennes.istic.l2gen.application.VectorReport;
+import fr.univrennes.istic.l2gen.application.Pangolin;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterType;
 import fr.univrennes.istic.l2gen.application.core.services.FileService;
@@ -76,7 +76,7 @@ public final class DataTable {
                 return new DataTable(file, alias, columnNames, columnTypes, rowCount, columnCount);
             }
         } catch (Exception e) {
-            if (VectorReport.DEBUG_MODE) {
+            if (Pangolin.DEBUG_MODE) {
                 e.printStackTrace();
             }
             return null;
@@ -131,7 +131,7 @@ public final class DataTable {
                     columnTypes.set(i, DataType.EMPTY);
                 }
             } catch (Exception e) {
-                if (VectorReport.DEBUG_MODE) {
+                if (Pangolin.DEBUG_MODE) {
                     e.printStackTrace();
                 }
             }
@@ -211,7 +211,7 @@ public final class DataTable {
             }
 
         } catch (Exception e) {
-            if (VectorReport.DEBUG_MODE) {
+            if (Pangolin.DEBUG_MODE) {
                 e.printStackTrace();
             }
         }
@@ -281,7 +281,7 @@ public final class DataTable {
             try {
                 prefetchExecutor.submit(() -> loadBlock(blockToFetch));
             } catch (RejectedExecutionException e) {
-                if (VectorReport.DEBUG_MODE) {
+                if (Pangolin.DEBUG_MODE) {
                     e.printStackTrace();
                 }
                 return;
@@ -294,7 +294,7 @@ public final class DataTable {
             try {
                 prefetchExecutor.submit(() -> loadBlock(aheadBlock));
             } catch (RejectedExecutionException e) {
-                if (VectorReport.DEBUG_MODE) {
+                if (Pangolin.DEBUG_MODE) {
                     e.printStackTrace();
                 }
                 return;
@@ -316,7 +316,7 @@ public final class DataTable {
         try {
             this.connection = (DuckDBConnection) DriverManager.getConnection("jdbc:duckdb:");
         } catch (Exception e) {
-            if (VectorReport.DEBUG_MODE) {
+            if (Pangolin.DEBUG_MODE) {
                 e.printStackTrace();
             }
             return false;
@@ -333,7 +333,7 @@ public final class DataTable {
                 connection.close();
             }
         } catch (Exception e) {
-            if (VectorReport.DEBUG_MODE) {
+            if (Pangolin.DEBUG_MODE) {
                 e.printStackTrace();
             }
         }
@@ -347,7 +347,7 @@ public final class DataTable {
         try {
             return connection == null || connection.isClosed();
         } catch (Exception e) {
-            if (VectorReport.DEBUG_MODE) {
+            if (Pangolin.DEBUG_MODE) {
                 e.printStackTrace();
             }
             return true;
@@ -402,7 +402,7 @@ public final class DataTable {
             try {
                 refreshRowCountFromQuery();
             } catch (Exception e) {
-                if (VectorReport.DEBUG_MODE) {
+                if (Pangolin.DEBUG_MODE) {
                     e.printStackTrace();
                 }
             }
@@ -412,7 +412,7 @@ public final class DataTable {
         try {
             refreshRowCountFromQuery();
         } catch (Exception e) {
-            if (VectorReport.DEBUG_MODE) {
+            if (Pangolin.DEBUG_MODE) {
                 e.printStackTrace();
             }
         }

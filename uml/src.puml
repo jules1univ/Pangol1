@@ -996,7 +996,7 @@ class GUIController {
   +onComputeCorrelationRequested(columnIndex: int, targetColumnIndex: int): void
 }
 
-class VectorReport {
+class Pangolin {
   +{static} DEBUG_MODE: boolean = ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("-agentlib:jdwp") > 0
   --
   +{static} main(args: String[]): void
