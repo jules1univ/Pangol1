@@ -1,4 +1,7 @@
-# 📊 Pangolin
+<h1 style="display: flex; align-items: center; gap: 12px;">
+<img src="src/resources/icons/logo.png" alt="Preview" width="48"/>
+Pangolin
+</h1>
 
 > Generate SVG charts from CSV files.
 
@@ -9,6 +12,7 @@
 [![Test](https://github.com/jules1univ/Pangolin/actions/workflows/test-junit.yml/badge.svg)](https://github.com/jules1univ/Pangolin/actions/workflows/test-junit.yml)
 
 <!-- > Preview 🎥 -->
+
 <!-- TODO: ajouter des images du projet ici -->
 <!-- Vu Desktop -->
 
