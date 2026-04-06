@@ -295,7 +295,7 @@ class TableListView {
   + isEmpty() : boolean
 }
 
-class Pangolin {
+class Pangol1 {
   + {static} DEBUG_MODE : boolean
   --
   + {static} main(String args) : void

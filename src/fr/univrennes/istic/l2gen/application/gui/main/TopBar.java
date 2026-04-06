@@ -1,12 +1,18 @@
 package fr.univrennes.istic.l2gen.application.gui.main;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.swing.*;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
+import fr.univrennes.istic.l2gen.application.core.services.TableService;
+import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.gui.GUIController;
 
 public final class TopBar extends JMenuBar {
@@ -19,19 +25,43 @@ public final class TopBar extends JMenuBar {
     }
 
     private void build() {
-        JMenu file = new JMenu(Lang.get("menu.file"));
+        JMenu fileMenu = new JMenu(Lang.get("menu.file"));
 
         JMenuItem openItem = new JMenuItem(Lang.get("menu.file.open"));
         openItem.addActionListener(e -> controller.onOpenFileDialog());
-        file.add(openItem);
+        fileMenu.add(openItem);
+
+        if (TableService.getRecentTables().size() > 0) {
+
+            JMenu openRecent = new JMenu(Lang.get("menu.file.open_recent"));
+            fileMenu.add(openRecent);
+
+            for (File recent : TableService.getRecentTables()) {
+                JMenuItem recentItem = new JMenuItem(recent.getAbsolutePath());
+                recentItem.addActionListener(e -> {
+                    DataTable table = TableService.get(recent);
+                    if (!recent.exists() || table == null) {
+                        TableService.removeRecent(recent);
+                        controller.onOpenExceptionDialog(
+                                new IOException(Lang.get("error.table_not_found", recent.getAbsolutePath())));
+                    } else {
+                        controller.setTable(table);
+                    }
+                });
+                openRecent.add(recentItem);
+            }
+
+        }
+
+        fileMenu.addSeparator();
 
         JMenuItem openUrlItem = new JMenuItem(Lang.get("menu.file.open_url"));
         openUrlItem.addActionListener(e -> controller.onOpenUrlDialog());
-        file.add(openUrlItem);
+        fileMenu.add(openUrlItem);
 
         JMenuItem exitItem = new JMenuItem(Lang.get("menu.file.exit"));
         exitItem.addActionListener(e -> System.exit(0));
-        file.add(exitItem);
+        fileMenu.add(exitItem);
 
         JMenu view = new JMenu(Lang.get("menu.view"));
 
@@ -77,7 +107,7 @@ public final class TopBar extends JMenuBar {
         about.addActionListener(e -> controller.onOpenAboutDialog());
         help.add(about);
 
-        add(file);
+        add(fileMenu);
         add(view);
         add(help);
     }

@@ -7,16 +7,18 @@ import fr.univrennes.istic.l2gen.application.core.services.TableService;
 import fr.univrennes.istic.l2gen.application.gui.main.MainView;
 
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.Locale;
 
 import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import javax.swing.*;
 
 public final class GUIApp extends CoreApp<GUIController> {
 
     public GUIApp() {
-        super(new GUIController());
+        super(GUIController.getInstance());
     }
 
     public GUIApp(GUIController controller) {
@@ -25,6 +27,7 @@ public final class GUIApp extends CoreApp<GUIController> {
 
     @Override
     public void start() {
+        FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#39B763"));
         if (!FlatLightLaf.setup()) {
             JOptionPane.showMessageDialog(null,
                     Lang.get("error.initfl_message"),

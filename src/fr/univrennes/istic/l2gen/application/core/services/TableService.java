@@ -2,6 +2,7 @@ package fr.univrennes.istic.l2gen.application.core.services;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,9 +16,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
@@ -25,14 +28,16 @@ import java.util.zip.ZipInputStream;
 
 import org.duckdb.DuckDBConnection;
 
-import fr.univrennes.istic.l2gen.application.Pangolin;
 import fr.univrennes.istic.l2gen.application.core.config.Config;
+import fr.univrennes.istic.l2gen.application.core.config.Log;
 import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.core.table.DataType;
+import fr.univrennes.istic.l2gen.application.gui.GUIController;
 
 public final class TableService {
     private static final Map<File, DataTable> loaded = Collections.synchronizedMap(new HashMap<>());
-    private static File[] recents = null;
+    private static final Set<File> recents = new HashSet<>();
+    private static final int MAX_RECENTS = 10;
 
     public static DataTable get(File file) {
         if (loaded.containsKey(file)) {
@@ -100,11 +105,13 @@ public final class TableService {
     public static List<DataTable> load(URI uri, File targetDir) {
         try {
             URL url = uri.toURL();
-            return processURL(targetDir, url);
+            return processURL(url, targetDir);
         } catch (Exception e) {
-            if (Pangolin.DEBUG_MODE) {
-                e.printStackTrace();
-            }
+            Log.mode(() -> {
+                Log.debug("Failed to load table from URI: " + uri, e);
+            }, () -> {
+                GUIController.getInstance().onOpenExceptionDialog(e);
+            });
             return List.of();
         }
     }
@@ -225,10 +232,12 @@ public final class TableService {
                 return new DataTable(outputPath, alias, columnNames, columnTypes, rowCount, columnNames.size());
             }
 
-        } catch (Exception exception) {
-            if (Pangolin.DEBUG_MODE) {
-                exception.printStackTrace();
-            }
+        } catch (Exception e) {
+            Log.mode(() -> {
+                Log.debug("Failed to convert table from " + inputPath + " to " + outputPath, e);
+            }, () -> {
+                GUIController.getInstance().onOpenExceptionDialog(e);
+            });
             return null;
         }
     }
@@ -246,22 +255,50 @@ public final class TableService {
         return result;
     }
 
-    private static List<DataTable> processURL(File targetDir, URL url) {
+    private static HttpURLConnection openHttpConnection(URL url) throws IOException {
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setInstanceFollowRedirects(true);
+
+        int code = conn.getResponseCode();
+        if (code == HttpURLConnection.HTTP_MOVED_PERM
+                || code == HttpURLConnection.HTTP_MOVED_TEMP
+                || code == 307
+                || code == 308) {
+
+            String redirect = conn.getHeaderField("Location");
+            if (redirect != null) {
+                conn.disconnect();
+                return openHttpConnection(URI.create(redirect).toURL());
+            }
+        }
+
+        return conn;
+    }
+
+    private static List<DataTable> processURL(URL url, File targetDir) {
         try {
-            HttpURLConnection conn;
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setInstanceFollowRedirects(true);
+            HttpURLConnection conn = openHttpConnection(url);
+
+            int code = conn.getResponseCode();
+            if (code == HttpURLConnection.HTTP_NOT_FOUND) {
+                throw new FileNotFoundException("Remote resource not found: " + url);
+            }
+            if (code < 200 || code >= 300) {
+                throw new IOException("Unexpected HTTP response " + code + " for: " + url);
+            }
 
             File file = new File(targetDir, FileService.getRemoteFileName(conn, url));
-            try (InputStream in = conn.getInputStream();
-                    FileOutputStream fos = new FileOutputStream(file)) {
-                in.transferTo(fos);
+            try (InputStream inputStream = conn.getInputStream();
+                    FileOutputStream outputStream = new FileOutputStream(file)) {
+                inputStream.transferTo(outputStream);
             }
             return load(file, targetDir);
         } catch (Exception e) {
-            if (Pangolin.DEBUG_MODE) {
-                e.printStackTrace();
-            }
+            Log.mode(() -> {
+                Log.debug("Failed to load table from URI: " + url, e);
+            }, () -> {
+                GUIController.getInstance().onOpenExceptionDialog(e);
+            });
         }
 
         return List.of();
@@ -298,31 +335,24 @@ public final class TableService {
     }
 
     public static void addRecent(File file) {
-        if (recents == null) {
-            loadRecents();
-        }
-        for (int index = recents.length - 1; index > 0; index--) {
-            recents[index] = recents[index - 1];
-        }
-        recents[0] = file;
-        saveRecents();
+        recents.add(file);
     }
 
-    public static List<File> getRecentTables() {
-        if (recents == null) {
-            loadRecents();
-        }
-        return List.of(recents);
+    public static void removeRecent(File file) {
+        recents.remove(file);
+    }
+
+    public static Set<File> getRecentTables() {
+        return recents;
     }
 
     public static void loadRecents() {
-        recents = new File[10];
         Config.get().getByteArray("recents", new byte[0]);
         try (Scanner scanner = new Scanner(
                 new ByteArrayInputStream(Config.get().getByteArray("recents", new byte[0])))) {
             int i = 0;
-            while (scanner.hasNextLine() && i < recents.length) {
-                recents[i] = new File(scanner.nextLine());
+            while (scanner.hasNextLine() && i < MAX_RECENTS) {
+                recents.add(new File(scanner.nextLine()));
                 i++;
             }
         }
@@ -330,9 +360,9 @@ public final class TableService {
 
     public static void saveRecents() {
         StringBuilder sb = new StringBuilder();
-        for (File f : recents) {
-            if (f != null) {
-                sb.append(f.getAbsolutePath()).append("\n");
+        for (File recent : recents) {
+            if (recent != null) {
+                sb.append(recent.getAbsolutePath()).append("\n");
             }
         }
         Config.get().putByteArray("recents", sb.toString().getBytes());

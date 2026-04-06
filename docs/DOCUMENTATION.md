@@ -1,4 +1,4 @@
-# 📚 Documentation du Projet Pangolin
+# 📚 Documentation du Projet Pangol1
 
 > Guide complet avec explications de chaque module
 

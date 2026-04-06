@@ -14,9 +14,9 @@ import javax.swing.SwingWorker;
 
 import com.formdev.flatlaf.util.SystemFileChooser;
 
-import fr.univrennes.istic.l2gen.application.Pangolin;
 import fr.univrennes.istic.l2gen.application.core.CoreController;
 import fr.univrennes.istic.l2gen.application.core.config.Config;
+import fr.univrennes.istic.l2gen.application.core.config.Log;
 import fr.univrennes.istic.l2gen.application.core.services.FileService;
 import fr.univrennes.istic.l2gen.application.core.services.StatisticOp;
 import fr.univrennes.istic.l2gen.application.core.services.StatisticService;
@@ -29,11 +29,19 @@ import fr.univrennes.istic.l2gen.application.gui.dialog.StatisticsDialog;
 import fr.univrennes.istic.l2gen.application.gui.main.MainView;
 
 public final class GUIController extends CoreController {
+    private static final GUIController instance = null;
 
     private MainView mainView;
     private DataTable currentTable;
 
-    public GUIController() {
+    public static GUIController getInstance() {
+        if (instance == null) {
+            return new GUIController();
+        }
+        return instance;
+    }
+
+    private GUIController() {
     }
 
     @Override
@@ -43,25 +51,25 @@ public final class GUIController extends CoreController {
 
         ///// REMOVE THIS LATER !!!
         ///// SUPPRIMER CE CODE UNIQUEMENT POUR LE "PROJET DE GEN" PAS POUR APPLICATION
-        File targetDir = new File(System.getProperty("user.home"), ".Pangolin");
+        File targetDir = new File(System.getProperty("user.home"), ".Pangol1");
         if (!targetDir.exists()) {
             targetDir.mkdirs();
         }
 
-        File outputRawFile = new File(targetDir, "ValeursFoncieres-2024.txt");
-        File ouputParquetFile = new File(targetDir, "ValeursFoncieres-2024.txt.parquet");
+        File remoteFile = new File(targetDir, "ValeursFoncieres-2024.txt");
+        File targetTable = new File(targetDir, "ValeursFoncieres-2024.txt.parquet");
 
-        if (!outputRawFile.exists()) {
+        if (!remoteFile.exists()) {
             TableService.load(
                     URI.create("https://www.data.gouv.fr/api/1/datasets/r/af812b0e-a898-4226-8cc8-5a570b257326"),
                     targetDir);
-        } else if (!ouputParquetFile.exists()) {
+        } else if (!targetTable.exists()) {
             TableService.load(
-                    outputRawFile,
+                    remoteFile,
                     targetDir);
         }
 
-        DataTable table = TableService.get(ouputParquetFile);
+        DataTable table = TableService.get(targetTable);
         if (table != null) {
             setTable(table);
         }
@@ -100,9 +108,7 @@ public final class GUIController extends CoreController {
     public void setTable(DataTable table) {
         setLoading(true);
         if (table == null) {
-            if (Pangolin.DEBUG_MODE) {
-                System.out.println("Attempted to set current table to null.");
-            }
+            Log.debug("Attempted to set null table");
             setLoading(false);
             return;
         }
@@ -113,9 +119,7 @@ public final class GUIController extends CoreController {
 
         if (table.isClosed()) {
             if (!table.open()) {
-                if (Pangolin.DEBUG_MODE) {
-                    System.out.println("Failed to open table: " + table.getAlias());
-                }
+                Log.debug("Failed to open table: " + table.getAlias());
                 setLoading(false);
                 return;
             }
@@ -251,9 +255,7 @@ public final class GUIController extends CoreController {
     }
 
     public void onOpenExceptionDialog(Exception e) {
-        if (Pangolin.DEBUG_MODE) {
-            e.printStackTrace();
-        }
+        Log.debug("An exception occurred", e);
 
         Throwable rootCause = e.getCause() != null ? e.getCause() : e;
         SwingUtilities.invokeLater(() -> {

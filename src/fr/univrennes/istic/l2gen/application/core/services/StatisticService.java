@@ -1,6 +1,6 @@
 package fr.univrennes.istic.l2gen.application.core.services;
 
-import fr.univrennes.istic.l2gen.application.Pangolin;
+import fr.univrennes.istic.l2gen.application.core.config.Log;
 import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.core.table.DataType;
 
@@ -148,8 +148,7 @@ public final class StatisticService {
             }
 
         } catch (Exception e) {
-            if (Pangolin.DEBUG_MODE)
-                e.printStackTrace();
+            Log.debug("Failed to execute query: " + query, e);
         }
         return OptionalDouble.empty();
     }
@@ -165,8 +164,7 @@ public final class StatisticService {
             }
 
         } catch (Exception e) {
-            if (Pangolin.DEBUG_MODE)
-                e.printStackTrace();
+            Log.debug("Failed to execute query: " + query, e);
         }
         return Optional.empty();
     }

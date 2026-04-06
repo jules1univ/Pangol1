@@ -1,6 +1,6 @@
 # 📖 Guide de Contribution
 
-> Guide complet pour contribuer au projet Pangolin en respectant les standards de qualité du codebase
+> Guide complet pour contribuer au projet Pangol1 en respectant les standards de qualité du codebase
 
 **Table of Contents**
 
@@ -44,8 +44,8 @@
 
 ```bash
 # 1. Cloner le dépôt
-git clone https://github.com/jules1univ/Pangolin.git
-cd Pangolin
+git clone https://github.com/jules1univ/Pangol1.git
+cd Pangol1
 
 # 2. Vérifier le JDK
 java --version

@@ -1,15 +1,15 @@
 <h1 style="display: flex; align-items: center; gap: 12px;">
 <img src="src/resources/icons/logo.png" alt="Preview" width="48"/>
-Pangolin
+Pangol1
 </h1>
 
 > Generate SVG charts from CSV files.
 
-![C](https://img.shields.io/github/languages/top/jules1univ/Pangolin?label=Java%20🔥)
+![C](https://img.shields.io/github/languages/top/jules1univ/Pangol1?label=Java%20🔥)
 ![Platform](https://img.shields.io/badge/Platform%20🌍-Windows%20|%20Linux%20|%20MacOS-purple)
-![Charts](https://img.shields.io/badge/Charts%20📊-Pangolin-green)
-[![Build](https://github.com/jules1univ/Pangolin/actions/workflows/build-jar.yml/badge.svg)](https://github.com/jules1univ/Pangolin/actions/workflows/build-jar.yml)
-[![Test](https://github.com/jules1univ/Pangolin/actions/workflows/test-junit.yml/badge.svg)](https://github.com/jules1univ/Pangolin/actions/workflows/test-junit.yml)
+![Charts](https://img.shields.io/badge/Charts%20📊-Pangol1-green)
+[![Build](https://github.com/jules1univ/Pangol1/actions/workflows/build-jar.yml/badge.svg)](https://github.com/jules1univ/Pangol1/actions/workflows/build-jar.yml)
+[![Test](https://github.com/jules1univ/Pangol1/actions/workflows/test-junit.yml/badge.svg)](https://github.com/jules1univ/Pangol1/actions/workflows/test-junit.yml)
 
 <!-- > Preview 🎥 -->
 
@@ -29,13 +29,13 @@ Pangolin
 ### Cloner le dépôt
 
 ```bash
-git clone https://github.com/jules1univ/Pangolin.git
-cd Pangolin
+git clone https://github.com/jules1univ/Pangol1.git
+cd Pangol1
 ```
 
 ### Ouvrir le projet
 
-- Ouvrir le dossier `Pangolin` dans **VS Code**
+- Ouvrir le dossier `Pangol1` dans **VS Code**
 - Vérifier que le JDK est bien configuré (`java --version`)
 
 ## Libraries
@@ -64,13 +64,13 @@ cd Pangolin
 Après avoir cloné et ouvert le projet :
 
 ```bash
-javac -cp "lib/*" application/Pangolin.java
+javac -cp "lib/*" application/Pangol1.java
 ```
 
 Ou, si un JAR est construit via le workflow :
 
 ```bash
-java -jar Pangolin.jar
+java -jar Pangol1.jar
 ```
 
 ## Contribution

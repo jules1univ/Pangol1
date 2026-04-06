@@ -17,7 +17,7 @@ import java.util.concurrent.RejectedExecutionException;
 
 import org.duckdb.DuckDBConnection;
 
-import fr.univrennes.istic.l2gen.application.Pangolin;
+import fr.univrennes.istic.l2gen.application.core.config.Log;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterType;
 import fr.univrennes.istic.l2gen.application.core.services.FileService;
@@ -76,9 +76,7 @@ public final class DataTable {
                 return new DataTable(file, alias, columnNames, columnTypes, rowCount, columnCount);
             }
         } catch (Exception e) {
-            if (Pangolin.DEBUG_MODE) {
-                e.printStackTrace();
-            }
+            Log.debug("Failed to load table from file: " + file.getAbsolutePath(), e);
             return null;
         }
     }
@@ -131,9 +129,7 @@ public final class DataTable {
                     columnTypes.set(i, DataType.EMPTY);
                 }
             } catch (Exception e) {
-                if (Pangolin.DEBUG_MODE) {
-                    e.printStackTrace();
-                }
+                Log.debug("Failed to check if column is empty for column: " + columnNames.get(i), e);
             }
         }
     }
@@ -211,9 +207,7 @@ public final class DataTable {
             }
 
         } catch (Exception e) {
-            if (Pangolin.DEBUG_MODE) {
-                e.printStackTrace();
-            }
+            Log.debug("Failed to change column type, reverting to original", e);
         }
     }
 
@@ -223,6 +217,11 @@ public final class DataTable {
 
     public void setAlias(String alias) {
         this.alias = alias;
+        try {
+            this.tablePath.renameTo(new File(tablePath.getParentFile(), alias + ".parquet"));
+        } catch (Exception e) {
+            Log.debug("Failed to rename file for alias change", e);
+        }
     }
 
     public long getRowCount() {
@@ -281,9 +280,7 @@ public final class DataTable {
             try {
                 prefetchExecutor.submit(() -> loadBlock(blockToFetch));
             } catch (RejectedExecutionException e) {
-                if (Pangolin.DEBUG_MODE) {
-                    e.printStackTrace();
-                }
+                Log.debug("Prefetch task rejected, likely due to shutdown", e);
                 return;
             }
         }
@@ -294,9 +291,7 @@ public final class DataTable {
             try {
                 prefetchExecutor.submit(() -> loadBlock(aheadBlock));
             } catch (RejectedExecutionException e) {
-                if (Pangolin.DEBUG_MODE) {
-                    e.printStackTrace();
-                }
+                Log.debug("Failed to submit prefetch task, likely due to shutdown", e);
                 return;
             }
         }
@@ -316,9 +311,7 @@ public final class DataTable {
         try {
             this.connection = (DuckDBConnection) DriverManager.getConnection("jdbc:duckdb:");
         } catch (Exception e) {
-            if (Pangolin.DEBUG_MODE) {
-                e.printStackTrace();
-            }
+            Log.debug("Failed to open DataTable", e);
             return false;
         }
 
@@ -333,9 +326,7 @@ public final class DataTable {
                 connection.close();
             }
         } catch (Exception e) {
-            if (Pangolin.DEBUG_MODE) {
-                e.printStackTrace();
-            }
+            Log.debug("Failed to close DataTable", e);
         }
     }
 
@@ -347,9 +338,7 @@ public final class DataTable {
         try {
             return connection == null || connection.isClosed();
         } catch (Exception e) {
-            if (Pangolin.DEBUG_MODE) {
-                e.printStackTrace();
-            }
+            Log.debug("Failed to check if DataTable is closed", e);
             return true;
         }
     }
@@ -402,9 +391,7 @@ public final class DataTable {
             try {
                 refreshRowCountFromQuery();
             } catch (Exception e) {
-                if (Pangolin.DEBUG_MODE) {
-                    e.printStackTrace();
-                }
+                Log.debug("Failed to refresh row count", e);
             }
             return;
         }
@@ -412,9 +399,7 @@ public final class DataTable {
         try {
             refreshRowCountFromQuery();
         } catch (Exception e) {
-            if (Pangolin.DEBUG_MODE) {
-                e.printStackTrace();
-            }
+            Log.debug("Failed to refresh row count", e);
         }
     }
 

@@ -18,10 +18,10 @@ jobs:
         run: mvn -B package -DskipTests
 
       - name: Prepare artifact
-        run: cp target/Pangolin-1.0-SNAPSHOT.jar Pangolin.jar
+        run: cp target/Pangol1-1.0-SNAPSHOT.jar Pangol1.jar
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Pangolin
-          path: Pangolin.jar
+          name: Pangol1
+          path: Pangol1.jar

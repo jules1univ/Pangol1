@@ -1,8 +1,8 @@
-# 📊 Pangolin - Cahier des Charges de Présentation
+# 📊 Pangol1 - Cahier des Charges de Présentation
 
 ## 📋 Informations Projet
 
-- **Nom** : Pangolin
+- **Nom** : Pangol1
 - **Description** : Génération de graphiques SVG à partir de fichiers CSV
 - **Langage** : Java
 - **Cas d'usage** : Visualisation de données & statistiques
@@ -15,7 +15,7 @@
 
 ### Slide 1-2 : Introduction
 
-- Titre du projet : Pangolin
+- Titre du projet : Pangol1
 - Objectifs : Visualiser et analyser les données via graphiques SVG
 - Équipe présentatrice (4-5 personnes)
 
@@ -146,7 +146,7 @@ Notes: Montrer la qualité vectorielle du rendu
 
 **Objectif** : Montrer le cycle complet
 
-1. Ouvrir l'application Pangolin
+1. Ouvrir l'application Pangol1
 2. Charger `data_sample_1.csv`
 3. Afficher le graphique par défaut (barres)
 4. Exporter en SVG
@@ -206,7 +206,7 @@ Notes: Montrer la qualité vectorielle du rendu
 
 ```
 📱 1 PC Principal (Présentateur Tech)
-   ├─ Pangolin en local
+   ├─ Pangol1 en local
    ├─ Écran principal (projector/TV)
    ├─ CSV d'exemple pré-chargés
    └─ Backup des screenshots
@@ -236,10 +236,10 @@ Notes: Montrer la qualité vectorielle du rendu
 ```
 📱 PC 1 - Présentateur Principal (Slides + Démo)
    ├─ Slides PowerPoint/Keynote
-   └─ Pangolin
+   └─ Pangol1
 
 📱 PC 2 - Backup / Démo Alternative (Optionnel)
-   └─ Instance Pangolin identique
+   └─ Instance Pangol1 identique
 ```
 
 ---
@@ -260,7 +260,7 @@ Notes: Montrer la qualité vectorielle du rendu
 **Durée parlée** :
 **Moments clés** :
 
-- "Bonjour et bienvenue à la présentation de Pangolin..."
+- "Bonjour et bienvenue à la présentation de Pangol1..."
 - "Avant de commencer la démo, je vais passer la parole à..."
 
 **Notes** :
@@ -284,7 +284,7 @@ Notes: Montrer la qualité vectorielle du rendu
 **Durée parlée** :
 **Moments clés** :
 
-- "Parlons maintenant de l'architecture derrière Pangolin..."
+- "Parlons maintenant de l'architecture derrière Pangol1..."
 - "Le flux est le suivant : CSV → Parser → Analyse → Génération SVG"
 - "Java nous permet de..."
 
@@ -364,7 +364,7 @@ Notes: Montrer la qualité vectorielle du rendu
 
 - "Merci pour votre attention. Avez-vous des questions ?"
 - "Je vais passer la parole à [expert] pour cette question..."
-- "Merci d'avoir écouté Pangolin !"
+- "Merci d'avoir écouté Pangol1 !"
 
 ---
 
@@ -374,9 +374,9 @@ Notes: Montrer la qualité vectorielle du rendu
 
 ```
 "Bonjour et bienvenue ! Je m'appelle [NAME] et je représente l'équipe qui a
-développé Pangolin.
+développé Pangol1.
 
-Aujourd'hui, nous allons vous montrer comment Pangolin transforme des
+Aujourd'hui, nous allons vous montrer comment Pangol1 transforme des
 données brutes en graphiques vectoriels de haute qualité, tout en fournissant
 des analyses statistiques détaillées.
 
@@ -393,7 +393,7 @@ Commençons !"
 ### Section Contexte & Motivation
 
 ```
-"Pourquoi Pangolin ? Avant ce projet, générer des graphiques de qualité
+"Pourquoi Pangol1 ? Avant ce projet, générer des graphiques de qualité
 à partir de fichiers CSV était complexe, manuel et sujet à erreurs.
 
 Nous avons constaté que les entreprises avaient besoin d'une solution qui :
@@ -402,7 +402,7 @@ Nous avons constaté que les entreprises avaient besoin d'une solution qui :
   ✓ Offre des analyses statistiques intégrées
   ✓ Soit flexible et extensible
 
-Pangolin répond à tous ces critères. Passons maintenant à [Présentateur Tech]."
+Pangol1 répond à tous ces critères. Passons maintenant à [Présentateur Tech]."
 ```
 
 ---
@@ -410,7 +410,7 @@ Pangolin répond à tous ces critères. Passons maintenant à [Présentateur Tec
 ### Section Architecture
 
 ```
-"L'architecture de Pangolin repose sur 4 modules principaux :
+"L'architecture de Pangol1 repose sur 4 modules principaux :
 
 1️⃣  PARSER CSV
    - Lit et valide les fichiers CSV
@@ -439,7 +439,7 @@ Techniquement, tout est écrit en Java pour la portabilité et la performance."
 "Passons à la démo ! [Présentateur Tech] va vous montrer l'application en action.
 
 [Démo 1 - Chargement basique]
-Comme vous le voyez, j'ouvre l'application Pangolin.
+Comme vous le voyez, j'ouvre l'application Pangol1.
 Je clique sur 'Load CSV'...
 Je sélectionne notre fichier d'exemple 'ventes_2025.csv'...
 Et voilà ! Un graphique en barres s'est généré automatiquement !
@@ -469,7 +469,7 @@ entièrement vectoriel et scalable à l'infini sans perte de qualité."
 ### Section Conclusion
 
 ```
-"En résumé, Pangolin offre :
+"En résumé, Pangol1 offre :
 
 ✅ Génération rapide de graphiques professionnels
 ✅ Analyses statistiques intégrées
@@ -522,7 +522,7 @@ Merci pour votre attention. Avant de conclure, [Modérateur Q&A]"
 
 ### T-1h30 : Test Technique Complet
 
-- [ ] Lancer Pangolin et vérifier le fonctionnement
+- [ ] Lancer Pangol1 et vérifier le fonctionnement
 - [ ] Charger chaque CSV d'exemple et valider
 - [ ] Générer chaque type de graphique
 - [ ] Tester les filtres
@@ -547,7 +547,7 @@ Merci pour votre attention. Avant de conclure, [Modérateur Q&A]"
 ### T-0h10 : Derniers Checks
 
 - [ ] Tous les fichiers CSV sont accessibles
-- [ ] Pangolin est prête mais pas lancée
+- [ ] Pangol1 est prête mais pas lancée
 - [ ] Slides sont préparées et en standby
 - [ ] Équipe de présentation est prête (habits, élocution)
 - [ ] Respirez ! 😌
@@ -558,7 +558,7 @@ Merci pour votre attention. Avant de conclure, [Modérateur Q&A]"
 
 | Problème                     | Solution                                                          |
 | ---------------------------- | ----------------------------------------------------------------- |
-| Pangolin crash               | Redémarrer l'application, utiliser les screenshots en backup      |
+| Pangol1 crash                | Redémarrer l'application, utiliser les screenshots en backup      |
 | CSV ne se charge pas         | Vérifier l'encodage (UTF-8), utiliser un autre exemple            |
 | Vidéo projecteur noir        | Appuyer sur F5, basculer sur le moniteur local                    |
 | CSV mal formaté              | Avoir un CSV de secours pré-validé                                |
