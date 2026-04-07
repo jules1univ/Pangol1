@@ -89,7 +89,7 @@ public final class TopBar extends JMenuBar {
             String name = langLocale.getDisplayLanguage(langLocale);
 
             name = name.substring(0, 1).toUpperCase() + langLocale.getDisplayLanguage(langLocale).substring(1);
-            JMenuItem langItem = new JMenuItem(name);
+            JMenuItem langItem = new JMenuItem(name + " (" + langLocale.getLanguage().toUpperCase() + ")");
             langItem.addActionListener(e -> {
                 controller.onLanguageChange(langLocale);
             });

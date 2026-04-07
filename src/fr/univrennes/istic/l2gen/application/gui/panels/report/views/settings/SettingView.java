@@ -10,6 +10,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -31,6 +32,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
+import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.gui.GUIController;
 
 public class SettingView extends JPanel {
@@ -47,42 +49,43 @@ public class SettingView extends JPanel {
         JPanel content = new JPanel();
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
-        content.add(buildSection("Chart", new JPanel[][] {
-                row("Type", dropdown(new String[] { "Pie", "Bar", "Columns" })),
-                row("Title", textField("My Chart")),
-                row("Width", spinner(100, 4000, 800, 10)),
-                row("Height", spinner(100, 4000, 600, 10)),
-                row("Show Legend", checkbox(true)),
+        content.add(buildSection(Lang.get("setting.chart"), new JPanel[][] {
+                row(Lang.get("setting.chart.type"),
+                        dropdown(new String[] { Lang.get("setting.chart.pie"), Lang.get("setting.chart.bar"),
+                                Lang.get("setting.chart.columns") })),
+                row(Lang.get("setting.chart.title"), textField(Lang.get("setting.chart.default_title"))),
+                separator(),
+                row(Lang.get("setting.chart.show_legend"), checkbox(true)),
+                separator("Axes"),
+                row(Lang.get("setting.chart.tick_count"), spinner(1, 50, 5, 1)),
+                row(Lang.get("setting.chart.scale"),
+                        dropdown(new String[] { Lang.get("setting.chart.linear"), Lang.get("setting.chart.logarithmic"),
+                                Lang.get("setting.chart.sqrt") })),
+                row(Lang.get("setting.chart.show_x_axis"), checkbox(true)),
+                row(Lang.get("setting.chart.x_label"), textField(Lang.get("setting.chart.default_labelx"))),
+                row(Lang.get("setting.chart.show_y_axis"), checkbox(true)),
+                row(Lang.get("setting.chart.y_label"), textField(Lang.get("setting.chart.default_labely"))),
+
         }));
 
-        content.add(buildSection("Data", new JPanel[][] {
-                row("Table filters", dropdown(new String[] { "include", "exclude" })),
-                row("Aggregate", dropdown(new String[] { "Sum", "Average", "Count", "Max", "Min" })),
-                row("Normalize", checkbox(false)),
+        content.add(buildSection(Lang.get("setting.data"), new JPanel[][] {
+
         }));
 
-        String[] fonts = List.of(GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts())
-                .stream()
-                .map(Font::getFontName)
-                .toArray(String[]::new);
+        // String[] fonts =
+        // List.of(GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts())
+        // .stream()
+        // .map(Font::getFontName)
+        // .toArray(String[]::new);
 
-        content.add(buildSection("Appearance", new JPanel[][] {
-                row("Fill Color", colorPicker(new Color(0x4C86C8))),
-                row("Stroke Color", colorPicker(Color.DARK_GRAY)),
-                row("Opacity", slider(0, 100, 90)),
-                row("Stroke Width", spinner(1, 20, 2, 1)),
-                row("Font", dropdown(fonts)),
-                row("Font Size", spinner(6, 72, 12, 1)),
-        }));
-
-        content.add(buildSection("Axes", new JPanel[][] {
-                row("Show X Axis", checkbox(true)),
-                row("Show Y Axis", checkbox(true)),
-                row("X Label", textField("X Axis")),
-                row("Y Label", textField("Y Axis")),
-                row("Tick Count", spinner(1, 50, 5, 1)),
-                row("Scale", dropdown(new String[] { "Linear", "Logarithmic", "Sqrt" })),
-        }));
+        // content.add(buildSection("Appearance", new JPanel[][] {
+        // row("Fill Color", colorPicker(new Color(0x4C86C8))),
+        // row("Stroke Color", colorPicker(Color.DARK_GRAY)),
+        // row("Opacity", slider(0, 100, 90)),
+        // row("Stroke Width", spinner(1, 20, 2, 1)),
+        // row("Font", dropdown(fonts)),
+        // row("Font Size", spinner(6, 72, 12, 1)),
+        // }));
 
         content.add(Box.createVerticalGlue());
 
@@ -90,6 +93,13 @@ public class SettingView extends JPanel {
         scroll.setBorder(null);
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         add(scroll, BorderLayout.CENTER);
+    }
+
+    public void refresh() {
+        removeAll();
+        build();
+        revalidate();
+        repaint();
     }
 
     private JPanel buildSection(String title, JPanel[][] rows) {
@@ -150,6 +160,36 @@ public class SettingView extends JPanel {
 
     private JComboBox<String> dropdown(String[] options) {
         return new JComboBox<>(options);
+    }
+
+    private JPanel[] separator() {
+        return separator(null);
+    }
+
+    private JPanel[] separator(String label) {
+        JPanel sep = new JPanel() {
+            @Override
+            protected void paintComponent(java.awt.Graphics g) {
+                super.paintComponent(g);
+                int y = getHeight() / 2;
+                g.setColor(Color.LIGHT_GRAY);
+                g.drawLine(0, y, getWidth(), y);
+            }
+        };
+        sep.setPreferredSize(new Dimension(0, 12));
+
+        if (label != null) {
+            JLabel lbl = new JLabel(label);
+            lbl.setFont(lbl.getFont().deriveFont(Font.ITALIC));
+            lbl.setForeground(Color.GRAY);
+
+            JPanel wrapper = new JPanel(new BorderLayout());
+            wrapper.add(lbl, BorderLayout.WEST);
+            wrapper.add(sep, BorderLayout.CENTER);
+            return new JPanel[] { wrapper, new JPanel() };
+        } else {
+            return new JPanel[] { sep, new JPanel() };
+        }
     }
 
     private JSpinner spinner(int min, int max, int value, int step) {

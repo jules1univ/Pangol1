@@ -31,6 +31,8 @@ public final class TableDataView extends JPanel {
 
         tableModel = new TableModel(this);
         tableView = new JTable(tableModel);
+
+        tableView.setShowGrid(true);
         tableView.setFillsViewportHeight(true);
         tableView.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         tableView.setRowSorter(null);

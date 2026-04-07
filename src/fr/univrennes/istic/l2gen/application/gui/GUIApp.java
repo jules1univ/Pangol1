@@ -28,6 +28,7 @@ public final class GUIApp extends CoreApp<GUIController> {
     @Override
     public void start() {
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#39B763"));
+
         if (!FlatLightLaf.setup()) {
             JOptionPane.showMessageDialog(null,
                     Lang.get("error.initfl_message"),
