@@ -13,7 +13,7 @@ public final class Lang {
 
     private Lang() {
         this.locale = getDefaultLocale();
-        this.bundle = ResourceBundle.getBundle("languages.Pangol1", locale);
+        this.bundle = ResourceBundle.getBundle("languages.pangol1", locale);
     }
 
     public static void setLocale(Locale locale) {
@@ -22,7 +22,7 @@ public final class Lang {
         } else {
             instance.locale = locale;
         }
-        instance.bundle = ResourceBundle.getBundle("languages.Pangol1", instance.locale);
+        instance.bundle = ResourceBundle.getBundle("languages.pangol1", instance.locale);
     }
 
     public static Locale getLocale() {
@@ -43,7 +43,7 @@ public final class Lang {
     }
 
     public static boolean isSupported(Locale locale) {
-        String resourcePath = "/languages/Pangol1_" + locale.getLanguage() + ".properties";
+        String resourcePath = "/languages/pangol1_" + locale.getLanguage() + ".properties";
         return Lang.class.getResourceAsStream(resourcePath) != null;
     }
 
