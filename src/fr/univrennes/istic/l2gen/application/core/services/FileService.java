@@ -10,7 +10,7 @@ import java.util.Map;
 public final class FileService {
 
     public static String getExtension(File file) {
-        String name = file.getName().toLowerCase();
+        String name = file.getName().toLowerCase().trim();
         int i = name.lastIndexOf('.');
         return (i > 0) ? name.substring(i + 1) : "";
     }

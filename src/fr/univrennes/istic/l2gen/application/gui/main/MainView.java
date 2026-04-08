@@ -40,7 +40,7 @@ public final class MainView extends JFrame {
     private void build() {
         setTitle(Lang.get("app.title"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1280, 800);
+        setSize(1420, 800);
         setMinimumSize(new Dimension(700, 450));
         setLocationRelativeTo(null);
         setJMenuBar(topBar);
