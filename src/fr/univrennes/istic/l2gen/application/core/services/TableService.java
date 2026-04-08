@@ -74,6 +74,7 @@ public final class TableService {
                 switch (ext) {
                     case "zip":
                         return processZip(file, targetDir);
+                    case "":
                     case "csv":
                     case "tsv":
                     case "txt": {

@@ -5,13 +5,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.List;
-import java.util.Optional;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -56,7 +52,7 @@ public class SettingView extends JPanel {
                 row(Lang.get("setting.chart.title"), textField(Lang.get("setting.chart.default_title"))),
                 separator(),
                 row(Lang.get("setting.chart.show_legend"), checkbox(true)),
-                separator("Axes"),
+                separator(Lang.get("setting.chart.axis")),
                 row(Lang.get("setting.chart.tick_count"), spinner(1, 50, 5, 1)),
                 row(Lang.get("setting.chart.scale"),
                         dropdown(new String[] { Lang.get("setting.chart.linear"), Lang.get("setting.chart.logarithmic"),
@@ -68,24 +64,25 @@ public class SettingView extends JPanel {
 
         }));
 
+        String[] cols = controller.getTable().map(table -> {
+            final int size = (int) table.getColumnCount();
+            String[] names = new String[size];
+            for (int i = 0; i < size; i++) {
+                names[i] = table.getColumnName(i);
+            }
+            return names;
+        }).orElse(new String[] {});
+
+        String[] colsWithNone = new String[cols.length + 1];
+        System.arraycopy(cols, 0, colsWithNone, 0, cols.length);
+        colsWithNone[cols.length] = Lang.get("setting.data.none");
+
         content.add(buildSection(Lang.get("setting.data"), new JPanel[][] {
-
+                row(Lang.get("setting.data.col_group"), dropdown(colsWithNone)),
+                row(Lang.get("setting.data.col_value"), dropdown(cols)),
+                separator(),
+                row(Lang.get("setting.data.filter_include"), checkbox(true))
         }));
-
-        // String[] fonts =
-        // List.of(GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts())
-        // .stream()
-        // .map(Font::getFontName)
-        // .toArray(String[]::new);
-
-        // content.add(buildSection("Appearance", new JPanel[][] {
-        // row("Fill Color", colorPicker(new Color(0x4C86C8))),
-        // row("Stroke Color", colorPicker(Color.DARK_GRAY)),
-        // row("Opacity", slider(0, 100, 90)),
-        // row("Stroke Width", spinner(1, 20, 2, 1)),
-        // row("Font", dropdown(fonts)),
-        // row("Font Size", spinner(6, 72, 12, 1)),
-        // }));
 
         content.add(Box.createVerticalGlue());
 
@@ -200,6 +197,13 @@ public class SettingView extends JPanel {
         JCheckBox box = new JCheckBox();
         box.setSelected(selected);
         return box;
+    }
+
+    private JPanel text(String def) {
+        JPanel wrapper = new JPanel(new BorderLayout());
+        JTextField field = new JTextField(def);
+        wrapper.add(field, BorderLayout.CENTER);
+        return wrapper;
     }
 
     private JSlider slider(int min, int max, int value) {

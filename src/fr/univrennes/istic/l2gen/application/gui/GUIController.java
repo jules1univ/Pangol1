@@ -128,6 +128,7 @@ public final class GUIController extends CoreController {
         currentTable = table;
         mainView.getTablePanel().open(table);
         mainView.getTablePanel().refresh();
+        mainView.getReportPanel().refresh();
 
         SwingUtilities.invokeLater(() -> {
             mainView.getBottomBar().setTableInfo(
@@ -304,7 +305,11 @@ public final class GUIController extends CoreController {
         }
 
         setLoading(true);
-        setStatus(Lang.get("status.loading_files", selectedFiles.length));
+        if (selectedFiles.length == 1) {
+            setStatus(Lang.get("status.loading_file", selectedFiles[0].getName()));
+        } else {
+            setStatus(Lang.get("status.loading_files", selectedFiles.length));
+        }
 
         new SwingWorker<List<DataTable>, DataTableWorkerStatus>() {
             @Override

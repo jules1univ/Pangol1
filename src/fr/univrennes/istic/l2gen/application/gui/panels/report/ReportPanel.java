@@ -39,4 +39,9 @@ public class ReportPanel extends JPanel {
         setLayout(new BorderLayout());
         add(mainSplit, BorderLayout.CENTER);
     }
+
+    public void refresh() {
+        // this.noteBook.refresh();
+        this.settingView.refresh();
+    }
 }
