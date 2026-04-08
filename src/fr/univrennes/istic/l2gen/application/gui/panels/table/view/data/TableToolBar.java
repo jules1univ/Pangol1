@@ -20,6 +20,10 @@ public final class TableToolBar extends JToolBar {
                                 Ico.get("icons/filter.svg"));
                 advancedFilterButton.addActionListener(e -> GUIController.getInstance().onOpenFilterDialog());
 
+                JButton clearFiltersButton = new JButton(Lang.get("tabletoolbar.clear_filters"),
+                                Ico.get("icons/clear_filters.svg"));
+                clearFiltersButton.addActionListener(e -> GUIController.getInstance().onFilterReset());
+
                 JButton showAllColumnsButton = new JButton(Lang.get("tabletoolbar.show_all_columns"),
                                 Ico.get("icons/show_columns.svg"));
                 showAllColumnsButton.addActionListener(e -> tablePanel.getTable().showAllColumns());
@@ -33,6 +37,7 @@ public final class TableToolBar extends JToolBar {
                 closeButton.addActionListener(e -> GUIController.getInstance().onCloseTable());
 
                 add(advancedFilterButton);
+                add(clearFiltersButton);
                 addSeparator();
                 add(showAllColumnsButton);
                 add(hideEmptyColumnsButton);

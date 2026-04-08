@@ -118,8 +118,8 @@ public final class DataTable {
                 continue;
             }
 
-            String query = String.format("SELECT COUNT(*) FROM '%s' WHERE \"%s\" IS NOT NULL",
-                    tableName, columnNames.get(i).replace("\"", "\"\""));
+            String query = String.format("SELECT COUNT(*) FROM '%s' WHERE %s IS NOT NULL",
+                    tableName, getSQLColumnName(i));
 
             try (Statement statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(query);
@@ -351,7 +351,7 @@ public final class DataTable {
 
     public List<Filter> getFilter(int columnIndex) {
         return filters.stream()
-                .filter(f -> f.hasColumnFilter(columnIndex))
+                .filter(f -> f.getColumnIndex() == columnIndex)
                 .toList();
     }
 
@@ -360,7 +360,7 @@ public final class DataTable {
     }
 
     public void clearFilters(int columnIndex) {
-        filters.removeIf(f -> f.hasColumnFilter(columnIndex));
+        filters.removeIf(f -> f.getColumnIndex() == columnIndex);
         invalidateCache();
         refreshRowCount();
     }
@@ -428,7 +428,7 @@ public final class DataTable {
         long offsetRow = getBlockStartRow(blockIndex);
         long limitCount = getBlockRowCount(blockIndex);
 
-        String query = FilterBuilder.query(this, offsetRow, limitCount);
+        String query = FilterBuilder.query(this, limitCount, offsetRow);
         try {
             Object[][] blockData;
             synchronized (connection) {

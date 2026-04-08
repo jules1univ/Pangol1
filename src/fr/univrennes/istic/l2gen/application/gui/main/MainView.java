@@ -28,9 +28,8 @@ public final class MainView extends JFrame {
 
     private JSplitPane mainSplit;
 
-    public MainView(SplashScreen splash) {
-        this.splash = splash;
-
+    public MainView() {
+        this.splash = new SplashScreen();
         this.tablePanel = new TablePanel();
         this.reportPanel = new ReportPanel();
 
@@ -41,6 +40,9 @@ public final class MainView extends JFrame {
     }
 
     private void build() {
+        splash.setVisible(true);
+
+        setVisible(false);
         setTitle(Lang.get("app.title"));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1420, 800);

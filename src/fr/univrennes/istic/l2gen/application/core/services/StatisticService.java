@@ -28,7 +28,7 @@ public final class StatisticService {
             case DOUBLE, INTEGER, BOOLEAN -> {
                 query = String.format(
                         "SELECT %s(val) FROM (" +
-                                "SELECT %s AS val FROM '%s') WHERE val IS NOT NULL",
+                                "SELECT %s AS val FROM %s) WHERE val IS NOT NULL",
                         action.name(), table.getSQLColumnName(columnIndex), table.getSQLName());
             }
             case DATE -> {
@@ -37,7 +37,7 @@ public final class StatisticService {
                 }
 
                 query = String.format(
-                        "SELECT %s(%s) FROM '%s'",
+                        "SELECT %s(%s) FROM %s",
                         action.name(),
                         table.getSQLColumnName(columnIndex),
                         table.getSQLName());
@@ -47,7 +47,7 @@ public final class StatisticService {
             }
             default -> {
                 query = String.format(
-                        "SELECT %s(LENGTH(%s)) FROM '%s' WHERE %s IS NOT NULL",
+                        "SELECT %s(LENGTH(%s)) FROM %s WHERE %s IS NOT NULL",
                         action.name(),
                         table.getSQLColumnName(columnIndex),
                         table.getSQLName(),
@@ -72,7 +72,7 @@ public final class StatisticService {
 
         String query = String.format(
                 "SELECT CORR(x, y) FROM (" +
-                        "SELECT %s AS x, %s AS y FROM '%s') " +
+                        "SELECT %s AS x, %s AS y FROM %s) " +
                         "WHERE x IS NOT NULL AND y IS NOT NULL",
                 table.getSQLColumnName(columnIndexX), table.getSQLColumnName(columnIndexY), table.getSQLName());
 
@@ -87,7 +87,7 @@ public final class StatisticService {
         String query = String.format(
                 "SELECT CASE WHEN AVG(val) = 0 THEN NULL " +
                         "ELSE STDDEV_SAMP(val) / AVG(val) END " +
-                        "FROM (SELECT %s AS val FROM '%s') WHERE val IS NOT NULL",
+                        "FROM (SELECT %s AS val FROM %s) WHERE val IS NOT NULL",
                 table.getSQLColumnName(columnIndex), table.getSQLName());
 
         return executeDoubleQuery(query);
@@ -99,7 +99,7 @@ public final class StatisticService {
 
         String query = String.format(
                 "SELECT SKEWNESS(val) FROM (" +
-                        "SELECT %s AS val FROM '%s') WHERE val IS NOT NULL",
+                        "SELECT %s AS val FROM %s) WHERE val IS NOT NULL",
                 table.getSQLColumnName(columnIndex), table.getSQLName());
 
         return executeDoubleQuery(query);
@@ -111,7 +111,7 @@ public final class StatisticService {
 
         String query = String.format(
                 "SELECT QUANTILE_CONT(val, 0.75) - QUANTILE_CONT(val, 0.25) " +
-                        "FROM (SELECT %s AS val FROM '%s') WHERE val IS NOT NULL",
+                        "FROM (SELECT %s AS val FROM %s) WHERE val IS NOT NULL",
                 table.getSQLColumnName(columnIndex), table.getSQLName());
 
         return executeDoubleQuery(query);
@@ -121,7 +121,7 @@ public final class StatisticService {
         String col = table.getSQLColumnName(columnIndex);
 
         String query = String.format(
-                "SELECT COUNT(*) FILTER (WHERE %s IS NULL) * 1.0 / NULLIF(COUNT(*), 0) FROM '%s'",
+                "SELECT COUNT(*) FILTER (WHERE %s IS NULL) * 1.0 / NULLIF(COUNT(*), 0) FROM %s",
                 col, table.getSQLName());
 
         return executeDoubleQuery(query);
@@ -131,7 +131,7 @@ public final class StatisticService {
         String col = table.getSQLColumnName(columnIndex);
 
         String query = String.format(
-                "SELECT COUNT(DISTINCT %s) * 1.0 / NULLIF(COUNT(*), 0) FROM '%s'",
+                "SELECT COUNT(DISTINCT %s) * 1.0 / NULLIF(COUNT(*), 0) FROM %s",
                 col, table.getSQLName());
 
         return executeDoubleQuery(query);
@@ -186,7 +186,7 @@ public final class StatisticService {
         } else {
             summary.append("Null rate: N/A\n");
         }
-        summary.append("Type: ").append(currentTable.getColumnType(columnIndex).name()).append("\n");
+        summary.append("Type: ").append(currentTable.getColumnType(columnIndex)).append("\n");
         summary.append("Native Type: ").append(currentTable.getColumnType(columnIndex).toSQL()).append("\n");
 
         return summary.toString();

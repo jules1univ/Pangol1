@@ -5,69 +5,86 @@ import java.util.List;
 
 public final class Filter {
 
-    private int sortColumnIndex = -1;
-    private boolean sortAscending = true;
+    private final int columnIndex;
 
-    private Integer limit;
-    private Integer offset;
+    private FilterSort sort = FilterSort.NONE;
+    private FilterLogic operator = FilterLogic.AND;
 
-    private FilterLogic whereOperator = FilterLogic.AND;
     private final List<FilterCondition> conditions = new ArrayList<>();
 
-    private final List<Integer> groupByColumns = new ArrayList<>();
-
-    private final List<FilterCondition> havingConditions = new ArrayList<>();
-
-    private final List<FilterJoin> joins = new ArrayList<>();
-
-    private final List<Integer> selectedColumns = new ArrayList<>();
-
-    public Filter() {
-
+    public Filter(int columnIndex) {
+        this.columnIndex = columnIndex;
     }
 
     public static Filter sort(int columnIndex, boolean ascending) {
-        Filter filter = new Filter();
-        filter.sortColumnIndex = columnIndex;
-        filter.sortAscending = ascending;
+        Filter filter = new Filter(columnIndex);
+        filter.sort = ascending ? FilterSort.ASCENDING : FilterSort.DESCENDING;
         return filter;
     }
 
     public static Filter search(int columnIndex, String searchTerm) {
-        Filter filter = new Filter();
-        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.LIKE, searchTerm));
+        Filter filter = new Filter(columnIndex);
+        filter.add(new FilterCondition(FilterOperator.LIKE, searchTerm));
         return filter;
     }
 
     public static Filter topN(int columnIndex, int n) {
-        Filter filter = new Filter();
-        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.GREATER, String.valueOf(n)));
+        Filter filter = new Filter(columnIndex);
+        filter.conditions.add(new FilterCondition(FilterOperator.GREATER, String.valueOf(n)));
         return filter;
     }
 
     public static Filter bottomN(int columnIndex, int n) {
-        Filter filter = new Filter();
-        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.LESS, String.valueOf(n)));
+        Filter filter = new Filter(columnIndex);
+        filter.conditions.add(new FilterCondition(FilterOperator.LESS, String.valueOf(n)));
         return filter;
     }
 
     public static Filter byRange(int columnIndex, double minValue, double maxValue) {
-        Filter filter = new Filter();
-        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.GREATER_EQUAL, String.valueOf(minValue)));
-        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.LESS_EQUAL, String.valueOf(maxValue)));
+        Filter filter = new Filter(columnIndex);
+        filter.add(new FilterCondition(FilterOperator.GREATER_EQUAL, String.valueOf(minValue)));
+        filter.add(new FilterCondition(FilterOperator.LESS_EQUAL, String.valueOf(maxValue)));
         return filter;
     }
 
     public static Filter showEmpty(int columnIndex) {
-        Filter filter = new Filter();
-        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.IS_NULL, null));
+        Filter filter = new Filter(columnIndex);
+        filter.conditions.add(new FilterCondition(FilterOperator.IS_NULL, null));
         return filter;
     }
 
     public static Filter hideEmpty(int columnIndex) {
-        Filter filter = new Filter();
-        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.NOT_NULL, null));
+        Filter filter = new Filter(columnIndex);
+        filter.conditions.add(new FilterCondition(FilterOperator.NOT_NULL, null));
         return filter;
+    }
+
+    public int getColumnIndex() {
+        return columnIndex;
+    }
+
+    public void setOperator(FilterLogic operator) {
+        this.operator = operator;
+    }
+
+    public void setSort(FilterSort sort) {
+        this.sort = sort;
+    }
+
+    public FilterLogic getOperator() {
+        return operator;
+    }
+
+    public FilterSort getSort() {
+        return sort;
+    }
+
+    public List<FilterCondition> getConditions() {
+        return conditions;
+    }
+
+    public void add(FilterCondition condition) {
+        conditions.add(condition);
     }
 
     public boolean hasRowLimitingEffect() {
@@ -78,7 +95,21 @@ public final class Filter {
         });
     }
 
-    public boolean hasColumnFilter(int columnIndex) {
-        return sortColumnIndex == columnIndex || conditions.stream().anyMatch(c -> c.columnIndex() == columnIndex);
+    public boolean hasConditions() {
+        return !conditions.isEmpty();
+    }
+
+    public String getSQL(String columnName) {
+        StringBuilder sql = new StringBuilder();
+
+        for (int i = 0; i < conditions.size(); i++) {
+            FilterCondition condition = conditions.get(i);
+            sql.append(condition.getSQL(columnName));
+            if (i < conditions.size() - 1) {
+                sql.append(" ").append(operator.name()).append(" ");
+            }
+        }
+
+        return sql.toString();
     }
 }

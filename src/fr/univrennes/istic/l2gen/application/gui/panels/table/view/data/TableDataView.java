@@ -19,12 +19,16 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class TableDataView extends JPanel {
 
     private final TableModel tableModel;
     private final JTable tableView;
     private final TablePagination paginationBar;
+
+    private List<Integer> hiddenColumns = new ArrayList<>();
 
     public TableDataView(TablePanel tablePanel) {
         super(new BorderLayout());
@@ -49,12 +53,14 @@ public final class TableDataView extends JPanel {
                 if (clickedColumnIndex == -1) {
                     return;
                 }
+
+                int realColumnIndex = getRealColumnIndex(clickedColumnIndex);
                 if (SwingUtilities.isRightMouseButton(e)) {
-                    TableColumnContextMenu contextMenu = new TableColumnContextMenu(selfView, clickedColumnIndex);
+                    TableColumnContextMenu contextMenu = new TableColumnContextMenu(selfView, realColumnIndex);
                     contextMenu.show(tableView.getTableHeader(), e.getX(), e.getY());
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
                     selectColumn(clickedColumnIndex);
-                    GUIController.getInstance().onColumnSelected(clickedColumnIndex);
+                    GUIController.getInstance().onColumnSelected(realColumnIndex);
                 }
             }
         });
@@ -64,6 +70,18 @@ public final class TableDataView extends JPanel {
         add(new TableToolBar(tablePanel), BorderLayout.NORTH);
         add(new JScrollPane(tableView), BorderLayout.CENTER);
         add(paginationBar, BorderLayout.SOUTH);
+    }
+
+    private int getRealColumnIndex(int viewColumnIndex) {
+        int realColumnIndex = viewColumnIndex;
+        for (int hiddenColumn : hiddenColumns) {
+            if (hiddenColumn <= realColumnIndex) {
+                realColumnIndex++;
+            } else {
+                break;
+            }
+        }
+        return realColumnIndex;
     }
 
     public void open(DataTable table) {
@@ -97,8 +115,8 @@ public final class TableDataView extends JPanel {
         if (columnIndex < 0 || columnIndex >= columnModel.getColumnCount()) {
             return;
         }
+        hiddenColumns.add(columnIndex);
         tableView.removeColumn(columnModel.getColumn(columnIndex));
-
         updateHeaderIcons();
     }
 
@@ -112,6 +130,7 @@ public final class TableDataView extends JPanel {
     }
 
     public void showAllColumns() {
+        hiddenColumns.clear();
         TableColumnModel columnModel = tableView.getColumnModel();
         while (columnModel.getColumnCount() > 0) {
             columnModel.removeColumn(columnModel.getColumn(0));
@@ -130,9 +149,14 @@ public final class TableDataView extends JPanel {
 
         int viewIndex = 0;
         int tableIndex = 0;
-        while (tableIndex < table.getColumnCount() && viewIndex < tableView.getColumnCount()) {
+        int viewColumnCount = tableView.getColumnCount();
+        while (tableIndex < table.getColumnCount() && viewIndex < viewColumnCount) {
+
             if (table.getColumnType(tableIndex) == DataType.EMPTY) {
                 tableView.removeColumn(tableView.getColumnModel().getColumn(viewIndex));
+                hiddenColumns.add(tableIndex);
+
+                viewColumnCount--;
                 tableIndex++;
                 continue;
             }
@@ -140,7 +164,6 @@ public final class TableDataView extends JPanel {
             viewIndex++;
             tableIndex++;
         }
-
         updateHeaderIcons();
     }
 

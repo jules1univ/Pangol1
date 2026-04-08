@@ -54,13 +54,7 @@ public final class GUIApp extends CoreApp<GUIController> {
 
         SwingUtilities.invokeLater(() -> {
             TableService.loadRecents();
-
-            SplashScreen splash = new SplashScreen();
-            splash.setVisible(true);
-
-            MainView view = new MainView(splash);
-
-            this.controller.setMainView(view);
+            this.controller.setMainView(new MainView());
             this.controller.onStart();
         });
 

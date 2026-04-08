@@ -27,15 +27,18 @@ public enum DataType {
 
     public static DataType fromSQL(String type) {
         type = type.toUpperCase();
-
-        if (type.contains("INT"))
+        if (type.contains("INT")) {
             return INTEGER;
-        if (type.contains("DOUBLE") || type.contains("FLOAT"))
+        }
+        if (type.contains("DOUBLE") || type.contains("FLOAT")) {
             return DOUBLE;
-        if (type.contains("BOOL"))
+        }
+        if (type.contains("BOOL")) {
             return BOOLEAN;
-        if (type.contains("DATE") || type.contains("TIME"))
+        }
+        if (type.contains("DATE") || type.contains("TIME")) {
             return DATE;
+        }
 
         return STRING;
     }

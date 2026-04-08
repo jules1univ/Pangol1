@@ -29,15 +29,12 @@ import fr.univrennes.istic.l2gen.application.gui.dialog.StatisticsDialog;
 import fr.univrennes.istic.l2gen.application.gui.main.MainView;
 
 public final class GUIController extends CoreController {
-    private static final GUIController instance = null;
+    private static final GUIController instance = new GUIController();
 
     private MainView mainView;
     private DataTable currentTable;
 
     public static GUIController getInstance() {
-        if (instance == null) {
-            return new GUIController();
-        }
         return instance;
     }
 
@@ -468,7 +465,7 @@ public final class GUIController extends CoreController {
             MainView oldView = mainView;
             oldView.dispose();
 
-            MainView newView = new MainView(this.mainView.getSplash());
+            MainView newView = new MainView();
             setMainView(newView);
             newView.setVisible(true);
         });

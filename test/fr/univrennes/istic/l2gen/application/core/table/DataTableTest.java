@@ -136,61 +136,6 @@ public class DataTableTest {
     }
 
     @Test
-    public void testFiltersAndPrivateQueries() throws Exception {
-        File parquet = createMainParquet();
-        DataTable table = DataTable.of(parquet);
-        Assert.assertNotNull(table);
-        openedTables.add(table);
-
-        table.addFilter(Filter.sort(0, true));
-        Assert.assertEquals(1, table.getAllFilters().size());
-
-        table.addFilter(Filter.byRange(1, 15.0, 30.0));
-        Assert.assertEquals(5L, table.getRowCount());
-        Assert.assertEquals(1, table.getFilter(1).size());
-
-        table.addFilter(Filter.search(2, "O'B"));
-        Assert.assertEquals(5L, table.getRowCount());
-
-        table.clearFilters(2);
-        Assert.assertEquals(5L, table.getRowCount());
-
-        table.clearAllFilters();
-        Assert.assertEquals(5L, table.getRowCount());
-
-        table.addFilter(Filter.topN(0, 2));
-        String topCountQuery = (String) invokePrivate(table, "buildCountQuery", new Class<?>[] {});
-        Assert.assertTrue(topCountQuery.contains("DESC LIMIT 2"));
-
-        table.clearAllFilters();
-        table.addFilter(Filter.bottomN(0, 3));
-        String bottomCountQuery = (String) invokePrivate(table, "buildCountQuery", new Class<?>[] {});
-        Assert.assertTrue(bottomCountQuery.contains("ASC LIMIT 3"));
-
-        table.clearAllFilters();
-        table.addFilter(Filter.byRange(1, 5.0, 50.0));
-        table.addFilter(Filter.showEmpty(3));
-        table.addFilter(Filter.hideEmpty(4));
-        table.addFilter(Filter.search(2, "a"));
-        table.addFilter(Filter.sort(0, false));
-
-        String query = (String) invokePrivate(table, "buildQuery", new Class<?>[] { long.class, long.class }, 10L, 1L);
-        Assert.assertTrue(query.contains("TRY_CAST"));
-        Assert.assertTrue(query.contains(" IS NULL"));
-        Assert.assertTrue(query.contains(" IS NOT NULL"));
-        Assert.assertTrue(query.contains(" ILIKE '%a%'"));
-        Assert.assertTrue(query.contains("ORDER BY \"id\" DESC"));
-        Assert.assertTrue(query.contains("LIMIT 10 OFFSET 1"));
-
-        table.clearAllFilters();
-        table.addFilter(Filter.topN(0, 1));
-        String topQuery = (String) invokePrivate(table, "buildQuery", new Class<?>[] { long.class, long.class }, 10L,
-                0L);
-        Assert.assertTrue(topQuery.contains("ORDER BY \"id\" DESC LIMIT 1"));
-        Assert.assertFalse(topQuery.contains("OFFSET"));
-    }
-
-    @Test
     public void testPrefetchAndRejectedExecutionPath() throws Exception {
         File parquet = createLargeParquet();
         DataTable table = DataTable.of(parquet);

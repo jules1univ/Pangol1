@@ -4,15 +4,70 @@ import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 
 public final class FilterBuilder {
 
-    public static String count(DataTable table) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM ");
+    public static StringBuilder base(String base, DataTable table) {
+        StringBuilder sql = new StringBuilder(base);
+        sql.append(" ").append(table.getSQLName());
 
-        return sql.toString();
+        int filterCount = table.getAllFilters().size();
+        if (filterCount > 0) {
+            int initialLength = sql.length();
+            String whereClause = " WHERE ";
+            sql.append(whereClause);
+
+            FilterSort sort = FilterSort.NONE;
+            String sortColumn = null;
+            for (int i = 0; i < filterCount; i++) {
+                Filter filter = table.getAllFilters().get(i);
+
+                String columnName = table.getSQLColumnName(filter.getColumnIndex());
+                sql.append(filter.getSQL(columnName));
+
+                if (i < filterCount - 1 && filter.hasConditions()) {
+                    if (filter.getOperator() == FilterLogic.AND) {
+                        sql.append(" AND ");
+                    } else {
+                        sql.append(" OR ");
+                    }
+                }
+
+                if (filter.getSort() != FilterSort.NONE) {
+                    sortColumn = table.getSQLColumnName(filter.getColumnIndex()); // fix 1
+                    sort = filter.getSort();
+                }
+            }
+
+            if (sql.length() == initialLength + whereClause.length()) {
+                sql.setLength(initialLength);
+            }
+
+            if (sort != FilterSort.NONE) {
+                sql.append(" ORDER BY ").append(sortColumn);
+                if (sort == FilterSort.ASCENDING) {
+                    sql.append(" ASC");
+                } else {
+                    sql.append(" DESC");
+                }
+            }
+        }
+
+        return sql;
+    }
+
+    public static String count(DataTable table) {
+        return base("SELECT COUNT(*) FROM", table).toString();
     }
 
     public static String query(DataTable table, long limit, long offset) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM " + table.getSQLName());
+        StringBuilder sql = base("SELECT * FROM", table);
+        if (limit != -1) { // fix 2
+            sql.append(" LIMIT ").append(limit);
+        }
 
+        if (offset != -1) {
+            sql.append(" OFFSET ").append(offset);
+        }
+
+        System.out.println(sql.toString());
         return sql.toString();
     }
 }
