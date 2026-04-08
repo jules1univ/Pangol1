@@ -26,7 +26,7 @@ public final class TableDataView extends JPanel {
     private final JTable tableView;
     private final TablePagination paginationBar;
 
-    public TableDataView(TablePanel tablePanel, GUIController controller) {
+    public TableDataView(TablePanel tablePanel) {
         super(new BorderLayout());
 
         tableModel = new TableModel(this);
@@ -50,19 +50,18 @@ public final class TableDataView extends JPanel {
                     return;
                 }
                 if (SwingUtilities.isRightMouseButton(e)) {
-                    TableColumnContextMenu contextMenu = new TableColumnContextMenu(selfView, controller,
-                            clickedColumnIndex);
+                    TableColumnContextMenu contextMenu = new TableColumnContextMenu(selfView, clickedColumnIndex);
                     contextMenu.show(tableView.getTableHeader(), e.getX(), e.getY());
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
                     selectColumn(clickedColumnIndex);
-                    controller.onColumnSelected(clickedColumnIndex);
+                    GUIController.getInstance().onColumnSelected(clickedColumnIndex);
                 }
             }
         });
 
         paginationBar = new TablePagination(tableModel);
 
-        add(new TableToolBar(controller, tablePanel), BorderLayout.NORTH);
+        add(new TableToolBar(tablePanel), BorderLayout.NORTH);
         add(new JScrollPane(tableView), BorderLayout.CENTER);
         add(paginationBar, BorderLayout.SOUTH);
     }

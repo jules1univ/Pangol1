@@ -2,7 +2,6 @@ package fr.univrennes.istic.l2gen.application.gui.panels.report.views.notebook;
 
 import javax.swing.JPanel;
 
-import fr.univrennes.istic.l2gen.application.gui.GUIController;
 import fr.univrennes.istic.l2gen.io.svg.SVGExport;
 import fr.univrennes.istic.l2gen.svg.interfaces.ISVGShape;
 
@@ -17,7 +16,7 @@ public class Chart extends JPanel {
 
     private SVGDiagram diagram;
 
-    public Chart(GUIController controller) {
+    public Chart() {
         setLayout(new BorderLayout());
     }
 

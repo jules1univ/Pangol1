@@ -1,86 +1,84 @@
 package fr.univrennes.istic.l2gen.application.core.filter;
 
-public class Filter {
+import java.util.ArrayList;
+import java.util.List;
 
-    private final FilterType type;
-    private final int columnIndex;
+public final class Filter {
 
-    private boolean ascending;
-    private int n;
-    private double min, max;
-    private String searchTerm;
+    private int sortColumnIndex = -1;
+    private boolean sortAscending = true;
 
-    private Filter(FilterType type, int columnIndex) {
-        this.type = type;
-        this.columnIndex = columnIndex;
+    private Integer limit;
+    private Integer offset;
+
+    private FilterLogic whereOperator = FilterLogic.AND;
+    private final List<FilterCondition> conditions = new ArrayList<>();
+
+    private final List<Integer> groupByColumns = new ArrayList<>();
+
+    private final List<FilterCondition> havingConditions = new ArrayList<>();
+
+    private final List<FilterJoin> joins = new ArrayList<>();
+
+    private final List<Integer> selectedColumns = new ArrayList<>();
+
+    public Filter() {
+
     }
 
     public static Filter sort(int columnIndex, boolean ascending) {
-        Filter f = new Filter(FilterType.SORT, columnIndex);
-        f.ascending = ascending;
-        return f;
-    }
-
-    public static Filter topN(int columnIndex, int n) {
-        Filter f = new Filter(FilterType.TOP_N, columnIndex);
-        f.n = n;
-        return f;
-    }
-
-    public static Filter bottomN(int columnIndex, int n) {
-        Filter f = new Filter(FilterType.BOTTOM_N, columnIndex);
-        f.n = n;
-        return f;
-    }
-
-    public static Filter byRange(int columnIndex, double min, double max) {
-        Filter f = new Filter(FilterType.RANGE, columnIndex);
-        f.min = min;
-        f.max = max;
-        return f;
-    }
-
-    public static Filter showEmpty(int columnIndex) {
-        return new Filter(FilterType.EMPTY, columnIndex);
-    }
-
-    public static Filter hideEmpty(int columnIndex) {
-        return new Filter(FilterType.NOT_EMPTY, columnIndex);
+        Filter filter = new Filter();
+        filter.sortColumnIndex = columnIndex;
+        filter.sortAscending = ascending;
+        return filter;
     }
 
     public static Filter search(int columnIndex, String searchTerm) {
-        Filter f = new Filter(FilterType.SEARCH, columnIndex);
-        f.searchTerm = searchTerm;
-        f.min = Double.NaN;
-        f.max = Double.NaN;
-        return f;
+        Filter filter = new Filter();
+        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.LIKE, searchTerm));
+        return filter;
     }
 
-    public FilterType getType() {
-        return type;
+    public static Filter topN(int columnIndex, int n) {
+        Filter filter = new Filter();
+        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.GREATER, String.valueOf(n)));
+        return filter;
     }
 
-    public int getColumnIndex() {
-        return columnIndex;
+    public static Filter bottomN(int columnIndex, int n) {
+        Filter filter = new Filter();
+        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.LESS, String.valueOf(n)));
+        return filter;
     }
 
-    public boolean isAscending() {
-        return ascending;
+    public static Filter byRange(int columnIndex, double minValue, double maxValue) {
+        Filter filter = new Filter();
+        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.GREATER_EQUAL, String.valueOf(minValue)));
+        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.LESS_EQUAL, String.valueOf(maxValue)));
+        return filter;
     }
 
-    public int getN() {
-        return n;
+    public static Filter showEmpty(int columnIndex) {
+        Filter filter = new Filter();
+        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.IS_NULL, null));
+        return filter;
     }
 
-    public double getMin() {
-        return min;
+    public static Filter hideEmpty(int columnIndex) {
+        Filter filter = new Filter();
+        filter.conditions.add(new FilterCondition(columnIndex, FilterOperator.NOT_NULL, null));
+        return filter;
     }
 
-    public double getMax() {
-        return max;
+    public boolean hasRowLimitingEffect() {
+        return conditions.stream().anyMatch(c -> switch (c.operator()) {
+            case GREATER, GREATER_EQUAL, LESS, LESS_EQUAL, LIKE -> true;
+            case IS_NULL, NOT_NULL -> true;
+            default -> false;
+        });
     }
 
-    public String getSearchTerm() {
-        return searchTerm;
+    public boolean hasColumnFilter(int columnIndex) {
+        return sortColumnIndex == columnIndex || conditions.stream().anyMatch(c -> c.columnIndex() == columnIndex);
     }
 }

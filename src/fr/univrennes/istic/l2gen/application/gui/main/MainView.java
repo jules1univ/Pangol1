@@ -13,11 +13,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
-import fr.univrennes.istic.l2gen.application.gui.GUIController;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.ReportPanel;
 import fr.univrennes.istic.l2gen.application.gui.panels.table.TablePanel;
 
 public final class MainView extends JFrame {
+
+    private final SplashScreen splash;
 
     private final TablePanel tablePanel;
     private final ReportPanel reportPanel;
@@ -27,11 +28,13 @@ public final class MainView extends JFrame {
 
     private JSplitPane mainSplit;
 
-    public MainView(GUIController controller) {
-        this.tablePanel = new TablePanel(controller);
-        this.reportPanel = new ReportPanel(controller);
+    public MainView(SplashScreen splash) {
+        this.splash = splash;
 
-        this.topBar = new TopBar(controller);
+        this.tablePanel = new TablePanel();
+        this.reportPanel = new ReportPanel();
+
+        this.topBar = new TopBar();
         this.bottomBar = new BottomBar();
 
         build();
@@ -82,5 +85,17 @@ public final class MainView extends JFrame {
 
     public BottomBar getBottomBar() {
         return bottomBar;
+    }
+
+    public SplashScreen getSplash() {
+        return splash;
+    }
+
+    public void ready() {
+        this.splash.setVisible(false);
+        this.splash.dispose();
+
+        setVisible(true);
+        tablePanel.refresh();
     }
 }

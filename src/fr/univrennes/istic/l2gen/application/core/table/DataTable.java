@@ -19,7 +19,7 @@ import org.duckdb.DuckDBConnection;
 
 import fr.univrennes.istic.l2gen.application.core.config.Log;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
-import fr.univrennes.istic.l2gen.application.core.filter.FilterType;
+import fr.univrennes.istic.l2gen.application.core.filter.FilterBuilder;
 import fr.univrennes.istic.l2gen.application.core.services.FileService;
 
 public final class DataTable {
@@ -139,7 +139,7 @@ public final class DataTable {
     }
 
     public String getSQLName() {
-        return tableName;
+        return "\'" + tableName.replace("'", "''") + "\'";
     }
 
     public String getSQLColumnName(int columnIndex) {
@@ -344,7 +344,6 @@ public final class DataTable {
     }
 
     public void addFilter(Filter filter) {
-        clearFilters(filter.getColumnIndex());
         filters.add(filter);
         invalidateCache();
         refreshRowCount();
@@ -352,7 +351,7 @@ public final class DataTable {
 
     public List<Filter> getFilter(int columnIndex) {
         return filters.stream()
-                .filter(f -> f.getColumnIndex() == columnIndex)
+                .filter(f -> f.hasColumnFilter(columnIndex))
                 .toList();
     }
 
@@ -361,7 +360,7 @@ public final class DataTable {
     }
 
     public void clearFilters(int columnIndex) {
-        filters.removeIf(f -> f.getColumnIndex() == columnIndex);
+        filters.removeIf(f -> f.hasColumnFilter(columnIndex));
         invalidateCache();
         refreshRowCount();
     }
@@ -380,12 +379,7 @@ public final class DataTable {
 
     private void refreshRowCount() {
         boolean hasRowLimitingFilters = filters.stream()
-                .anyMatch(f -> f.getType() == FilterType.RANGE
-                        || f.getType() == FilterType.EMPTY
-                        || f.getType() == FilterType.NOT_EMPTY
-                        || f.getType() == FilterType.SEARCH
-                        || f.getType() == FilterType.TOP_N
-                        || f.getType() == FilterType.BOTTOM_N);
+                .anyMatch(f -> f.hasRowLimitingEffect());
 
         if (!hasRowLimitingFilters) {
             try {
@@ -404,7 +398,7 @@ public final class DataTable {
     }
 
     private void refreshRowCountFromQuery() throws Exception {
-        String countQuery = buildCountQuery();
+        String countQuery = FilterBuilder.count(this);
         synchronized (connection) {
             try (Statement statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(countQuery);
@@ -413,72 +407,6 @@ public final class DataTable {
                 this.blockCount = (int) Math.ceil((double) this.rowCount / BLOCK_SIZE);
             }
         }
-    }
-
-    private String buildCountQuery() {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM '")
-                .append(tableName)
-                .append("'");
-
-        boolean hasWhere = false;
-
-        for (Filter filter : filters) {
-            String col = getSQLColumnName(filter.getColumnIndex());
-
-            switch (filter.getType()) {
-                case RANGE -> {
-                    sql.append(hasWhere ? " AND " : " WHERE ");
-                    sql.append(String.format(
-                            "TRY_CAST(%s AS DOUBLE) BETWEEN %f AND %f",
-                            col, filter.getMin(), filter.getMax()));
-                    hasWhere = true;
-                }
-                case EMPTY -> {
-                    sql.append(hasWhere ? " AND " : " WHERE ");
-                    sql.append(col).append(" IS NULL");
-                    hasWhere = true;
-                }
-                case NOT_EMPTY -> {
-                    sql.append(hasWhere ? " AND " : " WHERE ");
-                    sql.append(col).append(" IS NOT NULL");
-                    hasWhere = true;
-                }
-                case SEARCH -> {
-                    sql.append(hasWhere ? " AND " : " WHERE ");
-                    sql.append(col).append("::TEXT ILIKE '%").append(filter.getSearchTerm().replace("'", "''"))
-                            .append("%'");
-                    hasWhere = true;
-                }
-                case TOP_N -> {
-                    sql = new StringBuilder("SELECT COUNT(*) FROM (SELECT ")
-                            .append(col)
-                            .append(" FROM '")
-                            .append(tableName)
-                            .append("' ORDER BY ")
-                            .append(col)
-                            .append(" DESC LIMIT ")
-                            .append(filter.getN())
-                            .append(")");
-                    return sql.toString();
-                }
-                case BOTTOM_N -> {
-                    sql = new StringBuilder("SELECT COUNT(*) FROM (SELECT ")
-                            .append(col)
-                            .append(" FROM '")
-                            .append(tableName)
-                            .append("' ORDER BY ")
-                            .append(col)
-                            .append(" ASC LIMIT ")
-                            .append(filter.getN())
-                            .append(")");
-                    return sql.toString();
-                }
-                default -> {
-                }
-            }
-        }
-
-        return sql.toString();
     }
 
     private Object[][] getBlock(int blockIndex) {
@@ -500,7 +428,7 @@ public final class DataTable {
         long offsetRow = getBlockStartRow(blockIndex);
         long limitCount = getBlockRowCount(blockIndex);
 
-        String query = buildQuery(limitCount, offsetRow);
+        String query = FilterBuilder.query(this, offsetRow, limitCount);
         try {
             Object[][] blockData;
             synchronized (connection) {
@@ -531,76 +459,4 @@ public final class DataTable {
         }
     }
 
-    private String buildQuery(long limit, long offset) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM '")
-                .append(tableName)
-                .append("'");
-
-        boolean hasWhere = false;
-
-        for (Filter f : filters) {
-            String col = getSQLColumnName(f.getColumnIndex());
-
-            switch (f.getType()) {
-                case RANGE -> {
-                    sql.append(hasWhere ? " AND " : " WHERE ");
-                    sql.append(String.format(
-                            "TRY_CAST(%s AS DOUBLE) BETWEEN %f AND %f",
-                            col, f.getMin(), f.getMax()));
-                    hasWhere = true;
-                }
-                case EMPTY -> {
-                    sql.append(hasWhere ? " AND " : " WHERE ");
-                    sql.append(col).append(" IS NULL");
-                    hasWhere = true;
-                }
-                case NOT_EMPTY -> {
-                    sql.append(hasWhere ? " AND " : " WHERE ");
-                    sql.append(col).append(" IS NOT NULL");
-                    hasWhere = true;
-                }
-                case SEARCH -> {
-                    sql.append(hasWhere ? " AND " : " WHERE ");
-                    sql.append(col).append("::TEXT ILIKE '%").append(f.getSearchTerm().replace("'", "''")).append("%'");
-                    hasWhere = true;
-                }
-                default -> {
-                }
-            }
-        }
-
-        for (Filter f : filters) {
-            String col = getSQLColumnName(f.getColumnIndex());
-
-            switch (f.getType()) {
-                case SORT -> {
-                    sql.append(" ORDER BY ")
-                            .append(col)
-                            .append(f.isAscending() ? " ASC" : " DESC");
-                }
-                case TOP_N -> {
-                    sql.append(" ORDER BY ")
-                            .append(col)
-                            .append(" DESC LIMIT ")
-                            .append(f.getN());
-                }
-                case BOTTOM_N -> {
-                    sql.append(" ORDER BY ")
-                            .append(col)
-                            .append(" ASC LIMIT ")
-                            .append(f.getN());
-                }
-                default -> {
-                }
-            }
-        }
-
-        if (filters.stream()
-                .noneMatch(f -> f.getType() == FilterType.TOP_N || f.getType() == FilterType.BOTTOM_N)) {
-            sql.append(" LIMIT ").append(limit)
-                    .append(" OFFSET ").append(offset);
-        }
-
-        return sql.toString();
-    }
 }

@@ -10,22 +10,20 @@ import javax.swing.JPanel;
 import java.awt.CardLayout;
 
 public final class TablePanel extends JPanel {
-    private final GUIController controller;
     private final CardLayout cardLayout = new CardLayout();
 
     private final TableListView tableListView;
     private final TableDataView tableDataView;
 
-    public TablePanel(GUIController controller) {
-        this.controller = controller;
+    public TablePanel() {
         setLayout(cardLayout);
 
-        add(new EmptyView(controller), TableViewState.EMPTY.name());
+        add(new EmptyView(), TableViewState.EMPTY.name());
 
-        tableListView = new TableListView(this, controller);
+        tableListView = new TableListView(this);
         add(tableListView, TableViewState.LIST.name());
 
-        tableDataView = new TableDataView(this, controller);
+        tableDataView = new TableDataView(this);
         add(tableDataView, TableViewState.TABLE.name());
 
         cardLayout.show(this, TableViewState.EMPTY.name());
@@ -53,7 +51,7 @@ public final class TablePanel extends JPanel {
     public void refresh() {
         tableListView.refresh();
 
-        if (controller.getTable().isEmpty()) {
+        if (GUIController.getInstance().getTable().isEmpty()) {
             if (tableListView.isEmpty()) {
                 cardLayout.show(this, TableViewState.EMPTY.name());
                 return;

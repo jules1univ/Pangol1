@@ -21,8 +21,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
-import fr.univrennes.istic.l2gen.application.core.filter.Filter;
-
 public class DataTableTest {
 
     private final List<DataTable> openedTables = new ArrayList<>();

@@ -20,7 +20,7 @@ public final class TableListView extends JPanel {
 
     private final DefaultTableModel listModel;
 
-    public TableListView(TablePanel panel, GUIController controller) {
+    public TableListView(TablePanel panel) {
         super(new BorderLayout());
         this.listModel = new DefaultTableModel(new String[] {
                 Lang.get("tablelist.path"),
@@ -51,7 +51,7 @@ public final class TableListView extends JPanel {
                             refresh();
                             return;
                         }
-                        controller.setTable(table);
+                        GUIController.getInstance().setTable(table);
                     }
                 }
             }

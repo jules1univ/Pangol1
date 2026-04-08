@@ -13,14 +13,12 @@ import fr.univrennes.istic.l2gen.application.gui.GUIController;
 
 public final class TableColumnContextMenu extends JPopupMenu {
 
-    private final GUIController controller;
     private final TableDataView tableView;
     private final DataTable table;
     private final int columnIndex;
 
-    public TableColumnContextMenu(TableDataView tableView, GUIController controller,
+    public TableColumnContextMenu(TableDataView tableView,
             int columnIndex) {
-        this.controller = controller;
         this.tableView = tableView;
         this.columnIndex = columnIndex;
         this.table = tableView.getTableModel().getTable().get();
@@ -51,10 +49,11 @@ public final class TableColumnContextMenu extends JPopupMenu {
         JMenu sortMenu = new JMenu(Lang.get("tablecolumnmenu.sort"));
 
         JMenuItem sortAscendingItem = new JMenuItem(Lang.get("tablecolumnmenu.sort.ascending"));
-        sortAscendingItem.addActionListener(e -> controller.onColumnSortRequested(columnIndex, true));
+        sortAscendingItem.addActionListener(e -> GUIController.getInstance().onColumnSortRequested(columnIndex, true));
 
         JMenuItem sortDescendingItem = new JMenuItem(Lang.get("tablecolumnmenu.sort.descending"));
-        sortDescendingItem.addActionListener(e -> controller.onColumnSortRequested(columnIndex, false));
+        sortDescendingItem
+                .addActionListener(e -> GUIController.getInstance().onColumnSortRequested(columnIndex, false));
 
         sortMenu.add(sortAscendingItem);
         sortMenu.add(sortDescendingItem);
@@ -70,7 +69,7 @@ public final class TableColumnContextMenu extends JPopupMenu {
             if (input != null && !input.isBlank()) {
                 try {
                     int n = Integer.parseInt(input.trim());
-                    controller.onFilterTopNRequested(columnIndex, n, true);
+                    GUIController.getInstance().onFilterTopNRequested(columnIndex, n, true);
                 } catch (NumberFormatException ignored) {
                     JOptionPane.showMessageDialog(tableView, Lang.get("error.invalid_number"));
                 }
@@ -83,7 +82,7 @@ public final class TableColumnContextMenu extends JPopupMenu {
             if (input != null && !input.isBlank()) {
                 try {
                     int n = Integer.parseInt(input.trim());
-                    controller.onFilterTopNRequested(columnIndex, n, false);
+                    GUIController.getInstance().onFilterTopNRequested(columnIndex, n, false);
                 } catch (NumberFormatException ignored) {
                     JOptionPane.showMessageDialog(tableView, Lang.get("error.invalid_number"));
                 }
@@ -103,20 +102,21 @@ public final class TableColumnContextMenu extends JPopupMenu {
             try {
                 double min = Double.parseDouble(minInput.trim());
                 double max = Double.parseDouble(maxInput.trim());
-                controller.onFilterByRangeRequested(columnIndex, min, max);
+                GUIController.getInstance().onFilterByRangeRequested(columnIndex, min, max);
             } catch (NumberFormatException ignored) {
                 JOptionPane.showMessageDialog(tableView, Lang.get("error.invalid_number"));
             }
         });
 
         JMenuItem filterEmptyItem = new JMenuItem(Lang.get("tablecolumnmenu.filter.empty"));
-        filterEmptyItem.addActionListener(e -> controller.onFilterEmptyRequested(columnIndex, true));
+        filterEmptyItem.addActionListener(e -> GUIController.getInstance().onFilterEmptyRequested(columnIndex, true));
 
         JMenuItem filterNonEmptyItem = new JMenuItem(Lang.get("tablecolumnmenu.filter.non_empty"));
-        filterNonEmptyItem.addActionListener(e -> controller.onFilterEmptyRequested(columnIndex, false));
+        filterNonEmptyItem
+                .addActionListener(e -> GUIController.getInstance().onFilterEmptyRequested(columnIndex, false));
 
         JMenuItem clearFilterItem = new JMenuItem(Lang.get("tablecolumnmenu.filter.clear"));
-        clearFilterItem.addActionListener(e -> controller.onFilterCleared(columnIndex));
+        clearFilterItem.addActionListener(e -> GUIController.getInstance().onFilterCleared(columnIndex));
 
         filterMenu.add(filterTopNItem);
         filterMenu.add(filterBottomNItem);
@@ -134,35 +134,38 @@ public final class TableColumnContextMenu extends JPopupMenu {
 
         JMenu stats = new JMenu(Lang.get("tablecolumnmenu.stats"));
         JMenuItem summaryItem = new JMenuItem(Lang.get("tablecolumnmenu.stats.summary"));
-        summaryItem.addActionListener(e -> controller.onComputeSummaryRequested(columnIndex));
+        summaryItem.addActionListener(e -> GUIController.getInstance().onComputeSummaryRequested(columnIndex));
         stats.add(summaryItem);
 
         JMenuItem nullRateItem = new JMenuItem(Lang.get("tablecolumnmenu.stats.null_rate"));
-        nullRateItem.addActionListener(e -> controller.onComputeNullRateRequested(columnIndex));
+        nullRateItem.addActionListener(e -> GUIController.getInstance().onComputeNullRateRequested(columnIndex));
         stats.add(nullRateItem);
 
         JMenuItem cardinalityRatioItem = new JMenuItem(Lang.get("tablecolumnmenu.stats.cardinality_ratio"));
-        cardinalityRatioItem.addActionListener(e -> controller.onComputeCardinalityRatioRequested(columnIndex));
+        cardinalityRatioItem
+                .addActionListener(e -> GUIController.getInstance().onComputeCardinalityRatioRequested(columnIndex));
         stats.add(cardinalityRatioItem);
 
         if (this.table.getColumnType(columnIndex).isNumeric()) {
             JMenuItem interquartileRangeItem = new JMenuItem(Lang.get("tablecolumnmenu.stats.interquartile_range"));
-            interquartileRangeItem.addActionListener(e -> controller.onComputeInterquartileRangeRequested(columnIndex));
+            interquartileRangeItem.addActionListener(
+                    e -> GUIController.getInstance().onComputeInterquartileRangeRequested(columnIndex));
             stats.add(interquartileRangeItem);
 
             JMenuItem skewnessItem = new JMenuItem(Lang.get("tablecolumnmenu.stats.skewness"));
-            skewnessItem.addActionListener(e -> controller.onComputeSkewnessRequested(columnIndex));
+            skewnessItem.addActionListener(e -> GUIController.getInstance().onComputeSkewnessRequested(columnIndex));
             stats.add(skewnessItem);
 
             JMenuItem coefVariationItem = new JMenuItem(Lang.get("tablecolumnmenu.stats.coef_variation"));
-            coefVariationItem.addActionListener(e -> controller.onComputeCoefficientOfVariationRequested(columnIndex));
+            coefVariationItem.addActionListener(
+                    e -> GUIController.getInstance().onComputeCoefficientOfVariationRequested(columnIndex));
             stats.add(coefVariationItem);
 
             JMenu correlationItem = new JMenu(Lang.get("tablecolumnmenu.stats.correlation"));
             this.columnSelector(correlationItem,
                     i -> i != columnIndex && table.getColumnType(i).isNumeric(),
                     targetIndex -> {
-                        controller.onComputeCorrelationRequested(columnIndex, targetIndex);
+                        GUIController.getInstance().onComputeCorrelationRequested(columnIndex, targetIndex);
                         return null;
                     });
 

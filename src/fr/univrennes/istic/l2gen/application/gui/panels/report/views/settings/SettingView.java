@@ -32,10 +32,8 @@ import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.gui.GUIController;
 
 public class SettingView extends JPanel {
-    private final GUIController controller;
 
-    public SettingView(GUIController controller) {
-        this.controller = controller;
+    public SettingView() {
         this.build();
     }
 
@@ -64,7 +62,7 @@ public class SettingView extends JPanel {
 
         }));
 
-        String[] cols = controller.getTable().map(table -> {
+        String[] cols = GUIController.getInstance().getTable().map(table -> {
             final int size = (int) table.getColumnCount();
             String[] names = new String[size];
             for (int i = 0; i < size; i++) {

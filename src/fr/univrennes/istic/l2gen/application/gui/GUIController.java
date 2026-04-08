@@ -46,7 +46,6 @@ public final class GUIController extends CoreController {
 
     @Override
     public void onStart() {
-        this.mainView.getTablePanel().refresh();
         setStatus(Lang.get("status.ready"));
 
         ///// REMOVE THIS LATER !!!
@@ -60,8 +59,8 @@ public final class GUIController extends CoreController {
         File targetTable = new File(targetDir, "ValeursFoncieres-2024.txt.parquet");
 
         if (!remoteFile.exists()) {
-            TableService.load(
-                    URI.create("https://www.data.gouv.fr/api/1/datasets/r/af812b0e-a898-4226-8cc8-5a570b257326"),
+            TableService.load(URI.create("none"),
+                    // URI.create("https://www.data.gouv.fr/api/1/datasets/r/99a26050-b94f-4ffc-9eb0-73ed28a895d1"),
                     targetDir);
         } else if (!targetTable.exists()) {
             TableService.load(
@@ -73,6 +72,8 @@ public final class GUIController extends CoreController {
         if (table != null) {
             setTable(table);
         }
+
+        this.mainView.ready();
         /////
 
     }
@@ -467,7 +468,7 @@ public final class GUIController extends CoreController {
             MainView oldView = mainView;
             oldView.dispose();
 
-            MainView newView = new MainView(this);
+            MainView newView = new MainView(this.mainView.getSplash());
             setMainView(newView);
             newView.setVisible(true);
         });

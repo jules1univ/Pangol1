@@ -9,10 +9,10 @@ import java.awt.GridBagLayout;
 
 public final class EmptyView extends JPanel {
 
-    public EmptyView(GUIController controller) {
+    public EmptyView() {
         super(new GridBagLayout());
         JButton loadButton = new JButton(Lang.get("tableempty.load"));
-        loadButton.addActionListener(e -> controller.onOpenFileDialog());
+        loadButton.addActionListener(e -> GUIController.getInstance().onOpenFileDialog());
         add(loadButton);
     }
 }

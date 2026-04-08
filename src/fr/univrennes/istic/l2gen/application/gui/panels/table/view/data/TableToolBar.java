@@ -13,12 +13,12 @@ import fr.univrennes.istic.l2gen.application.gui.panels.table.TablePanel;
 
 public final class TableToolBar extends JToolBar {
 
-        TableToolBar(GUIController controller, TablePanel tablePanel) {
+        TableToolBar(TablePanel tablePanel) {
                 setFloatable(false);
 
                 JButton advancedFilterButton = new JButton(Lang.get("tabletoolbar.filters"),
                                 Ico.get("icons/filter.svg"));
-                advancedFilterButton.addActionListener(e -> controller.onOpenFilterDialog());
+                advancedFilterButton.addActionListener(e -> GUIController.getInstance().onOpenFilterDialog());
 
                 JButton showAllColumnsButton = new JButton(Lang.get("tabletoolbar.show_all_columns"),
                                 Ico.get("icons/show_columns.svg"));
@@ -30,7 +30,7 @@ public final class TableToolBar extends JToolBar {
 
                 Icon closeIcon = UIManager.getIcon("InternalFrame.closeIcon");
                 JButton closeButton = new JButton(closeIcon);
-                closeButton.addActionListener(e -> controller.onCloseTable());
+                closeButton.addActionListener(e -> GUIController.getInstance().onCloseTable());
 
                 add(advancedFilterButton);
                 addSeparator();
