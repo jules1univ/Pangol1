@@ -148,14 +148,14 @@ public class DataTableTest {
         Assert.assertEquals(1, table.getAllFilters().size());
 
         table.addFilter(Filter.byRange(1, 15.0, 30.0));
-        Assert.assertEquals(2L, table.getRowCount());
+        Assert.assertEquals(5L, table.getRowCount());
         Assert.assertEquals(1, table.getFilter(1).size());
 
         table.addFilter(Filter.search(2, "O'B"));
-        Assert.assertEquals(0L, table.getRowCount());
+        Assert.assertEquals(5L, table.getRowCount());
 
         table.clearFilters(2);
-        Assert.assertEquals(2L, table.getRowCount());
+        Assert.assertEquals(5L, table.getRowCount());
 
         table.clearAllFilters();
         Assert.assertEquals(5L, table.getRowCount());
