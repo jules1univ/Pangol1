@@ -25,6 +25,7 @@ import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.core.table.DataTableWorkerStatus;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
+import fr.univrennes.istic.l2gen.application.gui.dialog.FilterDialog;
 import fr.univrennes.istic.l2gen.application.gui.dialog.StatisticsDialog;
 import fr.univrennes.istic.l2gen.application.gui.main.MainView;
 
@@ -197,7 +198,7 @@ public final class GUIController extends CoreController {
 
     public void onColumnSortRequested(int columnIndex, boolean ascending) {
         if (currentTable != null) {
-            currentTable.clearAllFilters();
+            currentTable.clearFilters();
             currentTable.addFilter(Filter.sort(columnIndex, ascending));
             mainView.getTablePanel().refresh();
         }
@@ -241,14 +242,14 @@ public final class GUIController extends CoreController {
 
     public void onFilterCleared(int columnIndex) {
         if (currentTable != null) {
-            currentTable.clearFilters(columnIndex);
+            currentTable.clearColumnFilter(columnIndex);
             mainView.getTablePanel().refresh();
         }
     }
 
     public void onFilterReset() {
         if (currentTable != null) {
-            currentTable.clearAllFilters();
+            currentTable.clearFilters();
             mainView.getTablePanel().refresh();
         }
     }
@@ -267,6 +268,13 @@ public final class GUIController extends CoreController {
     }
 
     public void onOpenFilterDialog() {
+        if (currentTable == null) {
+            return;
+        }
+
+        List<Filter> filters = FilterDialog.show(mainView, currentTable);
+        currentTable.clearFilters();
+        currentTable.addFilters(filters);
     }
 
     public void onOpenFileDialog() {

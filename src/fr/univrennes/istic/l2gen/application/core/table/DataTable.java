@@ -156,6 +156,10 @@ public final class DataTable {
         return columnNames.get(columnIndex);
     }
 
+    public List<String> getColumnNames() {
+        return columnNames;
+    }
+
     public DataType getColumnType(int columnIndex) {
         if (columnIndex < 0 || columnIndex >= columnTypes.size()) {
             return DataType.STRING;
@@ -343,29 +347,35 @@ public final class DataTable {
         }
     }
 
+    public void addFilters(List<Filter> newFilters) {
+        filters.addAll(newFilters);
+        invalidateCache();
+        refreshRowCount();
+    }
+
     public void addFilter(Filter filter) {
         filters.add(filter);
         invalidateCache();
         refreshRowCount();
     }
 
-    public List<Filter> getFilter(int columnIndex) {
+    public List<Filter> getColumnFilters(int columnIndex) {
         return filters.stream()
                 .filter(f -> f.getColumnIndex() == columnIndex)
                 .toList();
     }
 
-    public List<Filter> getAllFilters() {
+    public List<Filter> getFilters() {
         return filters;
     }
 
-    public void clearFilters(int columnIndex) {
+    public void clearColumnFilter(int columnIndex) {
         filters.removeIf(f -> f.getColumnIndex() == columnIndex);
         invalidateCache();
         refreshRowCount();
     }
 
-    public void clearAllFilters() {
+    public void clearFilters() {
         filters.clear();
         invalidateCache();
         refreshRowCount();

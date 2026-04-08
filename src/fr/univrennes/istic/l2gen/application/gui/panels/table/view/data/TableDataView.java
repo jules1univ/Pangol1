@@ -189,7 +189,7 @@ public final class TableDataView extends JPanel {
 
         Icon filterIcon = Ico.get("icons/filter.svg");
         for (int columnIndex = 0; columnIndex < table.getColumnCount(); columnIndex++) {
-            boolean hasFilter = table.getFilter(columnIndex).size() > 0;
+            boolean hasFilter = table.getColumnFilters(columnIndex).size() > 0;
             if (hasFilter) {
                 headerRenderer.setIcon(columnIndex, filterIcon);
             } else {

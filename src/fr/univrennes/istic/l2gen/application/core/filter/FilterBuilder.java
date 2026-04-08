@@ -8,7 +8,7 @@ public final class FilterBuilder {
         StringBuilder sql = new StringBuilder(base);
         sql.append(" ").append(table.getSQLName());
 
-        int filterCount = table.getAllFilters().size();
+        int filterCount = table.getFilters().size();
         if (filterCount > 0) {
             int initialLength = sql.length();
             String whereClause = " WHERE ";
@@ -17,7 +17,7 @@ public final class FilterBuilder {
             FilterSort sort = FilterSort.NONE;
             String sortColumn = null;
             for (int i = 0; i < filterCount; i++) {
-                Filter filter = table.getAllFilters().get(i);
+                Filter filter = table.getFilters().get(i);
 
                 String columnName = table.getSQLColumnName(filter.getColumnIndex());
                 sql.append(filter.getSQL(columnName));
@@ -66,8 +66,6 @@ public final class FilterBuilder {
         if (offset != -1) {
             sql.append(" OFFSET ").append(offset);
         }
-
-        System.out.println(sql.toString());
         return sql.toString();
     }
 }
