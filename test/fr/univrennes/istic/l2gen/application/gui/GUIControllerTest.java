@@ -29,6 +29,7 @@ public class GUIControllerTest {
     /**
      * On verifie que onStart() peut être appelé sans erreur
      */
+    //NE MARCHE PAS 
     // @Test
     public void testOnStartMethodExists() {
         GUIController controller = GUIController.getInstance();
@@ -44,6 +45,7 @@ public class GUIControllerTest {
     /**
      * On verifie que onStop() peut être appelé sans erreur
      */
+    //NE MARCHE PAS 
     // @Test
     public void testOnStopMethodExists() {
         GUIController controller = GUIController.getInstance();
