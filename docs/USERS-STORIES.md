@@ -1,126 +1,84 @@
-# Backlog Produit : Pangol1
+# 📋 Backlog Produit : Projet Pangol1
+
+Ce document recense l'ensemble des besoins utilisateurs et des exigences techniques du projet. Chaque **User Story (US)** possède un identifiant unique permettant d'assurer une traçabilité parfaite avec le fichier de suivi des Sprints.
 
 ---
 
-## Gestion des Données
+## 🏗️ Groupe 1 : Gestion des Données & Core Architecture
 
-### US 01 : Importation de fichier CSV
-
+### **US 01** | Importation Multi-Sources
 **En tant qu'** analyste de données,  
-**je veux** pouvoir charger un fichier CSV depuis mon ordinateur,  
-**afin de** visualiser les données brutes dans le tableau de l'application.
-
+**je veux** charger un fichier CSV local ou importer des données via une URL,  
+**afin de** visualiser instantanément les données dans l'application.
 - **Critères d'acceptation :**
-  - Le bouton "Load a table" ouvre l'explorateur de fichiers.
-  - Les données s'affichent correctement dans la grille inférieure.
-  - Le nombre de lignes et de colonnes est mis à jour dans la barre d'état.
+  - Support du chargement local et distant.
+  - La barre d'état confirme le statut "Ready" après l'import.
 
-### US 02 : Filtrage dynamique
-
+### **US 02** | Filtrage Dynamique et Logique
 **En tant qu'** utilisateur,  
-**je veux** pouvoir appliquer des filtres logiques (égal, contient, supérieur à...),  
-**afin d'** isoler uniquement les données qui m'intéressent pour mon rapport.
-
+**je veux** appliquer des filtres complexes (AND, OR, NOT) et des tris sur les colonnes,  
+**afin d'** isoler les données pertinentes pour mon analyse.
 - **Critères d'acceptation :**
-  - Accès via le bouton "Filters".
-  - Possibilité de combiner des conditions avec AND/OR.
-  - Le tableau se met à jour instantanément après avoir cliqué sur "Apply".
+  - Clic droit sur l'en-tête pour le tri (Asc/Desc).
+  - Accès au menu "Filters" pour les plages numériques et textuelles.
 
 ---
 
-## Visualisation Graphique
+## 🌍 Groupe 2 : Internationalisation (i18n)
 
-### US 03 : Création de graphique
+### **US 03** | Support Multilingue Intégré
+**En tant qu'** utilisateur international,  
+**je veux** pouvoir changer la langue de l'interface à tout moment via le menu `Help > Languages`.
+- **Langues supportées :** Français 🇫🇷, Anglais 🇬🇧, Espagnol 🇪🇸, Arabe 🇸🇦, Chinois 🇨🇳, Portugais 🇵🇹, Russe 🇷🇺, Japonais 🇯🇵, Indonésien 🇮🇩 ( 10 plus parlé dans le monde ).
 
+---
+
+## 📊 Groupe 3 : Visualisation & Statistiques
+
+### **US 04** | Rendu Graphique Vectoriel
 **En tant que** responsable d'équipe,  
-**je veux** générer un graphique de type "Pie","Bar","Diagramme de Bar",  
-**afin de** voir la répartition proportionnelle de mes données (ex: effectifs par métier).
+**je veux** générer des graphiques de type Camembert (Pie), Barres (Bar) ou Colonnes (Columns),  
+**afin de** produire des rapports visuels clairs.
 
-- **Critères d'acceptation :**
-  - Sélection du type dans le panneau latéral.
-  - Possibilité de donner un titre personnalisé au graphique.
-  - Affichage d'une légende claire si l'option est cochée.
-
-### US 04 : Personnalisation esthétique
-
-**En tant qu'** utilisateur soucieux du design,  
-**je veux** pouvoir modifier les couleurs, l'opacité et la police du graphique,  
-**afin de** l'adapter à la charte graphique de mon entreprise.
-
-- **Critères d'acceptation :**
-  - Accès aux sélecteurs de couleur (Fill/Stroke).
-  - Modification de la taille de la police et de l'épaisseur des traits.
-  - Prévisualisation en temps réel dans la zone centrale.
+### **US 05** | Analyse Statistique (Summary)
+**En tant qu'** utilisateur,  
+**je veux** voir un résumé statistique d'une colonne (Type, Null Rate, Moyenne, Somme),  
+**afin de** comprendre rapidement la structure de mes données.
 
 ---
 
-## Expérience Utilisateur (UX)
+## ⚙️ Groupe 4 : Qualité & Performance (Agile, Tests, Optimisation)
 
-### US 05 : Gestion de l'espace de travail
-
-**En tant qu'** utilisateur avec un petit écran,  
-**je veux** pouvoir masquer ou détacher les panneaux (Tableau, Paramètres),  
-**afin de** maximiser la zone de visualisation du graphique.
-
-- **Critères d'acceptation :**
-  - Menu "View > Panels" fonctionnel.
-  - Les panneaux se détachent dans des fenêtres indépendantes.
-
-### US 06 : Navigation dans les grands jeux de données
-
-**En tant qu'** utilisateur manipulant des fichiers volumineux,  
-**je veux** pouvoir naviguer par pages dans le tableau,  
-**afin de** ne pas ralentir l'application et garder une lecture fluide.
-
-- **Critères d'acceptation :**
-  - Boutons First/Previous/Next/Last fonctionnels.
-  - Indication du numéro de page actuelle (ex: Page 1/1).
-
-# DOCUMENTATION & QUALITÉ (FINALISATION)
-
----
-
-## 🛠️ Optimisation du Code Source
-
-### US 07 : Optimisation et mise au propre du code
-
+### **US 06** | Méthodologie Agile & Suivi de Projet
 **En tant que** développeur,  
-**je veux** nettoyer le code source et supprimer les traces de debug,  
-**afin de** garantir une base de code saine et maintenable pour le futur.
-
+**je veux** travailler par itérations (Sprints) et découper mes tâches,  
+**afin de** livrer des fonctionnalités testées et fonctionnelles à chaque fin de cycle.
 - **Critères d'acceptation :**
-  - Suppression des `System.out.println` et des blocs de commentaires de test.
-  - Ajout de la JavaDoc sur les méthodes clés de calcul (`ReportService`).
-  - Respect des conventions de nommage Java (CamelCase) sur l'ensemble des classes et variables.
+  - Utilisation d'un fichier `SPRINT.md` mis à jour quotidiennement.
+  - Définition claire des "DoD" (Definition of Done) pour chaque tâche.
+
+### **US 07** | Fiabilité par les Tests
+**En tant que** responsable qualité,  
+**je veux** implémenter des tests unitaires et d'intégration,  
+**afin de** garantir qu'aucune régression n'apparaît lors du développement.
+- **Critères d'acceptation :**
+  - Validation des algorithmes de calcul statistique (Moyenne, Somme).
+  - Test de l'importation de fichiers malformés (gestion des erreurs).
+
+### **US 08** | Optimisation du Code et Refactoring
+**En tant que** développeur,  
+**je veux** optimiser le moteur de traitement et nettoyer le code,  
+**afin de** garantir que l'application reste fluide même avec des milliers de lignes.
+- **Critères d'acceptation :**
+  - Suppression du code mort et des commentaires de debug.
+  - Optimisation des boucles de traitement des données vectorielles.
+  - Temps de chargement inférieur à 500ms pour les fichiers standard.
 
 ---
 
-## 📖 Documentation Utilisateur
+## 📖 Groupe 5 : Documentation Finale
 
-### US 08 : Création du manuel d'utilisation PDF
-
+### **US 09** | Manuel Utilisateur en LaTeX
 **En tant qu'** utilisateur final,  
-**je veux** disposer d'un guide complet au format PDF avec un sommaire interactif,  
-**afin de** prendre en main l'application de manière autonome et rapide.
-
-- **Critères d'acceptation :**
-  - Sommaire cliquable fonctionnel vers les différentes sections du document.
-  - Présence de captures d'écran annotées pour chaque panneau (Filter, Table, Chart).
-  - Mise en page professionnelle incluant un fil d'ariane pour faciliter la navigation.
-
----
-
-## 📈 Gestion de Projet (Agile)
-
-### US 09 : Structuration du Backlog et des Sprints
-
-**En tant que** responsable de projet,  
-**je veux** mettre en forme l'ensemble des User Stories et des Sprints en Markdown,  
-**afin de** présenter un dossier de gestion de projet professionnel et parfaitement lisible.
-
-- **Critères d'acceptation :**
-  - Toutes les US sont regroupées par catégories logiques (UI, Data, Finalisation).
-  - Utilisation rigoureuse de la syntaxe Markdown (tableaux, listes à puces, mise en gras).
-  - Cohérence visuelle entre les tâches décrites et les fonctionnalités finales de l'application.
-
----
+**je veux** consulter un manuel PDF avec un sommaire cliquable,  
+**afin de** maîtriser l'outil en toute autonomie.
