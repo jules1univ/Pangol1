@@ -108,7 +108,7 @@ Ce manuel fournit une documentation complète sur l'utilisation de \textbf{Pango
 Pangol1 fonctionne sur Windows, Linux et macOS. Pour lancer l'application :
 
 \begin{enumerate}
-    \item Lancez le fichier \textbf{Pangol1.jar} ou exécutez la commande : \texttt{java -jar Pangol1.jar}
+    \item Lancez le fichier \textbf{Pangol1.jar} ou exécutez la commande : \texttt{java -jar Pangol1.jar} ou compiler le programme depuis vscode ./pangol1/src/application/Pangol1.java
     \item L'interface graphique s'affiche
     \item Vous pouvez maintenant charger vos données et créer des graphiques
 \end{enumerate}
@@ -116,11 +116,10 @@ Pangol1 fonctionne sur Windows, Linux et macOS. Pour lancer l'application :
 \subsection{Première Utilisation}
 \begin{enumerate}
     \item Lancez Pangol1
-    \item Allez dans \textbf{File} → \textbf{Open} pour charger un fichier CSV
-    \item Sélectionnez un fichier CSV sur votre ordinateur
+    \item Allez dans \textbf{File} → \textbf{Open} pour charger un fichier ( CSV , txt, TSV, ZIP, Parquet )
+    \item Sélectionnez un fichier sur votre ordinateur
     \item Les données s'affichent automatiquement dans la table à droite
-    \item Configurez votre graphique via le panneau de configuration à gauche
-    \item Exportez votre graphique en SVG si désiré
+    \item Configurez votre graphique via le panneau de configuration en bas à gauche
 \end{enumerate}
 
 \section{Interface Utilisateur}
@@ -129,9 +128,9 @@ Pangol1 fonctionne sur Windows, Linux et macOS. Pour lancer l'application :
 L'interface de Pangol1 est organisée en trois zones principales :
 
 \begin{itemize}
-    \item \textbf{Panneau de Configuration (Gauche)} : Permet de configurer le graphique (type, données, apparence)
+    \item \textbf{Panneau de Configuration (Bas à Gauche)} : Permet de configurer le graphique (type, données, apparence)
     
-    \item \textbf{Zone de Rendu (Centre)} : Affiche le graphique généré en temps réel
+    \item \textbf{Zone de Rendu (Centre Gauche)} : Affiche le graphique généré en temps réel
     
     \item \textbf{Table de Données (Droite)} : Affiche les lignes du fichier CSV importé avec système de pagination
 \end{itemize}
@@ -140,17 +139,17 @@ L'interface de Pangol1 est organisée en trois zones principales :
 La barre de menus contient les options suivantes :
 
 \begin{itemize}
-    \item \textbf{File} : Gestion des fichiers (Open, Save, Export, Exit)
-    \item \textbf{Help} : Aide et paramètres (Languages, About)
+    \item \textbf{Fichier} : Gestion des fichiers (Ouvrir, Ouvrir fichier récent, Ouvrir URL)
+    \item \textbf{Aide} : Aide et paramètres (Langues, documentation, à propos)
 \end{itemize}
 
 \section{Chargement des Données}
 
-\subsection{Importer un Fichier CSV}
-Pour charger un fichier CSV :
+\subsection{Importer un Fichier}
+Pour charger un fichier :
 
 \begin{enumerate}
-    \item Cliquez sur \textbf{File} → \textbf{Open}
+    \item Cliquez sur \textbf{Fichier} → \textbf{Ouvrir}
     \item Une fenêtre de sélection s'ouvre
     \item Naviguez et sélectionnez votre fichier CSV
     \item Cliquez sur \textbf{Ouvrir}
@@ -158,10 +157,9 @@ Pour charger un fichier CSV :
 \end{enumerate}
 
 \subsection{Format des Fichiers}
-Pangol1 accepte les fichiers au format \textbf{CSV} (Comma-Separated Values) :
+Pangol1 accepte les fichiers au format \textbf{( CSV , txt, TSV, ZIP, Parquet )} (Comma-Separated Values) :
 
 \begin{itemize}
-    \item Les colonnes sont séparées par des virgules ou des points-virgules
     \item La première ligne contient généralement les en-têtes de colonnes
     \item Les fichiers doivent être encodés en UTF-8 pour un fonctionnement optimal
 \end{itemize}
@@ -170,10 +168,10 @@ Pangol1 accepte les fichiers au format \textbf{CSV} (Comma-Separated Values) :
 Pour changer la langue de l'interface :
 
 \begin{enumerate}
-    \item Cliquez sur \textbf{Help} → \textbf{Languages}
+    \item Cliquez sur \textbf{Aide} → \textbf{Langues}
     \item Sélectionnez votre langue parmi les 9 disponibles :
     \begin{itemize}
-        \item Français (défaut)
+        \item Français
         \item Anglais
         \item Chinois simplifié
         \item Espagnol
@@ -193,7 +191,7 @@ La table de données à droite affiche le contenu de votre fichier CSV :
 
 \begin{itemize}
     \item \textbf{Pagination} : Utilisez les boutons \textbf{First, Previous, Next, Last} pour naviguer entre les pages
-    \item \textbf{En-têtes de Colonnes} : Cliquez sur les en-têtes pour accéder aux options de tri et filtrage
+    \item \textbf{En-têtes de Colonnes} : Cliquez ( clic Droit ) sur les en-têtes pour accéder aux options de tri et filtrage
     \item Chaque ligne représente un enregistrement du fichier
 \end{itemize}
 
@@ -201,7 +199,7 @@ La table de données à droite affiche le contenu de votre fichier CSV :
 Pour trier une colonne :
 
 \begin{enumerate}
-    \item Cliquez sur l'en-tête de la colonne
+    \item Cliquez droit sur l'en-tête de la colonne
     \item Un menu contextuel apparaît
     \item Choisissez \textbf{Ascendant} ou \textbf{Descendant}
     \item Les données se réorganisent automatiquement
@@ -211,19 +209,32 @@ Pour trier une colonne :
 Pour filtrer les données :
 
 \begin{enumerate}
-    \item Cliquez sur l'en-tête de la colonne
+    \item Cliquez droit sur l'en-tête de la colonne
     \item Sélectionnez \textbf{Top N} pour afficher les N valeurs les plus hautes
     \item Ou sélectionnez \textbf{Bottom N} pour afficher les N valeurs les plus basses
     \item Seules les lignes correspondantes s'affichent dans la table
 \end{enumerate}
 
 \subsection{Masquage de Colonnes}
-Pour masquer une colonne :
+Pour masquer ou renommer une colonne :
 
 \begin{enumerate}
-    \item Cliquez sur l'en-tête de la colonne
-    \item Sélectionnez \textbf{Hide} ou \textbf{Masquer}
+    \item Cliquez droit sur l'en-tête de la colonne
+    \item Sélectionnez \textbf{Masquer}
     \item La colonne disparaît de la table
+    \item Ou sélectionnez \textbf{renommer}
+    \item Pour renommer la colonne comme bon vous souhaite
+\end{enumerate}
+
+\subsection{Statistique}
+Pour avoir des statistique sur la colonne :
+
+\begin{enumerate}
+    \item Cliquez droit sur l'en-tête de la colonne
+    \item Sélectionnez \textbf{Statistiques}
+    \item Puis \textbf{Résumé} pour avoir : ( Min, Max, Moyenne, Somme,le nombre de données, le nombre de cellule vide, le type)
+    \item Ou \textbf{Taux de valeur nulles} pour avoir les valeurs nouvelles
+    \item Ou \textbf{Taux de cardinalités} pour avoir les cardinalités
 \end{enumerate}
 
 \section{Génération de Graphiques}
@@ -235,7 +246,6 @@ Pangol1 propose trois types de graphiques :
 \begin{itemize}
     \item Utilisation : Visualiser les proportions et les parts
     \item Cas d'usage : Répartition de pourcentages, composition d'un ensemble
-    \item Recommandation : Optimal avec 3 à 6 catégories
 \end{itemize}
 
 \subsubsection{Barres Horizontales (Bar Chart)}
