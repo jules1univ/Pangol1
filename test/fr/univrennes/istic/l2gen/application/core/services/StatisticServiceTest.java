@@ -41,13 +41,13 @@ public class StatisticServiceTest {
         DataTable table = createTable();
         openedTables.add(table);
 
-        Assert.assertEquals("1.00", StatisticService.computeBase(table, 0, StatisticOp.MIN).orElseThrow());
-        Assert.assertEquals("8.00", StatisticService.computeBase(table, 1, StatisticOp.MAX).orElseThrow());
-        Assert.assertEquals("2.50", StatisticService.computeBase(table, 0, StatisticOp.AVG).orElseThrow());
-        Assert.assertEquals("4.00", StatisticService.computeBase(table, 0, StatisticOp.COUNT).orElseThrow());
+        Assert.assertEquals("1,00", StatisticService.computeBase(table, 0, StatisticOp.MIN).orElseThrow());
+        Assert.assertEquals("8,00", StatisticService.computeBase(table, 1, StatisticOp.MAX).orElseThrow());
+        Assert.assertEquals("2,50", StatisticService.computeBase(table, 0, StatisticOp.AVG).orElseThrow());
+        Assert.assertEquals("4,00", StatisticService.computeBase(table, 0, StatisticOp.COUNT).orElseThrow());
         Assert.assertTrue(StatisticService.computeBase(table, 3, StatisticOp.MIN).orElseThrow().length() > 0);
         Assert.assertTrue(StatisticService.computeBase(table, 3, StatisticOp.MAX).orElseThrow().length() > 0);
-        Assert.assertEquals("3.00 length", StatisticService.computeBase(table, 2, StatisticOp.AVG).orElseThrow());
+        Assert.assertEquals("3,00 length", StatisticService.computeBase(table, 2, StatisticOp.AVG).orElseThrow());
         Assert.assertFalse(StatisticService.computeBase(table, 3, StatisticOp.AVG).isPresent());
 
         String summary = StatisticService.computeSummary(table, 2);
