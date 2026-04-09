@@ -144,6 +144,9 @@ public final class TableService {
                     }
                 }
 
+                GUIController.getInstance().updateTask(taskId, Lang.get("task.convert", inputPath.getName()),
+                        TaskStatus.RUNNING);
+
                 String statsQuery = "SELECT " + IntStream.range(0, columnNames.size())
                         .mapToObj(index -> {
                             String columnName = columnNames.get(index);
@@ -223,8 +226,6 @@ public final class TableService {
                         })
                         .collect(Collectors.joining(", "));
 
-                GUIController.getInstance().updateTask(taskId, Lang.get("task.convert", inputPath.getName()),
-                        TaskStatus.RUNNING);
                 statement.execute(String.format(
                         "COPY (SELECT %s FROM staging) TO '%s' (FORMAT PARQUET, CODEC 'SNAPPY')",
                         castSelectClause, tableOut));

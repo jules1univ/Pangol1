@@ -62,7 +62,7 @@ public final class StatisticService {
         }
 
         GUIController.getInstance().updateTask(taskId,
-                Lang.get("task.stats.base", action.getDisplayName(), table.getColumnName(columnIndex)),
+                Lang.get("task.stats.base_done", action.getDisplayName(), table.getColumnName(columnIndex)),
                 TaskStatus.DONE);
 
         Double val = executeDoubleQuery(query).orElse(Double.NaN);
