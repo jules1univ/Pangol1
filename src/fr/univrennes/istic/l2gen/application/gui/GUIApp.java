@@ -53,9 +53,17 @@ public final class GUIApp extends CoreApp<GUIController> {
         }
 
         SwingUtilities.invokeLater(() -> {
-            TableService.loadRecents();
-            this.controller.setMainView(new MainView());
-            this.controller.onStart();
+            SplashScreen splash = new SplashScreen();
+
+            new Thread(() -> {
+                splash.setStatus(Lang.get("app.loading.recents"));
+                TableService.loadRecents();
+
+                splash.setStatus(Lang.get("app.loading.ui"));
+                MainView mainView = new MainView(splash);
+                this.controller.setMainView(mainView);
+                this.controller.onStart();
+            }).start();
         });
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

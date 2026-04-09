@@ -9,6 +9,14 @@ import java.util.Map;
 
 public final class FileService {
 
+    public static File getAppDataDir() {
+        File dir = new File(System.getProperty("user.home"), ".Pangol1");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return dir;
+    }
+
     public static String getExtension(File file) {
         String name = file.getName().toLowerCase().trim();
         int i = name.lastIndexOf('.');

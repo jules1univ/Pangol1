@@ -34,6 +34,7 @@ public final class GUIController extends CoreController {
 
     private MainView mainView;
     private DataTable currentTable;
+    private int loadingIndex = 0;
 
     public static GUIController getInstance() {
         return instance;
@@ -46,34 +47,13 @@ public final class GUIController extends CoreController {
     public void onStart() {
         setStatus(Lang.get("status.ready"));
 
-        ///// REMOVE THIS LATER !!!
-        ///// SUPPRIMER CE CODE UNIQUEMENT POUR LE "PROJET DE GEN" PAS POUR APPLICATION
-        File targetDir = new File(System.getProperty("user.home"), ".Pangol1");
-        if (!targetDir.exists()) {
-            targetDir.mkdirs();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
         }
 
-        File remoteFile = new File(targetDir, "ValeursFoncieres-2024.txt");
-        File targetTable = new File(targetDir, "ValeursFoncieres-2024.txt.parquet");
-
-        if (!remoteFile.exists()) {
-            TableService.load(URI.create("none"),
-                    // URI.create("https://www.data.gouv.fr/api/1/datasets/r/99a26050-b94f-4ffc-9eb0-73ed28a895d1"),
-                    targetDir);
-        } else if (!targetTable.exists()) {
-            TableService.load(
-                    remoteFile,
-                    targetDir);
-        }
-
-        DataTable table = TableService.get(targetTable);
-        if (table != null) {
-            setTable(table);
-        }
-
-        this.mainView.ready();
-        /////
-
+        mainView.ready();
+        openDefaultTable();
     }
 
     @Override
@@ -84,6 +64,65 @@ public final class GUIController extends CoreController {
         }
     }
 
+    private void openDefaultTable() {
+        File targetDir = FileService.getAppDataDir();
+
+        /// TODO REMOVE THIS
+        String stableURI = "https://www.data.gouv.fr/api/1/datasets/r/99a26050-b94f-4ffc-9eb0-73ed28a895d1";
+        ///
+
+        String defaultTable = Config.get().get("default_table", stableURI);
+        URI parsedDefaultTableUri = null;
+        File parsedDefaultTableFile = null;
+
+        try {
+            parsedDefaultTableUri = URI.create(defaultTable);
+        } catch (Exception e) {
+            try {
+                parsedDefaultTableFile = new File(defaultTable);
+            } catch (Exception ex) {
+                parsedDefaultTableUri = URI.create(stableURI);
+            }
+        }
+
+        final URI defaultTableUri = parsedDefaultTableUri;
+        final File defaultTableFile = parsedDefaultTableFile;
+
+        enableLoading();
+        if (defaultTableUri != null) {
+            setStatus(Lang.get("status.loading_url", defaultTableUri.toString()));
+        } else {
+            setStatus(Lang.get("status.loading_file", defaultTableFile.getName()));
+        }
+
+        new SwingWorker<DataTable, Void>() {
+            @Override
+            protected DataTable doInBackground() throws Exception {
+                List<DataTable> tables = defaultTableUri != null
+                        ? TableService.load(defaultTableUri, targetDir)
+                        : TableService.load(defaultTableFile, targetDir);
+                return tables.isEmpty() ? null : tables.get(0);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    DataTable table = get();
+                    if (table != null) {
+                        Config.get().put("default_table", table.getPath().getAbsolutePath());
+                        setTable(table);
+                    }
+                } catch (Exception e) {
+                    onOpenExceptionDialog(e);
+                } finally {
+                    setStatus(Lang.get("status.ready"));
+                    disableLoading();
+                }
+            }
+        }.execute();
+
+    }
+
     public void setMainView(MainView frame) {
         mainView = frame;
     }
@@ -92,8 +131,18 @@ public final class GUIController extends CoreController {
         return mainView;
     }
 
-    public void setLoading(boolean isLoading) {
-        mainView.getBottomBar().setLoading(isLoading);
+    public void enableLoading() {
+        loadingIndex++;
+        mainView.getBottomBar().setLoading(true);
+    }
+
+    public void disableLoading() {
+        if (loadingIndex > 0) {
+            loadingIndex--;
+        }
+        if (loadingIndex == 0) {
+            mainView.getBottomBar().setLoading(false);
+        }
     }
 
     public void setStatus(String status) {
@@ -105,10 +154,10 @@ public final class GUIController extends CoreController {
     }
 
     public void setTable(DataTable table) {
-        setLoading(true);
+        enableLoading();
         if (table == null) {
             Log.debug("Attempted to set null table");
-            setLoading(false);
+            disableLoading();
             return;
         }
 
@@ -119,7 +168,7 @@ public final class GUIController extends CoreController {
         if (table.isClosed()) {
             if (!table.open()) {
                 Log.debug("Failed to open table: " + table.getAlias());
-                setLoading(false);
+                disableLoading();
                 return;
             }
         }
@@ -136,7 +185,7 @@ public final class GUIController extends CoreController {
                     (int) table.getColumnCount());
 
             setStatus(Lang.get("status.opening_table", table.getAlias()));
-            setLoading(false);
+            disableLoading();
         });
 
     }
@@ -159,7 +208,7 @@ public final class GUIController extends CoreController {
         if (currentTable != null) {
             mainView.getBottomBar().clearColumnStats();
 
-            setLoading(true);
+            enableLoading();
             new SwingWorker<List<Optional<String>>, Void>() {
                 @Override
                 protected List<Optional<String>> doInBackground() throws Exception {
@@ -188,7 +237,7 @@ public final class GUIController extends CoreController {
                     } catch (Exception e) {
                         onOpenExceptionDialog(e);
                     } finally {
-                        setLoading(false);
+                        disableLoading();
                     }
                 }
             }.execute();
@@ -282,7 +331,7 @@ public final class GUIController extends CoreController {
         fileChooser.setMultiSelectionEnabled(true);
         fileChooser.setFileSelectionMode(SystemFileChooser.FILES_ONLY);
 
-        if (fileChooser.showOpenDialog(this.getMainView()) != SystemFileChooser.APPROVE_OPTION) {
+        if (fileChooser.showOpenDialog(mainView) != SystemFileChooser.APPROVE_OPTION) {
             return;
         }
 
@@ -302,7 +351,7 @@ public final class GUIController extends CoreController {
             dirChooser.setFileSelectionMode(SystemFileChooser.DIRECTORIES_ONLY);
             dirChooser.setDialogTitle(Lang.get("dialog.select_target_dir"));
 
-            if (dirChooser.showOpenDialog(this.getMainView()) != SystemFileChooser.APPROVE_OPTION) {
+            if (dirChooser.showOpenDialog(mainView) != SystemFileChooser.APPROVE_OPTION) {
                 return;
             }
             targetDir = dirChooser.getSelectedFile();
@@ -310,7 +359,7 @@ public final class GUIController extends CoreController {
             targetDir = null;
         }
 
-        setLoading(true);
+        enableLoading();
         if (selectedFiles.length == 1) {
             setStatus(Lang.get("status.loading_file", selectedFiles[0].getName()));
         } else {
@@ -366,7 +415,7 @@ public final class GUIController extends CoreController {
                 } catch (Exception e) {
                     onOpenExceptionDialog(e);
                 } finally {
-                    setLoading(false);
+                    disableLoading();
                 }
             }
         }.execute();
@@ -391,12 +440,12 @@ public final class GUIController extends CoreController {
         dirChooser.setFileSelectionMode(SystemFileChooser.DIRECTORIES_ONLY);
         dirChooser.setDialogTitle(Lang.get("dialog.select_target_dir"));
 
-        if (dirChooser.showOpenDialog(this.getMainView()) != SystemFileChooser.APPROVE_OPTION) {
+        if (dirChooser.showOpenDialog(mainView) != SystemFileChooser.APPROVE_OPTION) {
             return;
         }
         File targetDir = dirChooser.getSelectedFile();
 
-        setLoading(true);
+        enableLoading();
         setStatus(Lang.get("status.loading_url", input));
 
         new SwingWorker<List<DataTable>, DataTableWorkerStatus>() {
@@ -432,7 +481,7 @@ public final class GUIController extends CoreController {
                 } catch (Exception e) {
                     onOpenExceptionDialog(e);
                 } finally {
-                    setLoading(false);
+                    disableLoading();
                 }
             }
         }.execute();
@@ -473,7 +522,7 @@ public final class GUIController extends CoreController {
             MainView oldView = mainView;
             oldView.dispose();
 
-            MainView newView = new MainView();
+            MainView newView = new MainView(mainView.getSplash());
             setMainView(newView);
             newView.setVisible(true);
         });

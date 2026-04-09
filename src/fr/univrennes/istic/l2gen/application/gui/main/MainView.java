@@ -20,23 +20,18 @@ public final class MainView extends JFrame {
 
     private final SplashScreen splash;
 
-    private final TablePanel tablePanel;
-    private final ReportPanel reportPanel;
+    private TablePanel tablePanel;
+    private ReportPanel reportPanel;
 
     private final TopBar topBar;
     private final BottomBar bottomBar;
 
     private JSplitPane mainSplit;
 
-    public MainView() {
-        this.splash = new SplashScreen();
-        this.tablePanel = new TablePanel();
-        this.reportPanel = new ReportPanel();
-
+    public MainView(SplashScreen splash) {
+        this.splash = splash;
         this.topBar = new TopBar();
         this.bottomBar = new BottomBar();
-
-        build();
     }
 
     private void build() {
@@ -62,6 +57,8 @@ public final class MainView extends JFrame {
             }
         }
 
+        this.tablePanel = new TablePanel();
+        this.reportPanel = new ReportPanel();
         this.tablePanel.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Separator.foreground")));
         this.reportPanel.setBorder(BorderFactory.createLineBorder(UIManager.getColor("Separator.foreground")));
 
@@ -94,10 +91,14 @@ public final class MainView extends JFrame {
     }
 
     public void ready() {
-        this.splash.setVisible(false);
-        this.splash.dispose();
+        SwingUtilities.invokeLater(() -> {
+            this.splash.setVisible(false);
+            this.splash.dispose();
 
-        setVisible(true);
-        tablePanel.refresh();
+            this.build();
+
+            setVisible(true);
+            tablePanel.refresh();
+        });
     }
 }
