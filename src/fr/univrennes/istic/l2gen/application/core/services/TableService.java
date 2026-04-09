@@ -30,9 +30,11 @@ import org.duckdb.DuckDBConnection;
 
 import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.config.Log;
+import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.core.table.DataType;
 import fr.univrennes.istic.l2gen.application.gui.GUIController;
+import fr.univrennes.istic.l2gen.application.gui.dialog.task.TaskStatus;
 
 public final class TableService {
     private static final Map<File, DataTable> loaded = Collections.synchronizedMap(new HashMap<>());
@@ -118,6 +120,9 @@ public final class TableService {
     }
 
     private static DataTable convert(File inputPath, File outputPath) {
+        String taskId = GUIController.getInstance().addTask(Lang.get("task.convert", inputPath.getName()),
+                TaskStatus.PENDING);
+
         String tableIn = inputPath.getAbsolutePath().replace("\\", "/");
         String tableOut = outputPath.getAbsolutePath().replace("\\", "/");
 
@@ -218,6 +223,8 @@ public final class TableService {
                         })
                         .collect(Collectors.joining(", "));
 
+                GUIController.getInstance().updateTask(taskId, Lang.get("task.convert", inputPath.getName()),
+                        TaskStatus.RUNNING);
                 statement.execute(String.format(
                         "COPY (SELECT %s FROM staging) TO '%s' (FORMAT PARQUET, CODEC 'SNAPPY')",
                         castSelectClause, tableOut));
@@ -229,11 +236,15 @@ public final class TableService {
                     rowCount = countResult.getLong(1);
                 }
 
+                GUIController.getInstance().updateTask(taskId, Lang.get("task.convert_done", inputPath.getName()),
+                        TaskStatus.DONE);
                 String alias = inputPath.getName().replaceFirst("[.][^.]+$", "");
                 return new DataTable(outputPath, alias, columnNames, columnTypes, rowCount, columnNames.size());
             }
 
         } catch (Exception e) {
+            GUIController.getInstance().removeTask(taskId);
+
             Log.mode(() -> {
                 Log.debug("Failed to convert table from " + inputPath + " to " + outputPath, e);
             }, () -> {
@@ -277,6 +288,9 @@ public final class TableService {
     }
 
     private static List<DataTable> processURL(URL url, File targetDir) {
+        String taskId = GUIController.getInstance().addTask(Lang.get("task.download", url.toString()),
+                TaskStatus.PENDING);
+
         try {
             HttpURLConnection conn = openHttpConnection(url);
 
@@ -288,13 +302,20 @@ public final class TableService {
                 throw new IOException("Unexpected HTTP response " + code + " for: " + url);
             }
 
+            GUIController.getInstance().updateTask(taskId, Lang.get("task.download", url.toString()),
+                    TaskStatus.RUNNING);
             File file = new File(targetDir, FileService.getRemoteFileName(conn, url));
             try (InputStream inputStream = conn.getInputStream();
                     FileOutputStream outputStream = new FileOutputStream(file)) {
                 inputStream.transferTo(outputStream);
             }
+
+            GUIController.getInstance().updateTask(taskId, Lang.get("task.download_done", url.toString()),
+                    TaskStatus.DONE);
             return load(file, targetDir);
         } catch (Exception e) {
+            GUIController.getInstance().removeTask(taskId);
+
             Log.mode(() -> {
                 Log.debug("Failed to load table from URI: " + url, e);
             }, () -> {
@@ -305,10 +326,15 @@ public final class TableService {
         return List.of();
     }
 
-    private static List<DataTable> processZip(File zipFile, File targetDir) throws IOException {
+    private static List<DataTable> processZip(File zipFile, File targetDir) {
+        String taskId = GUIController.getInstance().addTask(Lang.get("task.unzip", zipFile.getName()),
+                TaskStatus.PENDING);
 
         List<DataTable> result = new ArrayList<>();
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+
+            GUIController.getInstance().updateTask(taskId, Lang.get("task.unzip", zipFile.getName()),
+                    TaskStatus.RUNNING);
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
 
@@ -330,8 +356,18 @@ public final class TableService {
 
                 result.addAll(load(resolvedFile, targetDir));
             }
-        }
 
+            GUIController.getInstance().updateTask(taskId, Lang.get("task.unzip_done", zipFile.getName()),
+                    TaskStatus.DONE);
+        } catch (Exception e) {
+            GUIController.getInstance().removeTask(taskId);
+
+            Log.mode(() -> {
+                Log.debug("Failed to unzip file: " + zipFile, e);
+            }, () -> {
+                GUIController.getInstance().onOpenExceptionDialog(e);
+            });
+        }
         return result;
     }
 

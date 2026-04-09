@@ -25,8 +25,9 @@ import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.core.table.DataTableWorkerStatus;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
-import fr.univrennes.istic.l2gen.application.gui.dialog.FilterDialog;
-import fr.univrennes.istic.l2gen.application.gui.dialog.StatisticsDialog;
+import fr.univrennes.istic.l2gen.application.gui.dialog.filter.FilterDialog;
+import fr.univrennes.istic.l2gen.application.gui.dialog.stats.StatisticsDialog;
+import fr.univrennes.istic.l2gen.application.gui.dialog.task.TaskStatus;
 import fr.univrennes.istic.l2gen.application.gui.main.MainView;
 
 public final class GUIController extends CoreController {
@@ -47,10 +48,12 @@ public final class GUIController extends CoreController {
     public void onStart() {
         setStatus(Lang.get("status.ready"));
 
+        /// REMOVE THIS LATER ARTIFICIAL DELAY
         try {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
         }
+        ///
 
         mainView.ready();
         openDefaultTable();
@@ -67,7 +70,7 @@ public final class GUIController extends CoreController {
     private void openDefaultTable() {
         File targetDir = FileService.getAppDataDir();
 
-        /// TODO REMOVE THIS
+        /// REMOVE THIS LATER
         String stableURI = "https://www.data.gouv.fr/api/1/datasets/r/99a26050-b94f-4ffc-9eb0-73ed28a895d1";
         ///
 
@@ -143,6 +146,25 @@ public final class GUIController extends CoreController {
         if (loadingIndex == 0) {
             mainView.getBottomBar().setLoading(false);
         }
+    }
+
+    public String addTask(String name, TaskStatus status) {
+        if (loadingIndex == 0) {
+            enableLoading();
+        }
+        return mainView.getBottomBar().addTask(name, status);
+    }
+
+    public void updateTask(String taskId, String name, TaskStatus status) {
+        mainView.getBottomBar().updateTask(taskId, name, status);
+        if (status == TaskStatus.DONE) {
+            disableLoading();
+        }
+    }
+
+    public void removeTask(String taskId) {
+        mainView.getBottomBar().removeTask(taskId);
+        disableLoading();
     }
 
     public void setStatus(String status) {

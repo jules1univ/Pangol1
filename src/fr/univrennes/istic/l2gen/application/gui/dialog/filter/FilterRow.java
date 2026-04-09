@@ -1,4 +1,4 @@
-package fr.univrennes.istic.l2gen.application.gui.dialog;
+package fr.univrennes.istic.l2gen.application.gui.dialog.filter;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

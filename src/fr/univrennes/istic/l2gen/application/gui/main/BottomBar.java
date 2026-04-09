@@ -3,9 +3,16 @@ package fr.univrennes.istic.l2gen.application.gui.main;
 import javax.swing.*;
 
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
+import fr.univrennes.istic.l2gen.application.gui.dialog.task.TaskEntry;
+import fr.univrennes.istic.l2gen.application.gui.dialog.task.TaskPanel;
+import fr.univrennes.istic.l2gen.application.gui.dialog.task.TaskStatus;
 
 import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public final class BottomBar extends JPanel {
 
@@ -13,13 +20,14 @@ public final class BottomBar extends JPanel {
     private final JLabel nameLabel;
     private final JLabel rowsLabel;
     private final JLabel colsLabel;
-
     private final JLabel sumLabel;
     private final JLabel avgLabel;
     private final JLabel minLabel;
     private final JLabel maxLabel;
-
     private final JProgressBar loadingBar;
+
+    private final List<TaskEntry> taskEntries = new ArrayList<>();
+    private TaskPanel taskPanel;
 
     public BottomBar() {
         setLayout(new BorderLayout(0, 0));
@@ -49,7 +57,6 @@ public final class BottomBar extends JPanel {
 
         JPanel labelsRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         labelsRow.setOpaque(false);
-
         labelsRow.add(nameLabel);
         labelsRow.add(makeSeparator());
         labelsRow.add(rowsLabel);
@@ -67,7 +74,6 @@ public final class BottomBar extends JPanel {
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setOpaque(false);
         centerPanel.add(labelsRow, new GridBagConstraints());
-
         add(centerPanel, BorderLayout.CENTER);
 
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
@@ -77,8 +83,15 @@ public final class BottomBar extends JPanel {
         loadingBar.setIndeterminate(false);
         loadingBar.setPreferredSize(new Dimension(100, 14));
         loadingBar.setVisible(false);
-        rightPanel.add(loadingBar);
+        loadingBar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        loadingBar.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                toggleTaskPanel();
+            }
+        });
 
+        rightPanel.add(loadingBar);
         add(rightPanel, BorderLayout.EAST);
     }
 
@@ -91,7 +104,6 @@ public final class BottomBar extends JPanel {
             nameLabel.setText(name);
             rowsLabel.setText(Lang.get("status.rows_count", rows));
             colsLabel.setText(Lang.get("status.cols_count", cols));
-
             nameLabel.setVisible(true);
             rowsLabel.setVisible(true);
             colsLabel.setVisible(true);
@@ -132,9 +144,103 @@ public final class BottomBar extends JPanel {
         SwingUtilities.invokeLater(() -> {
             loadingBar.setIndeterminate(isLoading);
             loadingBar.setVisible(isLoading);
+            if (!isLoading) {
+                dismissTaskPanel();
+            }
             revalidate();
             repaint();
         });
+    }
+
+    public String addTask(String name, TaskStatus status) {
+        String taskId = UUID.randomUUID().toString();
+        SwingUtilities.invokeLater(() -> {
+            taskEntries.add(new TaskEntry(taskId, name, status));
+            if (taskPanel != null) {
+                taskPanel.refresh(taskEntries);
+            }
+        });
+        return taskId;
+    }
+
+    public void updateTask(String taskId, String name, TaskStatus status) {
+        SwingUtilities.invokeLater(() -> {
+            for (int index = 0; index < taskEntries.size(); index++) {
+                if (taskEntries.get(index).id().equals(taskId)) {
+                    taskEntries.set(index, new TaskEntry(taskId, name, status));
+                    break;
+                }
+            }
+            if (taskPanel != null) {
+                taskPanel.refresh(taskEntries);
+            }
+        });
+    }
+
+    public void removeTask(String taskId) {
+        SwingUtilities.invokeLater(() -> {
+            taskEntries.removeIf(entry -> entry.id().equals(taskId));
+            if (taskPanel != null) {
+                taskPanel.refresh(taskEntries);
+            }
+        });
+    }
+
+    private void toggleTaskPanel() {
+        if (taskPanel != null) {
+            dismissTaskPanel();
+            return;
+        }
+
+        JRootPane rootPane = SwingUtilities.getRootPane(this);
+        if (rootPane == null)
+            return;
+
+        JLayeredPane layeredPane = rootPane.getLayeredPane();
+
+        taskPanel = new TaskPanel(taskId -> removeTask(taskId));
+        taskPanel.refresh(taskEntries);
+
+        Dimension panelSize = taskPanel.getPreferredSize();
+        int panelWidth = 280;
+        int panelHeight = panelSize.height;
+
+        Point loadingBarInRoot = SwingUtilities.convertPoint(loadingBar, 0, 0, layeredPane);
+        int panelX = loadingBarInRoot.x + loadingBar.getWidth() - panelWidth;
+        int panelY = loadingBarInRoot.y - panelHeight;
+
+        taskPanel.setBounds(panelX, panelY, panelWidth, panelHeight);
+        layeredPane.add(taskPanel, JLayeredPane.POPUP_LAYER);
+        layeredPane.revalidate();
+        layeredPane.repaint();
+
+        layeredPane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent event) {
+                if (taskPanel != null) {
+                    Rectangle taskPanelBounds = taskPanel.getBounds();
+                    if (!taskPanelBounds.contains(event.getPoint())) {
+                        dismissTaskPanel();
+                        layeredPane.removeMouseListener(this);
+                    }
+                } else {
+                    layeredPane.removeMouseListener(this);
+                }
+            }
+        });
+    }
+
+    private void dismissTaskPanel() {
+        if (taskPanel == null)
+            return;
+        JRootPane rootPane = SwingUtilities.getRootPane(this);
+        if (rootPane != null) {
+            JLayeredPane layeredPane = rootPane.getLayeredPane();
+            layeredPane.remove(taskPanel);
+            layeredPane.revalidate();
+            layeredPane.repaint();
+        }
+        taskPanel = null;
     }
 
     private JLabel createInfoLabel(String text) {
@@ -146,8 +252,8 @@ public final class BottomBar extends JPanel {
     }
 
     private JSeparator makeSeparator() {
-        JSeparator sep = new JSeparator(JSeparator.VERTICAL);
-        sep.setPreferredSize(new Dimension(1, 14));
-        return sep;
+        JSeparator separator = new JSeparator(JSeparator.VERTICAL);
+        separator.setPreferredSize(new Dimension(1, 14));
+        return separator;
     }
 }

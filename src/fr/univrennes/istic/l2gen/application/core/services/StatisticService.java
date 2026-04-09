@@ -1,8 +1,11 @@
 package fr.univrennes.istic.l2gen.application.core.services;
 
 import fr.univrennes.istic.l2gen.application.core.config.Log;
+import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.core.table.DataType;
+import fr.univrennes.istic.l2gen.application.gui.GUIController;
+import fr.univrennes.istic.l2gen.application.gui.dialog.task.TaskStatus;
 
 import org.duckdb.DuckDBConnection;
 
@@ -23,6 +26,9 @@ public final class StatisticService {
 
     public static Optional<String> computeBase(DataTable table, int columnIndex, StatisticOp action) {
         String query;
+        String taskId = GUIController.getInstance().addTask(
+                Lang.get("task.stats.base", action.getDisplayName(), table.getColumnName(columnIndex)),
+                TaskStatus.RUNNING);
 
         switch (table.getColumnType(columnIndex)) {
             case DOUBLE, INTEGER, BOOLEAN -> {
@@ -54,6 +60,10 @@ public final class StatisticService {
                         table.getSQLColumnName(columnIndex));
             }
         }
+
+        GUIController.getInstance().updateTask(taskId,
+                Lang.get("task.stats.base", action.getDisplayName(), table.getColumnName(columnIndex)),
+                TaskStatus.DONE);
 
         Double val = executeDoubleQuery(query).orElse(Double.NaN);
         if (Double.isNaN(val) || Double.isInfinite(val)) {

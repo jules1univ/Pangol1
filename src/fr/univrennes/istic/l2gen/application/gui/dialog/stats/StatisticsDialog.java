@@ -1,4 +1,4 @@
-package fr.univrennes.istic.l2gen.application.gui.dialog;
+package fr.univrennes.istic.l2gen.application.gui.dialog.stats;
 
 import javax.swing.*;
 
