@@ -49,9 +49,11 @@ public final class GUIController extends CoreController {
         setStatus(Lang.get("status.ready"));
 
         /// REMOVE THIS LATER ARTIFICIAL DELAY
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
+        if (!Log.DEBUG_MODE) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+            }
         }
         ///
 

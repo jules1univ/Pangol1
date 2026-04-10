@@ -26,8 +26,10 @@ public final class BottomBar extends JPanel {
     private final JLabel maxLabel;
     private final JProgressBar loadingBar;
 
+    private final JLabel taskCountLabel;
     private final List<TaskEntry> taskEntries = new ArrayList<>();
     private TaskPanel taskPanel;
+    private ComponentListener windowComponentListener;
 
     public BottomBar() {
         setLayout(new BorderLayout(0, 0));
@@ -76,8 +78,20 @@ public final class BottomBar extends JPanel {
         centerPanel.add(labelsRow, new GridBagConstraints());
         add(centerPanel, BorderLayout.CENTER);
 
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 4));
         rightPanel.setOpaque(false);
+
+        taskCountLabel = new JLabel("");
+        taskCountLabel.setFont(taskCountLabel.getFont().deriveFont(Font.PLAIN, 11f));
+        taskCountLabel.setForeground(UIManager.getColor("Label.disabledForeground"));
+        taskCountLabel.setVisible(false);
+        taskCountLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        taskCountLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                toggleTaskPanel();
+            }
+        });
 
         loadingBar = new JProgressBar();
         loadingBar.setIndeterminate(false);
@@ -91,6 +105,7 @@ public final class BottomBar extends JPanel {
             }
         });
 
+        rightPanel.add(taskCountLabel);
         rightPanel.add(loadingBar);
         add(rightPanel, BorderLayout.EAST);
     }
@@ -156,8 +171,10 @@ public final class BottomBar extends JPanel {
         String taskId = UUID.randomUUID().toString();
         SwingUtilities.invokeLater(() -> {
             taskEntries.add(new TaskEntry(taskId, name, status));
+            refreshTaskCountLabel();
             if (taskPanel != null) {
                 taskPanel.refresh(taskEntries);
+                repositionTaskPanel();
             }
         });
         return taskId;
@@ -171,8 +188,10 @@ public final class BottomBar extends JPanel {
                     break;
                 }
             }
+            refreshTaskCountLabel();
             if (taskPanel != null) {
                 taskPanel.refresh(taskEntries);
+                repositionTaskPanel();
             }
         });
     }
@@ -180,10 +199,24 @@ public final class BottomBar extends JPanel {
     public void removeTask(String taskId) {
         SwingUtilities.invokeLater(() -> {
             taskEntries.removeIf(entry -> entry.id().equals(taskId));
+            refreshTaskCountLabel();
             if (taskPanel != null) {
                 taskPanel.refresh(taskEntries);
+                repositionTaskPanel();
             }
         });
+    }
+
+    private void refreshTaskCountLabel() {
+        int runningCount = (int) taskEntries.stream()
+                .filter(entry -> entry.status() == TaskStatus.RUNNING)
+                .count();
+        if (runningCount > 0) {
+            taskCountLabel.setText(Lang.get("status.tasks_running", runningCount));
+            taskCountLabel.setVisible(true);
+        } else {
+            taskCountLabel.setVisible(false);
+        }
     }
 
     private void toggleTaskPanel() {
@@ -193,26 +226,40 @@ public final class BottomBar extends JPanel {
         }
 
         JRootPane rootPane = SwingUtilities.getRootPane(this);
-        if (rootPane == null)
+        if (rootPane == null) {
             return;
+        }
 
         JLayeredPane layeredPane = rootPane.getLayeredPane();
 
-        taskPanel = new TaskPanel(taskId -> removeTask(taskId));
+        taskPanel = new TaskPanel(this::removeTask);
         taskPanel.refresh(taskEntries);
 
-        Dimension panelSize = taskPanel.getPreferredSize();
-        int panelWidth = 280;
-        int panelHeight = panelSize.height;
+        Dimension fixedSize = taskPanel.getFixedSize(taskEntries.size());
+        taskPanel.setSize(fixedSize);
+        taskPanel.setPreferredSize(fixedSize);
 
-        Point loadingBarInRoot = SwingUtilities.convertPoint(loadingBar, 0, 0, layeredPane);
-        int panelX = loadingBarInRoot.x + loadingBar.getWidth() - panelWidth;
-        int panelY = loadingBarInRoot.y - panelHeight;
+        repositionTaskPanel();
 
-        taskPanel.setBounds(panelX, panelY, panelWidth, panelHeight);
         layeredPane.add(taskPanel, JLayeredPane.POPUP_LAYER);
         layeredPane.revalidate();
         layeredPane.repaint();
+
+        Window parentWindow = SwingUtilities.getWindowAncestor(this);
+        if (parentWindow != null) {
+            windowComponentListener = new ComponentAdapter() {
+                @Override
+                public void componentResized(ComponentEvent event) {
+                    repositionTaskPanel();
+                }
+
+                @Override
+                public void componentMoved(ComponentEvent event) {
+                    repositionTaskPanel();
+                }
+            };
+            parentWindow.addComponentListener(windowComponentListener);
+        }
 
         layeredPane.addMouseListener(new MouseAdapter() {
             @Override
@@ -230,9 +277,39 @@ public final class BottomBar extends JPanel {
         });
     }
 
-    private void dismissTaskPanel() {
-        if (taskPanel == null)
+    private void repositionTaskPanel() {
+        if (taskPanel == null) {
             return;
+        }
+
+        JRootPane rootPane = SwingUtilities.getRootPane(this);
+        if (rootPane == null) {
+            return;
+        }
+
+        JLayeredPane layeredPane = rootPane.getLayeredPane();
+        Dimension fixedSize = taskPanel.getFixedSize(taskEntries.size());
+
+        Point loadingBarInRoot = SwingUtilities.convertPoint(loadingBar, 0, 0, layeredPane);
+        int panelX = loadingBarInRoot.x + loadingBar.getWidth() - fixedSize.width;
+        int panelY = loadingBarInRoot.y - fixedSize.height;
+
+        taskPanel.setBounds(panelX, panelY, fixedSize.width, fixedSize.height);
+        layeredPane.revalidate();
+        layeredPane.repaint();
+    }
+
+    private void dismissTaskPanel() {
+        if (taskPanel == null) {
+            return;
+        }
+
+        Window parentWindow = SwingUtilities.getWindowAncestor(this);
+        if (parentWindow != null && windowComponentListener != null) {
+            parentWindow.removeComponentListener(windowComponentListener);
+            windowComponentListener = null;
+        }
+
         JRootPane rootPane = SwingUtilities.getRootPane(this);
         if (rootPane != null) {
             JLayeredPane layeredPane = rootPane.getLayeredPane();
@@ -240,6 +317,7 @@ public final class BottomBar extends JPanel {
             layeredPane.revalidate();
             layeredPane.repaint();
         }
+
         taskPanel = null;
     }
 

@@ -4,9 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.util.HashSet;
 import java.util.List;
@@ -16,14 +16,11 @@ import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
@@ -31,6 +28,11 @@ import javax.swing.border.EmptyBorder;
 public final class TaskPanel extends JPanel {
 
     private static final int DONE_REMOVAL_DELAY_MS = 5000;
+    private static final int FIXED_WIDTH = 320;
+    private static final int ROW_HEIGHT = 46;
+    private static final int MAX_VISIBLE_ROWS = 6;
+    private static final int HEADER_HEIGHT = 32;
+    private static final int SEPARATOR_HEIGHT = 1;
 
     private final JPanel taskListPanel;
     private final JLabel taskCountLabel;
@@ -90,24 +92,18 @@ public final class TaskPanel extends JPanel {
             }
         }
 
-        int rowHeight = 46;
-        int maxVisibleRows = 6;
-        int visibleRows = Math.min(Math.max(entries.size(), 1), maxVisibleRows);
-        taskListPanel.setPreferredSize(new Dimension(280, visibleRows * rowHeight));
+        int visibleRows = Math.min(Math.max(entries.size(), 1), MAX_VISIBLE_ROWS);
+        int listHeight = visibleRows * ROW_HEIGHT + (visibleRows - 1) * SEPARATOR_HEIGHT;
+        taskListPanel.setPreferredSize(new Dimension(FIXED_WIDTH, listHeight));
 
         revalidate();
         repaint();
+    }
 
-        JRootPane rootPane = SwingUtilities.getRootPane(this);
-        if (rootPane != null) {
-            JLayeredPane layeredPane = rootPane.getLayeredPane();
-            Dimension newPreferredSize = getPreferredSize();
-            Rectangle currentBounds = getBounds();
-            int newY = currentBounds.y + currentBounds.height - newPreferredSize.height;
-            setBounds(currentBounds.x, newY, 280, newPreferredSize.height);
-            layeredPane.revalidate();
-            layeredPane.repaint();
-        }
+    public Dimension getFixedSize(int entryCount) {
+        int visibleRows = Math.min(Math.max(entryCount, 1), MAX_VISIBLE_ROWS);
+        int listHeight = visibleRows * ROW_HEIGHT + (visibleRows - 1) * SEPARATOR_HEIGHT;
+        return new Dimension(FIXED_WIDTH, HEADER_HEIGHT + SEPARATOR_HEIGHT + listHeight);
     }
 
     private void scheduleRemovalForDoneEntries(List<TaskEntry> entries) {
@@ -126,9 +122,10 @@ public final class TaskPanel extends JPanel {
         JPanel rowPanel = new JPanel(new BorderLayout(0, 4));
         rowPanel.setBorder(new EmptyBorder(6, 10, 6, 10));
         rowPanel.setOpaque(false);
-        rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
+        rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, ROW_HEIGHT));
 
-        JLabel taskNameLabel = new JLabel(entry.name());
+        int availableTextWidth = FIXED_WIDTH - 20 - 60;
+        ScrollingLabel taskNameLabel = new ScrollingLabel(entry.name(), availableTextWidth);
         taskNameLabel.setFont(taskNameLabel.getFont().deriveFont(Font.PLAIN, 12f));
 
         JLabel statusBadge = createStatusBadge(entry.status());
@@ -199,5 +196,97 @@ public final class TaskPanel extends JPanel {
         badge.setBorder(new EmptyBorder(1, 6, 1, 6));
 
         return badge;
+    }
+
+    private static final class ScrollingLabel extends JPanel {
+
+        private static final int SCROLL_SPEED_PX = 1;
+        private static final int SCROLL_INTERVAL_MS = 30;
+        private static final int PAUSE_BEFORE_SCROLL_MS = 1500;
+        private static final int GAP_BETWEEN_REPEATS_PX = 40;
+
+        private final String text;
+        private final int maxWidth;
+        private int scrollOffset = 0;
+        private boolean scrollingActive = false;
+        private Timer scrollTimer;
+        private Font labelFont;
+
+        ScrollingLabel(String text, int maxWidth) {
+            this.text = text;
+            this.maxWidth = maxWidth;
+            setOpaque(false);
+            setPreferredSize(new Dimension(maxWidth, 18));
+            setMaximumSize(new Dimension(maxWidth, 18));
+        }
+
+        @Override
+        public void addNotify() {
+            super.addNotify();
+            labelFont = getFont().deriveFont(Font.PLAIN, 12f);
+            FontMetrics fontMetrics = getFontMetrics(labelFont);
+            int textWidth = fontMetrics.stringWidth(text);
+
+            if (textWidth > maxWidth) {
+                scrollingActive = true;
+                Timer pauseTimer = new Timer(PAUSE_BEFORE_SCROLL_MS, event -> startScrolling());
+                pauseTimer.setRepeats(false);
+                pauseTimer.start();
+            }
+        }
+
+        @Override
+        public void removeNotify() {
+            super.removeNotify();
+            if (scrollTimer != null) {
+                scrollTimer.stop();
+                scrollTimer = null;
+            }
+        }
+
+        private void startScrolling() {
+            scrollTimer = new Timer(SCROLL_INTERVAL_MS, event -> {
+                FontMetrics fontMetrics = getFontMetrics(labelFont);
+                int textWidth = fontMetrics.stringWidth(text);
+                int totalScrollDistance = textWidth + GAP_BETWEEN_REPEATS_PX;
+
+                scrollOffset += SCROLL_SPEED_PX;
+                if (scrollOffset >= totalScrollDistance) {
+                    scrollOffset = 0;
+                }
+                repaint();
+            });
+            scrollTimer.start();
+        }
+
+        @Override
+        protected void paintComponent(Graphics graphics) {
+            super.paintComponent(graphics);
+            if (labelFont == null) {
+                labelFont = getFont().deriveFont(Font.PLAIN, 12f);
+            }
+
+            Graphics2D graphics2d = (Graphics2D) graphics.create();
+            graphics2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            graphics2d.setFont(labelFont);
+            graphics2d.setColor(getForeground());
+
+            FontMetrics fontMetrics = graphics2d.getFontMetrics();
+            int textWidth = fontMetrics.stringWidth(text);
+            int baseline = (getHeight() + fontMetrics.getAscent() - fontMetrics.getDescent()) / 2;
+
+            if (!scrollingActive) {
+                graphics2d.setClip(0, 0, maxWidth, getHeight());
+                graphics2d.drawString(text, 0, baseline);
+            } else {
+                graphics2d.setClip(0, 0, maxWidth, getHeight());
+                int firstDrawX = -scrollOffset;
+                graphics2d.drawString(text, firstDrawX, baseline);
+                int secondDrawX = firstDrawX + textWidth + GAP_BETWEEN_REPEATS_PX;
+                graphics2d.drawString(text, secondDrawX, baseline);
+            }
+
+            graphics2d.dispose();
+        }
     }
 }
