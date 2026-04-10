@@ -1,5 +1,7 @@
 package fr.univrennes.istic.l2gen.application.gui.main;
 
+import java.awt.Frame;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -9,103 +11,126 @@ import java.util.Set;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.core.services.TableService;
 import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.gui.GUIController;
+import fr.univrennes.istic.l2gen.application.gui.dialog.settings.SettingsDialog;
 
 public final class TopBar extends JMenuBar {
 
     public TopBar() {
-        this.build();
+        add(buildFileMenu());
+        add(buildViewMenu());
+        add(buildHelpMenu());
     }
 
-    private void build() {
+    private JMenu buildFileMenu() {
         JMenu fileMenu = new JMenu(Lang.get("menu.file"));
+        fileMenu.setMnemonic(KeyEvent.VK_F);
 
         JMenuItem openItem = new JMenuItem(Lang.get("menu.file.open"));
-        openItem.addActionListener(e -> GUIController.getInstance().onOpenFileDialog());
+        openItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
+        openItem.addActionListener(event -> GUIController.getInstance().onOpenFileDialog());
         fileMenu.add(openItem);
 
-        if (TableService.getRecentTables().size() > 0) {
-
-            JMenu openRecent = new JMenu(Lang.get("menu.file.open_recent"));
-            fileMenu.add(openRecent);
-
-            for (File recent : TableService.getRecentTables()) {
-                JMenuItem recentItem = new JMenuItem(recent.getAbsolutePath());
-                recentItem.addActionListener(e -> {
-                    DataTable table = TableService.get(recent);
-                    if (!recent.exists() || table == null) {
-                        TableService.removeRecent(recent);
+        if (!TableService.getRecentTables().isEmpty()) {
+            JMenu openRecentMenu = new JMenu(Lang.get("menu.file.open_recent"));
+            for (File recentFile : TableService.getRecentTables()) {
+                JMenuItem recentItem = new JMenuItem(recentFile.getAbsolutePath());
+                recentItem.addActionListener(event -> {
+                    DataTable table = TableService.get(recentFile);
+                    if (!recentFile.exists() || table == null) {
+                        TableService.removeRecent(recentFile);
                         GUIController.getInstance().onOpenExceptionDialog(
-                                new IOException(Lang.get("error.table_not_found", recent.getAbsolutePath())));
+                                new IOException(Lang.get("error.table_not_found", recentFile.getAbsolutePath())));
                     } else {
                         GUIController.getInstance().setTable(table);
                     }
                 });
-                openRecent.add(recentItem);
+                openRecentMenu.add(recentItem);
             }
-
+            fileMenu.add(openRecentMenu);
         }
+
+        JMenuItem openUrlItem = new JMenuItem(Lang.get("menu.file.open_url"));
+        openUrlItem.setAccelerator(
+                KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
+        openUrlItem.addActionListener(event -> GUIController.getInstance().onOpenUrlDialog());
+        fileMenu.add(openUrlItem);
 
         fileMenu.addSeparator();
 
-        JMenuItem openUrlItem = new JMenuItem(Lang.get("menu.file.open_url"));
-        openUrlItem.addActionListener(e -> GUIController.getInstance().onOpenUrlDialog());
-        fileMenu.add(openUrlItem);
+        JMenuItem settingsItem = new JMenuItem(Lang.get("menu.file.settings"));
+        settingsItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, KeyEvent.CTRL_DOWN_MASK));
+        settingsItem.addActionListener(event -> {
+            Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(this);
+            new SettingsDialog(parentFrame).setVisible(true);
+        });
+        fileMenu.add(settingsItem);
+
+        fileMenu.addSeparator();
 
         JMenuItem exitItem = new JMenuItem(Lang.get("menu.file.exit"));
-        exitItem.addActionListener(e -> System.exit(0));
+        exitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK));
+        exitItem.addActionListener(event -> System.exit(0));
         fileMenu.add(exitItem);
 
-        JMenu view = new JMenu(Lang.get("menu.view"));
+        return fileMenu;
+    }
 
-        JMenu panels = new JMenu(Lang.get("menu.view.panels"));
-        panels.addSeparator();
+    private JMenu buildViewMenu() {
+        JMenu viewMenu = new JMenu(Lang.get("menu.view"));
+        viewMenu.setMnemonic(KeyEvent.VK_V);
 
-        view.add(panels);
+        JMenu panelsMenu = new JMenu(Lang.get("menu.view.panels"));
+        panelsMenu.addSeparator();
+        viewMenu.add(panelsMenu);
 
-        JMenu help = new JMenu(Lang.get("menu.help"));
+        return viewMenu;
+    }
 
-        Set<String> languages = new HashSet<>();
-        JMenu langs = new JMenu(Lang.get("menu.help.languages"));
+    private JMenu buildHelpMenu() {
+        JMenu helpMenu = new JMenu(Lang.get("menu.help"));
+        helpMenu.setMnemonic(KeyEvent.VK_H);
+
+        JMenu languagesMenu = new JMenu(Lang.get("menu.help.languages"));
+        Set<String> addedLanguages = new HashSet<>();
 
         for (Locale locale : Locale.getAvailableLocales()) {
-
             if (!Lang.isSupported(locale)) {
                 continue;
             }
-
-            if (!languages.add(locale.getLanguage())) {
+            if (!addedLanguages.add(locale.getLanguage())) {
                 continue;
             }
 
-            Locale langLocale = Locale.forLanguageTag(locale.getLanguage());
-            String name = langLocale.getDisplayLanguage(langLocale);
+            Locale languageLocale = Locale.forLanguageTag(locale.getLanguage());
+            String displayName = languageLocale.getDisplayLanguage(languageLocale);
+            displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
 
-            name = name.substring(0, 1).toUpperCase() + langLocale.getDisplayLanguage(langLocale).substring(1);
-            JMenuItem langItem = new JMenuItem(name + " (" + langLocale.getLanguage().toUpperCase() + ")");
-            langItem.addActionListener(e -> {
-                GUIController.getInstance().onLanguageChange(langLocale);
-            });
-
-            langs.add(langItem);
+            JMenuItem languageItem = new JMenuItem(
+                    displayName + " (" + languageLocale.getLanguage().toUpperCase() + ")");
+            languageItem.addActionListener(event -> GUIController.getInstance().onLanguageChange(languageLocale));
+            languagesMenu.add(languageItem);
         }
 
-        help.add(langs);
+        helpMenu.add(languagesMenu);
 
-        JMenuItem documentation = new JMenuItem(Lang.get("menu.help.documentation"));
-        documentation.addActionListener(e -> GUIController.getInstance().onOpenDocDialog());
-        help.add(documentation);
+        helpMenu.addSeparator();
 
-        JMenuItem about = new JMenuItem(Lang.get("menu.help.about"));
-        about.addActionListener(e -> GUIController.getInstance().onOpenAboutDialog());
-        help.add(about);
+        JMenuItem documentationItem = new JMenuItem(Lang.get("menu.help.documentation"));
+        documentationItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
+        documentationItem.addActionListener(event -> GUIController.getInstance().onOpenDocDialog());
+        helpMenu.add(documentationItem);
 
-        add(fileMenu);
-        add(view);
-        add(help);
+        JMenuItem aboutItem = new JMenuItem(Lang.get("menu.help.about"));
+        aboutItem.addActionListener(event -> GUIController.getInstance().onOpenAboutDialog());
+        helpMenu.add(aboutItem);
+
+        return helpMenu;
     }
 }
