@@ -108,7 +108,7 @@ public final class TaskPanel extends JPanel {
 
     private void scheduleRemovalForDoneEntries(List<TaskEntry> entries) {
         for (TaskEntry entry : entries) {
-            if (entry.status() == TaskStatus.DONE && !scheduledForRemoval.contains(entry.id())) {
+            if (entry.status() == TaskStatus.SUCCESS && !scheduledForRemoval.contains(entry.id())) {
                 scheduledForRemoval.add(entry.id());
                 String taskId = entry.id();
                 Timer removalTimer = new Timer(DONE_REMOVAL_DELAY_MS, event -> onTaskRemove.accept(taskId));
@@ -146,7 +146,7 @@ public final class TaskPanel extends JPanel {
                 miniBar.setIndeterminate(false);
                 miniBar.setValue(0);
             }
-            case DONE -> {
+            case SUCCESS, FAILED -> {
                 miniBar.setIndeterminate(false);
                 miniBar.setValue(100);
             }
@@ -162,19 +162,22 @@ public final class TaskPanel extends JPanel {
         String badgeText = switch (status) {
             case RUNNING -> "running";
             case PENDING -> "pending";
-            case DONE -> "done";
+            case SUCCESS -> "done";
+            case FAILED -> "failed";
         };
 
         Color badgeBackground = switch (status) {
             case RUNNING -> new Color(219, 234, 254);
             case PENDING -> UIManager.getColor("Panel.background");
-            case DONE -> new Color(209, 250, 229);
+            case SUCCESS -> new Color(209, 250, 229);
+            case FAILED -> new Color(254, 226, 226);
         };
 
         Color badgeForeground = switch (status) {
             case RUNNING -> new Color(30, 64, 175);
             case PENDING -> UIManager.getColor("Label.disabledForeground");
-            case DONE -> new Color(6, 95, 70);
+            case SUCCESS -> new Color(6, 95, 70);
+            case FAILED -> new Color(153, 27, 27);
         };
 
         JLabel badge = new JLabel(badgeText) {

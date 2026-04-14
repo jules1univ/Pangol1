@@ -238,13 +238,13 @@ public final class TableService {
                 }
 
                 GUIController.getInstance().updateTask(taskId, Lang.get("task.convert_done", inputPath.getName()),
-                        TaskStatus.DONE);
+                        TaskStatus.SUCCESS);
                 String alias = inputPath.getName().replaceFirst("[.][^.]+$", "");
                 return new DataTable(outputPath, alias, columnNames, columnTypes, rowCount, columnNames.size());
             }
 
         } catch (Exception e) {
-            GUIController.getInstance().removeTask(taskId);
+            GUIController.getInstance().updateTaskStatus(taskId, TaskStatus.FAILED);
 
             Log.mode(() -> {
                 Log.debug("Failed to convert table from " + inputPath + " to " + outputPath, e);
@@ -312,10 +312,10 @@ public final class TableService {
             }
 
             GUIController.getInstance().updateTask(taskId, Lang.get("task.download_done", url.toString()),
-                    TaskStatus.DONE);
+                    TaskStatus.SUCCESS);
             return load(file, targetDir);
         } catch (Exception e) {
-            GUIController.getInstance().removeTask(taskId);
+            GUIController.getInstance().updateTaskStatus(taskId, TaskStatus.FAILED);
 
             Log.mode(() -> {
                 Log.debug("Failed to load table from URI: " + url, e);
@@ -359,9 +359,9 @@ public final class TableService {
             }
 
             GUIController.getInstance().updateTask(taskId, Lang.get("task.unzip_done", zipFile.getName()),
-                    TaskStatus.DONE);
+                    TaskStatus.SUCCESS);
         } catch (Exception e) {
-            GUIController.getInstance().removeTask(taskId);
+            GUIController.getInstance().updateTaskStatus(taskId, TaskStatus.FAILED);
 
             Log.mode(() -> {
                 Log.debug("Failed to unzip file: " + zipFile, e);

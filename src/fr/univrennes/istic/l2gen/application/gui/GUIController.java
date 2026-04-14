@@ -81,12 +81,17 @@ public final class GUIController extends CoreController {
         File parsedDefaultTableFile = null;
 
         try {
-            parsedDefaultTableUri = URI.create(defaultTable);
+            if (defaultTable.startsWith("http://") || defaultTable.startsWith("https://")) {
+                parsedDefaultTableUri = URI.create(defaultTable);
+            } else {
+                parsedDefaultTableFile = new File(defaultTable);
+            }
         } catch (Exception e) {
             try {
                 parsedDefaultTableFile = new File(defaultTable);
             } catch (Exception ex) {
-                parsedDefaultTableUri = URI.create(stableURI);
+                Log.debug("Failed to parse default table path: " + defaultTable, ex);
+                return;
             }
         }
 
@@ -159,14 +164,16 @@ public final class GUIController extends CoreController {
 
     public void updateTask(String taskId, String name, TaskStatus status) {
         mainView.getBottomBar().updateTask(taskId, name, status);
-        if (status == TaskStatus.DONE) {
+        if (status == TaskStatus.SUCCESS) {
             disableLoading();
         }
     }
 
-    public void removeTask(String taskId) {
-        mainView.getBottomBar().removeTask(taskId);
-        disableLoading();
+    public void updateTaskStatus(String taskId, TaskStatus status) {
+        mainView.getBottomBar().updateTaskStatus(taskId, status);
+        if (status == TaskStatus.SUCCESS) {
+            disableLoading();
+        }
     }
 
     public void setStatus(String status) {

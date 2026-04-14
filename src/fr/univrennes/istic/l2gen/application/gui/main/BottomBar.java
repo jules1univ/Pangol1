@@ -196,7 +196,24 @@ public final class BottomBar extends JPanel {
         });
     }
 
-    public void removeTask(String taskId) {
+    public void updateTaskStatus(String taskId, TaskStatus status) {
+        SwingUtilities.invokeLater(() -> {
+            for (int index = 0; index < taskEntries.size(); index++) {
+                TaskEntry entry = taskEntries.get(index);
+                if (entry.id().equals(taskId)) {
+                    taskEntries.set(index, new TaskEntry(taskId, entry.name(), status));
+                    break;
+                }
+            }
+            refreshTaskCountLabel();
+            if (taskPanel != null) {
+                taskPanel.refresh(taskEntries);
+                repositionTaskPanel();
+            }
+        });
+    }
+
+    private void removeTask(String taskId) {
         SwingUtilities.invokeLater(() -> {
             taskEntries.removeIf(entry -> entry.id().equals(taskId));
             refreshTaskCountLabel();

@@ -28,7 +28,7 @@ public final class StatisticService {
         String query;
         String taskId = GUIController.getInstance().addTask(
                 Lang.get("task.stats.base", action.getDisplayName(), table.getColumnName(columnIndex)),
-                TaskStatus.RUNNING);
+                TaskStatus.PENDING);
 
         switch (table.getColumnType(columnIndex)) {
             case DOUBLE, INTEGER, BOOLEAN -> {
@@ -61,11 +61,14 @@ public final class StatisticService {
             }
         }
 
-        GUIController.getInstance().updateTask(taskId,
-                Lang.get("task.stats.base_done", action.getDisplayName(), table.getColumnName(columnIndex)),
-                TaskStatus.DONE);
+        GUIController.getInstance().updateTaskStatus(taskId, TaskStatus.RUNNING);
 
         Double val = executeDoubleQuery(query).orElse(Double.NaN);
+
+        GUIController.getInstance().updateTask(taskId,
+                Lang.get("task.stats.base_done", action.getDisplayName(), table.getColumnName(columnIndex)),
+                TaskStatus.SUCCESS);
+
         if (Double.isNaN(val) || Double.isInfinite(val)) {
             return Optional.empty();
         } else {
