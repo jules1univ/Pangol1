@@ -1,4 +1,4 @@
-package fr.univrennes.istic.l2gen.application.gui.dialog.settings;
+package fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -17,6 +17,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
+import fr.univrennes.istic.l2gen.application.gui.dialog.settings.SettingsPage;
 
 public final class ShortcutsSettingsPanel extends javax.swing.JPanel implements SettingsPage {
 

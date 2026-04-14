@@ -10,6 +10,7 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Component;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -20,13 +21,20 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.Box;
 
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
+import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.AdvancedSettingsPanel;
+import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.AppearanceSettingsPanel;
+import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.DataImportSettingsPanel;
+import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.GeneralSettingsPanel;
+import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.ShortcutsSettingsPanel;
 
 public final class SettingsDialog extends JDialog {
 
     private static final int DIALOG_WIDTH = 780;
     private static final int DIALOG_HEIGHT = 540;
+
     private static final String TAB_GENERAL = "general";
     private static final String TAB_APPEARANCE = "appearance";
     private static final String TAB_DATA_IMPORT = "data_import";
@@ -157,7 +165,7 @@ public final class SettingsDialog extends JDialog {
         });
 
         actionsPanel.add(cancelButton);
-        actionsPanel.add(javax.swing.Box.createHorizontalStrut(8));
+        actionsPanel.add(Box.createHorizontalStrut(8));
         actionsPanel.add(applyButton);
 
         footerPanel.add(actionsPanel, BorderLayout.EAST);
@@ -167,7 +175,7 @@ public final class SettingsDialog extends JDialog {
     }
 
     private void applyAllSettings() {
-        for (java.awt.Component component : contentPanel.getComponents()) {
+        for (Component component : contentPanel.getComponents()) {
             if (component instanceof SettingsPage settingsPage) {
                 settingsPage.applySettings();
             }

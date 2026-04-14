@@ -1,7 +1,9 @@
 package fr.univrennes.istic.l2gen.application.core.lang;
 
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import fr.univrennes.istic.l2gen.application.core.config.Log;
 
@@ -45,6 +47,20 @@ public final class Lang {
     public static boolean isSupported(Locale locale) {
         String resourcePath = "/languages/pangol1_" + locale.getLanguage() + ".properties";
         return Lang.class.getResourceAsStream(resourcePath) != null;
+    }
+
+    public static Set<String> getSupportedLanguages() {
+        Set<String> languages = new HashSet<>();
+        for (Locale locale : Locale.getAvailableLocales()) {
+            if (!isSupported(locale)) {
+                continue;
+            }
+
+            if (!languages.add(locale.getLanguage())) {
+                continue;
+            }
+        }
+        return languages;
     }
 
     public static Locale getDefaultLocale() {

@@ -4,7 +4,9 @@ import java.awt.Frame;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -98,23 +100,15 @@ public final class TopBar extends JMenuBar {
         helpMenu.setMnemonic(KeyEvent.VK_H);
 
         JMenu languagesMenu = new JMenu(Lang.get("menu.help.languages"));
-        Set<String> addedLanguages = new HashSet<>();
 
-        for (Locale locale : Locale.getAvailableLocales()) {
-            if (!Lang.isSupported(locale)) {
-                continue;
-            }
-            if (!addedLanguages.add(locale.getLanguage())) {
-                continue;
-            }
+        for (String lang : Lang.getSupportedLanguages()) {
+            Locale local = Locale.forLanguageTag(lang);
 
-            Locale languageLocale = Locale.forLanguageTag(locale.getLanguage());
-            String displayName = languageLocale.getDisplayLanguage(languageLocale);
+            String displayName = local.getDisplayLanguage(local);
             displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
 
-            JMenuItem languageItem = new JMenuItem(
-                    displayName + " (" + languageLocale.getLanguage().toUpperCase() + ")");
-            languageItem.addActionListener(event -> GUIController.getInstance().onLanguageChange(languageLocale));
+            JMenuItem languageItem = new JMenuItem(displayName + " (" + local.getLanguage().toUpperCase() + ")");
+            languageItem.addActionListener(event -> GUIController.getInstance().onLanguageChange(local));
             languagesMenu.add(languageItem);
         }
 

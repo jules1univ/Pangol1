@@ -92,8 +92,7 @@ public final class MainView extends JFrame {
 
     public void ready() {
         SwingUtilities.invokeLater(() -> {
-            this.splash.setVisible(false);
-            this.splash.dispose();
+            this.splash.close();
 
             this.build();
 

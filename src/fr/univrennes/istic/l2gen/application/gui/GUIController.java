@@ -555,7 +555,7 @@ public final class GUIController extends CoreController {
 
             MainView newView = new MainView(mainView.getSplash());
             setMainView(newView);
-            newView.setVisible(true);
+            newView.ready();
         });
     }
 

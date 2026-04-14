@@ -2,8 +2,6 @@ package fr.univrennes.istic.l2gen.application.gui.main;
 
 import javax.swing.*;
 
-import fr.univrennes.istic.l2gen.application.core.lang.Lang;
-
 import java.awt.*;
 
 public class SplashScreen extends JWindow {
@@ -64,5 +62,12 @@ public class SplashScreen extends JWindow {
 
     public void setStatus(String text) {
         SwingUtilities.invokeLater(() -> status.setText(text));
+    }
+
+    public void close() {
+        SwingUtilities.invokeLater(() -> {
+            setVisible(false);
+            dispose();
+        });
     }
 }
