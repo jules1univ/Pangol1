@@ -2,8 +2,10 @@ package fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.JSlider;
+import java.awt.GraphicsEnvironment;
+import java.util.ArrayList;
+import java.util.List;
 
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.AbstractSettingsPanel;
@@ -13,78 +15,76 @@ import fr.univrennes.istic.l2gen.application.gui.dialog.settings.SettingsSection
 public final class AppearanceSettingsPanel extends AbstractSettingsPanel {
 
         private final JComboBox<String> themeComboBox;
-        private final JComboBox<String> accentColorComboBox;
+        private final JSlider themeStartHourSlider;
+        private final JSlider themeEndHourSlider;
+
+        private final JCheckBox useFlatLafCheckBox;
+        private final JSlider fontSizeSlider;
         private final JComboBox<String> fontFamilyComboBox;
-        private final JSpinner fontSizeSpinner;
-        private final JCheckBox showGridLinesCheckBox;
-        private final JCheckBox alternateRowColorsCheckBox;
-        private final JSpinner rowHeightSpinner;
-        private final JCheckBox showStatusBarCheckBox;
-        private final JCheckBox showColumnStatsCheckBox;
 
         public AppearanceSettingsPanel() {
-                themeComboBox = new JComboBox<>(new String[] { "System default", "Light", "Dark", "High contrast" });
-
-                accentColorComboBox = new JComboBox<>(new String[] { "Blue", "Green", "Purple", "Orange", "Red" });
-
-                fontFamilyComboBox = new JComboBox<>(new String[] {
-                                "Dialog", "Monospaced", "SansSerif", "Serif", "Segoe UI", "SF Pro"
+                themeComboBox = new JComboBox<>(new String[] {
+                                Lang.get("settings.appearance.theme.light"),
+                                Lang.get("settings.appearance.theme.dark"),
+                                Lang.get("settings.appearance.theme.system"),
+                                Lang.get("settings.appearance.theme.auto")
                 });
 
-                fontSizeSpinner = new JSpinner(new SpinnerNumberModel(12, 8, 24, 1));
+                themeStartHourSlider = new JSlider(0, 23, 18);
+                themeStartHourSlider.setMajorTickSpacing(1);
+                themeStartHourSlider.setPaintTicks(true);
+                themeStartHourSlider.setPaintLabels(true);
+                themeStartHourSlider.setEnabled(false);
+                themeStartHourSlider.setLabelTable(themeStartHourSlider.createStandardLabels(6));
+                themeStartHourSlider.setSnapToTicks(true);
 
-                showGridLinesCheckBox = new JCheckBox();
-                showGridLinesCheckBox.setOpaque(false);
-                showGridLinesCheckBox.setSelected(true);
+                themeEndHourSlider = new JSlider(0, 23, 6);
+                themeEndHourSlider.setMajorTickSpacing(1);
+                themeEndHourSlider.setPaintTicks(true);
+                themeEndHourSlider.setPaintLabels(true);
+                themeEndHourSlider.setEnabled(false);
+                themeEndHourSlider.setLabelTable(themeEndHourSlider.createStandardLabels(6));
+                themeEndHourSlider.setSnapToTicks(true);
 
-                alternateRowColorsCheckBox = new JCheckBox();
-                alternateRowColorsCheckBox.setOpaque(false);
-                alternateRowColorsCheckBox.setSelected(false);
+                themeComboBox.addActionListener(e -> {
+                        String selected = (String) themeComboBox.getSelectedItem();
+                        boolean auto = selected.equals(Lang.get("settings.appearance.theme.auto"));
+                        themeStartHourSlider.setEnabled(auto);
+                        themeEndHourSlider.setEnabled(auto);
+                });
 
-                rowHeightSpinner = new JSpinner(new SpinnerNumberModel(22, 16, 60, 1));
+                useFlatLafCheckBox = new JCheckBox();
+                useFlatLafCheckBox.setSelected(true);
 
-                showStatusBarCheckBox = new JCheckBox();
-                showStatusBarCheckBox.setOpaque(false);
-                showStatusBarCheckBox.setSelected(true);
+                fontSizeSlider = new JSlider(8, 24, 12);
+                fontSizeSlider.setMajorTickSpacing(1);
+                fontSizeSlider.setPaintTicks(true);
+                fontSizeSlider.setPaintLabels(true);
+                fontSizeSlider.setLabelTable(fontSizeSlider.createStandardLabels(6));
+                themeEndHourSlider.setSnapToTicks(true);
 
-                showColumnStatsCheckBox = new JCheckBox();
-                showColumnStatsCheckBox.setOpaque(false);
-                showColumnStatsCheckBox.setSelected(true);
+                List<String> fontFamilies = new ArrayList<>();
+                fontFamilies.add(Lang.get("settings.appearance.ui.default_font"));
+                for (String font : GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()) {
+                        fontFamilies.add(font);
+                }
+                fontFamilyComboBox = new JComboBox<>(fontFamilies.toArray(new String[0]));
 
                 SettingsSectionPanel themeSection = new SettingsSectionPanel(
                                 Lang.get("settings.appearance.section.theme"));
                 themeSection.addRow(new SettingsRowPanel(Lang.get("settings.appearance.theme"), themeComboBox));
-                themeSection.addRow(new SettingsRowPanel(Lang.get("settings.appearance.accent_color"),
-                                accentColorComboBox));
-
-                SettingsSectionPanel fontSection = new SettingsSectionPanel(
-                                Lang.get("settings.appearance.section.font"));
-                fontSection.addRow(
-                                new SettingsRowPanel(Lang.get("settings.appearance.font.family"), fontFamilyComboBox));
-                fontSection.addRow(new SettingsRowPanel(Lang.get("settings.appearance.font.size"), fontSizeSpinner));
-
-                SettingsSectionPanel tableSection = new SettingsSectionPanel(
-                                Lang.get("settings.appearance.section.table"));
-                tableSection
-                                .addRow(new SettingsRowPanel(Lang.get("settings.appearance.table.show_grid"),
-                                                showGridLinesCheckBox));
-                tableSection.addRow(
-                                new SettingsRowPanel(Lang.get("settings.appearance.table.alternate_rows"),
-                                                alternateRowColorsCheckBox));
-                tableSection.addRow(new SettingsRowPanel(Lang.get("settings.appearance.table.row_height"),
-                                rowHeightSpinner));
+                themeSection.addRow(new SettingsRowPanel(Lang.get("settings.appearance.auto.start"),
+                                themeStartHourSlider));
+                themeSection.addRow(new SettingsRowPanel(Lang.get("settings.appearance.auto.end"), themeEndHourSlider));
 
                 SettingsSectionPanel uiSection = new SettingsSectionPanel(Lang.get("settings.appearance.section.ui"));
-                uiSection.addRow(
-                                new SettingsRowPanel(Lang.get("settings.appearance.ui.show_status_bar"),
-                                                showStatusBarCheckBox));
-                uiSection.addRow(
-                                new SettingsRowPanel(Lang.get("settings.appearance.ui.show_column_stats"),
-                                                showColumnStatsCheckBox));
+                uiSection.addRow(new SettingsRowPanel(Lang.get("settings.appearance.ui.use_flatlaf"),
+                                useFlatLafCheckBox));
+                uiSection.addRow(new SettingsRowPanel(Lang.get("settings.appearance.ui.font_size"), fontSizeSlider));
+                uiSection.addRow(new SettingsRowPanel(Lang.get("settings.appearance.ui.font_family"),
+                                fontFamilyComboBox));
 
                 addSection(themeSection);
-                addSection(fontSection);
-                addSection(tableSection);
                 addSection(uiSection);
         }
 
