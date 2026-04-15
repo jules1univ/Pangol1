@@ -82,18 +82,16 @@ public final class GeneralSettingsPanel extends AbstractSettingsPanel {
 
                 defaultTableSourceComboBox.addActionListener(e -> {
                         if (defaultTableSourceComboBox.getSelectedIndex() == 0) {
-                                defaultTableSourceTextField.setText("");
-                                defaultTableSourceTextField.setVisible(true);
+                                defaultTableSourceTextField.setVisible(false);
                                 defaultTableSourceFileButton.setVisible(false);
                         } else if (defaultTableSourceComboBox.getSelectedIndex() == 1) {
-                                defaultTableSourceTextField.setText("");
                                 defaultTableSourceTextField.setVisible(false);
                                 defaultTableSourceFileButton.setVisible(true);
                         } else {
-                                defaultTableSourceTextField.setText("");
-                                defaultTableSourceTextField.setVisible(false);
+                                defaultTableSourceTextField.setVisible(true);
                                 defaultTableSourceFileButton.setVisible(false);
                         }
+                        defaultTableSourceTextField.setText("");
                 });
 
                 startupSection.addRow(new SettingsRowPanel(Lang.get("settings.general.startup.default_table"),

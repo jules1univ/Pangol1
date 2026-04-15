@@ -7,6 +7,7 @@ import java.awt.Font;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -19,37 +20,23 @@ import javax.swing.table.DefaultTableModel;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.SettingsPage;
 
-public final class ShortcutsSettingsPanel extends javax.swing.JPanel implements SettingsPage {
+public final class ShortcutsSettingsPanel extends JPanel implements SettingsPage {
 
     private static final Object[][] SHORTCUT_DATA = {
-            { "File", Lang.get("shortcuts.file.open"), "Ctrl+O" },
-            { "File", Lang.get("shortcuts.file.save"), "Ctrl+S" },
-            { "File", Lang.get("shortcuts.file.save_as"), "Ctrl+Shift+S" },
-            { "File", Lang.get("shortcuts.file.close"), "Ctrl+W" },
-            { "Edit", Lang.get("shortcuts.edit.undo"), "Ctrl+Z" },
-            { "Edit", Lang.get("shortcuts.edit.redo"), "Ctrl+Y" },
-            { "Edit", Lang.get("shortcuts.edit.copy"), "Ctrl+C" },
-            { "Edit", Lang.get("shortcuts.edit.paste"), "Ctrl+V" },
-            { "Edit", Lang.get("shortcuts.edit.find"), "Ctrl+F" },
-            { "Edit", Lang.get("shortcuts.edit.select_all"), "Ctrl+A" },
-            { "View", Lang.get("shortcuts.view.settings"), "Ctrl+," },
-            { "View", Lang.get("shortcuts.view.zoom_in"), "Ctrl+=" },
-            { "View", Lang.get("shortcuts.view.zoom_out"), "Ctrl+-" },
-            { "Data", Lang.get("shortcuts.data.filter"), "Ctrl+Shift+F" },
-            { "Data", Lang.get("shortcuts.data.sort_asc"), "Ctrl+Shift+A" },
-            { "Data", Lang.get("shortcuts.data.sort_desc"), "Ctrl+Shift+D" },
+            { Lang.get("settings.shortcuts.table"), Lang.get("settings.shortcuts.table.open"), "Ctrl+O" },
+            { Lang.get("settings.shortcuts.table"), Lang.get("settings.shortcuts.table.close"), "Ctrl+W" },
+
+            { Lang.get("settings.shortcuts.view"), Lang.get("settings.shortcuts.view.filter"), "Ctrl+F" },
+            { Lang.get("settings.shortcuts.view"), Lang.get("settings.shortcuts.view.settings"), "Ctrl+," },
+
+            { Lang.get("settings.shortcuts.sort"), Lang.get("settings.shortcuts.sort.sort_asc"), "Ctrl+Shift+A" },
+            { Lang.get("settings.shortcuts.sort"), Lang.get("settings.shortcuts.sort.sort_desc"), "Ctrl+Shift+D" },
     };
 
     public ShortcutsSettingsPanel() {
         setLayout(new BorderLayout());
         setOpaque(false);
         setBorder(new EmptyBorder(16, 16, 16, 16));
-
-        JLabel infoLabel = new JLabel(Lang.get("settings.shortcuts.info"));
-        infoLabel.setFont(infoLabel.getFont().deriveFont(Font.PLAIN, 11f));
-        infoLabel.setForeground(UIManager.getColor("Label.disabledForeground"));
-        infoLabel.setBorder(new EmptyBorder(0, 0, 12, 0));
-        add(infoLabel, BorderLayout.NORTH);
 
         String[] columnHeaders = {
                 Lang.get("settings.shortcuts.column.category"),
@@ -84,7 +71,7 @@ public final class ShortcutsSettingsPanel extends javax.swing.JPanel implements 
                     boolean isSelected, boolean hasFocus, int row, int column) {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 if (column == 2 && !isSelected) {
-                    setFont(getFont().deriveFont(Font.BOLD, 11f));
+                    setFont(getFont().deriveFont(Font.BOLD, 12f));
                     setForeground(UIManager.getColor("Label.disabledForeground"));
                     setBorder(BorderFactory.createCompoundBorder(
                             new EmptyBorder(2, 4, 2, 4),

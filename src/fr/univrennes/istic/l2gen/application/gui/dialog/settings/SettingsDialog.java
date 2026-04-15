@@ -26,7 +26,6 @@ import javax.swing.Box;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.AdvancedSettingsPanel;
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.AppearanceSettingsPanel;
-import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.DataImportSettingsPanel;
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.GeneralSettingsPanel;
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.ShortcutsSettingsPanel;
 
@@ -37,7 +36,6 @@ public final class SettingsDialog extends JDialog {
 
     private static final String TAB_GENERAL = "general";
     private static final String TAB_APPEARANCE = "appearance";
-    private static final String TAB_DATA_IMPORT = "data_import";
     private static final String TAB_SHORTCUTS = "shortcuts";
     private static final String TAB_ADVANCED = "advanced";
 
@@ -63,7 +61,6 @@ public final class SettingsDialog extends JDialog {
         contentPanel.setOpaque(false);
         contentPanel.add(new GeneralSettingsPanel(), TAB_GENERAL);
         contentPanel.add(new AppearanceSettingsPanel(), TAB_APPEARANCE);
-        contentPanel.add(new DataImportSettingsPanel(), TAB_DATA_IMPORT);
         contentPanel.add(new ShortcutsSettingsPanel(), TAB_SHORTCUTS);
         contentPanel.add(new AdvancedSettingsPanel(), TAB_ADVANCED);
         rootPanel.add(contentPanel, BorderLayout.CENTER);
@@ -86,7 +83,6 @@ public final class SettingsDialog extends JDialog {
 
         tabsRow.add(buildTabButton(Lang.get("settings.tab.general"), TAB_GENERAL));
         tabsRow.add(buildTabButton(Lang.get("settings.tab.appearance"), TAB_APPEARANCE));
-        tabsRow.add(buildTabButton(Lang.get("settings.tab.data_import"), TAB_DATA_IMPORT));
         tabsRow.add(buildTabButton(Lang.get("settings.tab.shortcuts"), TAB_SHORTCUTS));
         tabsRow.add(buildTabButton(Lang.get("settings.tab.advanced"), TAB_ADVANCED));
 

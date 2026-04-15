@@ -25,7 +25,7 @@ public final class SettingsSectionPanel extends JPanel {
         headerPanel.setBorder(new EmptyBorder(0, 0, 6, 0));
 
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 11f));
+        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 12f));
         titleLabel.setForeground(UIManager.getColor("Label.disabledForeground"));
 
         JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
