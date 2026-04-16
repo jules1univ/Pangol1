@@ -8,33 +8,14 @@ import fr.univrennes.istic.l2gen.visustats.data.DataGroup;
 import fr.univrennes.istic.l2gen.visustats.view.dataset.IDataSetView;
 import fr.univrennes.istic.l2gen.visustats.view.dataset.PieDataSetView;
 
-/**
- * Vue groupe pour afficher plusieurs diagrammes camemberts côte à côte.
- * 
- * Chaque DataSet du DataGroup produit un camembert avec son titre associé.
- * Les camemberts sont alignés horizontalement avec espacement constant.
- * Une légende unique est affichée sous l'ensemble, correspondant aux
- * catégories colorées.
- * 
- * Pattern Observateur : la vue observe le DataGroup et se recalcule via
- * update() quand les données changent.
- */
 @SVGTag("g")
 public class PieDataGroupView extends AbstractDataGroupView {
 
     @SVGField("data-radius")
     protected double radius;
 
-    /**
-     * Constructeur.
-     * 
-     * @param data    le DataGroup contenant les datasets à visualiser
-     * @param spacing espacement horizontal entre les camemberts (en pixels)
-     * @param radius  le rayon de chaque camembert (en pixels)
-     * @param centre  le point centre autour duquel positionner les camemberts
-     */
-    public PieDataGroupView(DataGroup data, Point center, double spacing, double radius) {
-        super(data, center, spacing);
+    public PieDataGroupView(DataGroup data, Point center, double spacing, double radius, boolean horizontalLegend) {
+        super(data, center, spacing, horizontalLegend);
         this.radius = radius;
         this.update();
     }

@@ -24,8 +24,11 @@ public class BarDataGroupView extends AbstractDataGroupView {
                         double spacing,
 
                         double barWidth,
-                        double maxHeight) {
-                super(data, center, spacing);
+                        double maxHeight,
+
+                        boolean horizontalLegend) {
+
+                super(data, center, spacing, horizontalLegend);
 
                 this.maxHeight = maxHeight;
 

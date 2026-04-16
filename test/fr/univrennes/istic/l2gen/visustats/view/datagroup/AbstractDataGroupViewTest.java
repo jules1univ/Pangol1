@@ -4,6 +4,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import fr.univrennes.istic.l2gen.io.svg.SVGExportTestUtil;
+import fr.univrennes.istic.l2gen.svg.color.Color;
 import fr.univrennes.istic.l2gen.visustats.data.DataGroup;
 import fr.univrennes.istic.l2gen.visustats.data.Label;
 import fr.univrennes.istic.l2gen.visustats.view.dataset.AbstractDataSetViewTest;
@@ -17,6 +18,7 @@ public abstract class AbstractDataGroupViewTest<GroupView extends IDataGroupView
         DataGroup group = new DataGroup(new Label("Test title"));
         for (int i = 0; i < size; i++) {
             group.add(AbstractDataSetViewTest.createDataSet(size, minValue, maxValue));
+            group.add(new Label("Legend " + (i + 1), Color.random()));
         }
         return group;
     }

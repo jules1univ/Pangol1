@@ -21,8 +21,9 @@ public class ColumnsDataGroupView extends AbstractDataGroupView {
 
     private double innerSpacing;
 
-    public ColumnsDataGroupView(DataGroup data, Point center, double spacing, double barWidth, double maxHeight) {
-        super(data, center, spacing);
+    public ColumnsDataGroupView(DataGroup data, Point center, double spacing, double barWidth, double maxHeight,
+            boolean horizontalLegend) {
+        super(data, center, spacing, horizontalLegend);
 
         this.innerSpacing = spacing / 2f;
         this.maxHeight = maxHeight;
