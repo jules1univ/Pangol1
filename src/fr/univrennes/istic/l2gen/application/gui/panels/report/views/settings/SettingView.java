@@ -3,7 +3,6 @@ package fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -13,6 +12,8 @@ import javax.swing.ScrollPaneConstants;
 
 import fr.univrennes.istic.l2gen.application.core.icon.Ico;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
+import fr.univrennes.istic.l2gen.application.core.notebook.NoteBookValue;
+import fr.univrennes.istic.l2gen.application.core.services.NoteBookService;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.pages.ChartSettingsPanel;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.pages.DataSettingsPanel;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.pages.ImageSettingsPanel;
@@ -20,12 +21,13 @@ import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.pa
 
 public class SettingView extends JPanel {
 
-    private static final String CARD_BASE = "base";
-    private static final String CARD_CHART = "chart";
-    private static final String CARD_IMAGE = "image";
-    private static final String CARD_TEXT = "text";
-
     private final CardLayout cardLayout = new CardLayout();
+
+    private ChartSettingsPanel chartSettingsPanel;
+    private DataSettingsPanel dataSettingsPanel;
+
+    private ImageSettingsPanel imageSettingsPanel;
+    private TextSettingsPanel textSettingsPanel;
 
     public SettingView() {
         build();
@@ -34,12 +36,12 @@ public class SettingView extends JPanel {
     private void build() {
         setLayout(cardLayout);
 
-        add(buildBasePanel(), CARD_BASE);
-        add(buildChartSettingsPanel(), CARD_CHART);
-        add(buildImageSettingsPanel(), CARD_IMAGE);
-        add(buildTextSettingsPanel(), CARD_TEXT);
+        add(buildBasePanel(), SettingViewType.BASE.name());
+        add(buildChartSettingsPanel(), SettingViewType.CHART.name());
+        add(buildImageSettingsPanel(), SettingViewType.IMAGE.name());
+        add(buildTextSettingsPanel(), SettingViewType.TEXT.name());
 
-        cardLayout.show(this, CARD_BASE);
+        showCard(SettingViewType.BASE);
     }
 
     private JPanel buildBasePanel() {
@@ -49,19 +51,19 @@ public class SettingView extends JPanel {
         content.add(Box.createVerticalStrut(5));
 
         JButton addChartButton = buildActionButton(Lang.get("report.add.chart"), "icons/add_chart.svg");
-        addChartButton.addActionListener(e -> cardLayout.show(this, CARD_CHART));
+        addChartButton.addActionListener(e -> showCard(SettingViewType.CHART));
         content.add(addChartButton);
 
         content.add(Box.createVerticalStrut(6));
 
         JButton addImageButton = buildActionButton(Lang.get("report.add.image"), "icons/add_image.svg");
-        addImageButton.addActionListener(e -> cardLayout.show(this, CARD_IMAGE));
+        addImageButton.addActionListener(e -> showCard(SettingViewType.IMAGE));
         content.add(addImageButton);
 
         content.add(Box.createVerticalStrut(6));
 
         JButton addTextButton = buildActionButton(Lang.get("report.add.text"), "icons/add_text.svg");
-        addTextButton.addActionListener(e -> cardLayout.show(this, CARD_TEXT));
+        addTextButton.addActionListener(e -> showCard(SettingViewType.TEXT));
         content.add(addTextButton);
 
         content.add(Box.createVerticalGlue());
@@ -80,11 +82,13 @@ public class SettingView extends JPanel {
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
         content.add(Box.createVerticalStrut(5));
-        content.add(buildBackAndNextButtons());
+        content.add(buildBackAndNextButtons(SettingViewType.CHART));
         content.add(Box.createVerticalStrut(10));
 
-        content.add(new ChartSettingsPanel());
-        content.add(new DataSettingsPanel());
+        chartSettingsPanel = new ChartSettingsPanel();
+        dataSettingsPanel = new DataSettingsPanel();
+        content.add(chartSettingsPanel);
+        content.add(dataSettingsPanel);
 
         content.add(Box.createVerticalGlue());
 
@@ -96,10 +100,11 @@ public class SettingView extends JPanel {
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
         content.add(Box.createVerticalStrut(5));
-        content.add(buildBackAndNextButtons());
+        content.add(buildBackAndNextButtons(SettingViewType.IMAGE));
         content.add(Box.createVerticalStrut(10));
 
-        content.add(new ImageSettingsPanel());
+        imageSettingsPanel = new ImageSettingsPanel();
+        content.add(imageSettingsPanel);
 
         content.add(Box.createVerticalGlue());
 
@@ -111,10 +116,11 @@ public class SettingView extends JPanel {
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
 
         content.add(Box.createVerticalStrut(5));
-        content.add(buildBackAndNextButtons());
+        content.add(buildBackAndNextButtons(SettingViewType.TEXT));
         content.add(Box.createVerticalStrut(10));
 
-        content.add(new TextSettingsPanel());
+        textSettingsPanel = new TextSettingsPanel();
+        content.add(textSettingsPanel);
 
         content.add(Box.createVerticalGlue());
 
@@ -128,19 +134,56 @@ public class SettingView extends JPanel {
         return button;
     }
 
-    private JPanel buildBackAndNextButtons() {
+    private JPanel buildBackAndNextButtons(SettingViewType targetCard) {
         JButton backButton = new JButton(Lang.get("report.back"));
+        backButton.setPreferredSize(new Dimension(backButton.getPreferredSize().width, 24));
         backButton.setAlignmentX(CENTER_ALIGNMENT);
-        backButton.addActionListener(e -> cardLayout.show(this, CARD_BASE));
+        backButton.addActionListener(e -> showCard(SettingViewType.BASE));
 
         JButton nextButton = new JButton(Lang.get("report.next"));
+        nextButton.setIcon(Ico.get("icons/add.svg"));
+        nextButton.setPreferredSize(new Dimension(nextButton.getPreferredSize().width, 24));
         nextButton.setAlignmentX(CENTER_ALIGNMENT);
-        nextButton.addActionListener(e -> cardLayout.show(this, CARD_BASE));
+        nextButton.addActionListener(e -> {
+            handleNext(targetCard);
+            showCard(SettingViewType.BASE);
+        });
 
-        JPanel panel = new JPanel();
-        panel.add(backButton);
-        panel.add(nextButton);
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(backButton, BorderLayout.WEST);
+        panel.add(nextButton, BorderLayout.EAST);
         return panel;
+    }
+
+    private void handleNext(SettingViewType type) {
+        NoteBookValue value = null;
+        switch (type) {
+            case CHART:
+                if (dataSettingsPanel != null && chartSettingsPanel != null) {
+                    chartSettingsPanel.setDataSettings(dataSettingsPanel);
+                    value = chartSettingsPanel.createNoteBook();
+                }
+                break;
+            case IMAGE:
+                if (imageSettingsPanel != null) {
+                    value = imageSettingsPanel.createNoteBook();
+                }
+                break;
+            case TEXT:
+                if (textSettingsPanel != null) {
+                    value = textSettingsPanel.createNoteBook();
+                }
+                break;
+            default:
+                break;
+        }
+        if (value != null) {
+            NoteBookService.add(value);
+        }
+    }
+
+    private void showCard(SettingViewType card) {
+        cardLayout.show(this, card.name());
     }
 
     private JPanel wrapInScroll(JPanel content) {

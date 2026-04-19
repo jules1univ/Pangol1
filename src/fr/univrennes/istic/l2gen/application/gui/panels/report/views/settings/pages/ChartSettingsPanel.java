@@ -1,12 +1,15 @@
 package fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.pages;
 
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
+import fr.univrennes.istic.l2gen.application.core.notebook.NoteBookValue;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.SettingControlBuilder;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.SettingRowPanel;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.SettingSectionPanel;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.SettingSeparatorRow;
 
-public final class ChartSettingsPanel extends SettingSectionPanel {
+public final class ChartSettingsPanel extends SettingSectionPanel implements IReportSettingPanel {
+
+        private DataSettingsPanel dataSettings;
 
         public ChartSettingsPanel() {
                 super(Lang.get("report.setting.chart"));
@@ -49,5 +52,15 @@ public final class ChartSettingsPanel extends SettingSectionPanel {
 
                 addRow(new SettingRowPanel(Lang.get("report.setting.chart.y_label"),
                                 SettingControlBuilder.textField(Lang.get("report.setting.chart.default_labely"))));
+        }
+
+        public void setDataSettings(DataSettingsPanel dataSettings) {
+                this.dataSettings = dataSettings;
+        }
+
+        @Override
+        public NoteBookValue createNoteBook() {
+                // TODO Auto-generated method stub
+                throw new UnsupportedOperationException("Unimplemented method 'createNoteBook'");
         }
 }
