@@ -45,6 +45,9 @@ public final class GeneralSettingsPanel extends AbstractSettingsPanel {
                 }
 
                 languageComboBox = new JComboBox<>(languagesBox.toArray(new String[0]));
+                languageComboBox.setSelectedIndex(
+                                Lang.getSupportedLanguages().stream().toList().indexOf(Lang.getLocale().getLanguage()));
+
                 localizationSection
                                 .addRow(new SettingsRowPanel(Lang.get("settings.general.language"), languageComboBox));
 
