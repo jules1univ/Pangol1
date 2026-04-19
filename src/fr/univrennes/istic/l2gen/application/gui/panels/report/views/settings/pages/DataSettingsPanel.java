@@ -1,6 +1,13 @@
 package fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.pages;
 
+import java.awt.event.ItemEvent;
+import java.io.File;
+
+import javax.swing.JComboBox;
+
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
+import fr.univrennes.istic.l2gen.application.core.services.TableService;
+import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.gui.GUIController;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.SettingControlBuilder;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.SettingRowPanel;
@@ -11,6 +18,34 @@ public final class DataSettingsPanel extends SettingSectionPanel {
 
     public DataSettingsPanel() {
         super(Lang.get("report.setting.data"));
+
+        build();
+    }
+
+    private void build() {
+        String[] tables = TableService.get().stream().map(table -> {
+            if (table.getPath().equals(GUIController.getInstance().getTable().map(t -> t.getPath()).orElse(null))) {
+                return Lang.get("report.setting.data.current_table");
+            } else {
+                return table.getPath();
+            }
+        }).toArray(String[]::new);
+
+        JComboBox<String> selectTable = SettingControlBuilder.dropdown(tables);
+        selectTable.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                File selectedTable = new File((String) selectTable.getSelectedItem());
+                DataTable table = TableService.get(selectedTable);
+                if (table != null) {
+                    GUIController.getInstance().setTable(table);
+
+                    removeAll();
+                    build();
+                }
+            }
+        });
+
+        addRow(new SettingRowPanel(Lang.get("report.setting.data.table"), selectTable));
 
         String[] cols = GUIController.getInstance().getTable().map(table -> {
             final int size = (int) table.getColumnCount();
@@ -35,5 +70,6 @@ public final class DataSettingsPanel extends SettingSectionPanel {
 
         addRow(new SettingRowPanel(Lang.get("report.setting.data.filter_include"),
                 SettingControlBuilder.checkbox(true)));
+
     }
 }

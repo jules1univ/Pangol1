@@ -28,6 +28,7 @@ import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.AdvancedS
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.AppearanceSettingsPanel;
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.GeneralSettingsPanel;
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.ShortcutsSettingsPanel;
+import fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages.TableSettingsPanel;
 
 public final class SettingsDialog extends JDialog {
 
@@ -35,6 +36,7 @@ public final class SettingsDialog extends JDialog {
     private static final int DIALOG_HEIGHT = 540;
 
     private static final String TAB_GENERAL = "general";
+    private static final String TAB_TABLE = "table";
     private static final String TAB_APPEARANCE = "appearance";
     private static final String TAB_SHORTCUTS = "shortcuts";
     private static final String TAB_ADVANCED = "advanced";
@@ -60,6 +62,7 @@ public final class SettingsDialog extends JDialog {
 
         contentPanel.setOpaque(false);
         contentPanel.add(new GeneralSettingsPanel(), TAB_GENERAL);
+        contentPanel.add(new TableSettingsPanel(), TAB_TABLE);
         contentPanel.add(new AppearanceSettingsPanel(), TAB_APPEARANCE);
         contentPanel.add(new ShortcutsSettingsPanel(), TAB_SHORTCUTS);
         contentPanel.add(new AdvancedSettingsPanel(), TAB_ADVANCED);
@@ -82,6 +85,7 @@ public final class SettingsDialog extends JDialog {
         tabsRow.setBorder(new EmptyBorder(0, 4, 0, 4));
 
         tabsRow.add(buildTabButton(Lang.get("settings.tab.general"), TAB_GENERAL));
+        tabsRow.add(buildTabButton(Lang.get("settings.tab.table"), TAB_TABLE));
         tabsRow.add(buildTabButton(Lang.get("settings.tab.appearance"), TAB_APPEARANCE));
         tabsRow.add(buildTabButton(Lang.get("settings.tab.shortcuts"), TAB_SHORTCUTS));
         tabsRow.add(buildTabButton(Lang.get("settings.tab.advanced"), TAB_ADVANCED));
@@ -96,20 +100,20 @@ public final class SettingsDialog extends JDialog {
         JButton tabButton = new JButton(label) {
             @Override
             protected void paintComponent(Graphics graphics) {
-                Graphics2D graphics2d = (Graphics2D) graphics.create();
-                graphics2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                Graphics2D g2d = (Graphics2D) graphics.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
                 boolean isActive = tabKey.equals(activeTabKey);
                 if (isActive) {
-                    graphics2d.setColor(UIManager.getColor("Panel.background"));
-                    graphics2d.fillRect(0, 0, getWidth(), getHeight());
-                    graphics2d.setColor(UIManager.getColor("TabbedPane.underlineColor") != null
+                    g2d.setColor(UIManager.getColor("Panel.background"));
+                    g2d.fillRect(0, 0, getWidth(), getHeight());
+                    g2d.setColor(UIManager.getColor("TabbedPane.underlineColor") != null
                             ? UIManager.getColor("TabbedPane.underlineColor")
                             : new Color(70, 130, 180));
-                    graphics2d.fillRect(0, getHeight() - 2, getWidth(), 2);
+                    g2d.fillRect(0, getHeight() - 2, getWidth(), 2);
                 }
 
-                graphics2d.dispose();
+                g2d.dispose();
                 super.paintComponent(graphics);
             }
         };
