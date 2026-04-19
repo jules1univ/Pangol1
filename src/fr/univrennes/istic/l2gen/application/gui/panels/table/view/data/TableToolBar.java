@@ -17,19 +17,19 @@ public final class TableToolBar extends JToolBar {
                 setFloatable(false);
 
                 JButton advancedFilterButton = new JButton(Lang.get("tabletoolbar.filters"),
-                                Ico.get("icons/filter.svg"));
+                                Ico.get("icons/filter_on.svg"));
                 advancedFilterButton.addActionListener(e -> GUIController.getInstance().onOpenFilterDialog());
 
                 JButton clearFiltersButton = new JButton(Lang.get("tabletoolbar.clear_filters"),
-                                Ico.get("icons/clear_filters.svg"));
+                                Ico.get("icons/filter_off.svg"));
                 clearFiltersButton.addActionListener(e -> GUIController.getInstance().onFilterReset());
 
                 JButton showAllColumnsButton = new JButton(Lang.get("tabletoolbar.show_all_columns"),
-                                Ico.get("icons/show_columns.svg"));
+                                Ico.get("icons/show.svg"));
                 showAllColumnsButton.addActionListener(e -> tablePanel.getTable().showAllColumns());
 
                 JButton hideEmptyColumnsButton = new JButton(Lang.get("tabletoolbar.hide_empty_columns"),
-                                Ico.get("icons/hide_columns.svg"));
+                                Ico.get("icons/hide.svg"));
                 hideEmptyColumnsButton.addActionListener(e -> tablePanel.getTable().hideEmptyColumns());
 
                 Icon closeIcon = UIManager.getIcon("InternalFrame.closeIcon");

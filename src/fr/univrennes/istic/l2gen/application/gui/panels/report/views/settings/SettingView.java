@@ -28,7 +28,7 @@ public class SettingView extends JPanel {
 
         content.add(Box.createVerticalStrut(5));
 
-        JButton addChartButton = new JButton(Ico.get("icons/add.png"));
+        JButton addChartButton = new JButton(Ico.get("icons/add_chart.svg"));
         addChartButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, addChartButton.getPreferredSize().height));
         addChartButton.setAlignmentX(CENTER_ALIGNMENT);
 

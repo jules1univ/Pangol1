@@ -6,6 +6,7 @@ import javax.swing.border.TitledBorder;
 
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterLogic;
+import fr.univrennes.istic.l2gen.application.core.icon.Ico;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 
@@ -120,7 +121,7 @@ public final class FilterDialog extends JDialog {
         });
 
         JPanel addButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 4));
-        JButton addFilterButton = new JButton(Lang.get("filter.add"));
+        JButton addFilterButton = new JButton(Ico.get("icons/add.svg"));
         addFilterButton.addActionListener(event -> addCurrentFilter());
         addButtonPanel.add(addFilterButton);
 

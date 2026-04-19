@@ -2,6 +2,8 @@ package fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.p
 
 import java.awt.event.ItemEvent;
 import java.io.File;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.JComboBox;
 
@@ -23,15 +25,15 @@ public final class DataSettingsPanel extends SettingSectionPanel {
     }
 
     private void build() {
-        String[] tables = TableService.get().stream().map(table -> {
+        List<String> tables = TableService.get().stream().map(table -> {
             if (table.getPath().equals(GUIController.getInstance().getTable().map(t -> t.getPath()).orElse(null))) {
                 return Lang.get("report.setting.data.current_table");
             } else {
-                return table.getPath();
+                return table.getPath().toString();
             }
-        }).toArray(String[]::new);
+        }).collect(Collectors.toList());
 
-        JComboBox<String> selectTable = SettingControlBuilder.dropdown(tables);
+        JComboBox<String> selectTable = SettingControlBuilder.dropdown(tables.toArray(new String[0]));
         selectTable.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 File selectedTable = new File((String) selectTable.getSelectedItem());
