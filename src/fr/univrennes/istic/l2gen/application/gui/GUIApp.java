@@ -46,7 +46,9 @@ public final class GUIApp extends CoreApp<GUIController> {
         int hour = LocalTime.now().getHour();
         if (hour >= 18 || hour < 6) {
             try {
+
                 UIManager.setLookAndFeel(new FlatDarkLaf());
+                Config.DARK_MODE = true;
             } catch (Exception e) {
                 return;
             }

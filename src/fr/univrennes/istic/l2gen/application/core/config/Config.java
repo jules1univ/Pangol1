@@ -8,6 +8,8 @@ public final class Config {
 
     private static Preferences prefs = Preferences.userNodeForPackage(Pangol1.class);
 
+    public static boolean DARK_MODE = false;
+
     public static Preferences get() {
         return prefs;
     }
