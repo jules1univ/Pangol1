@@ -1,0 +1,400 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    bookmarksnumbered=true,
+    pdftitle={Manuel d'Utilisation Pangol1},
+    pdfauthor={Pangol1 Team}
+}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+\title{Manuel d'Utilisation : Pangol1}
+\author{}
+\date{}
+
+\addto\captionsfrench{\renewcommand{\contentsname}{Sommaire}}
+
+\begin{document}
+
+\maketitle
+
+\section*{À propos de ce document}
+\addcontentsline{toc}{section}{À propos de ce document}
+Ce manuel fournit une documentation complète sur l'utilisation de \textbf{Pangol1}. Il couvre tous les aspects de l'application, de l'importation de fichiers CSV à la génération de graphiques SVG.
+
+\vspace{2ex}
+\noindent
+{\small \textit{Dernière mise à jour : \today}}
+
+\newpage
+
+% Sommaire manuscrit
+\section*{Sommaire}
+\addcontentsline{toc}{section}{Sommaire}
+
+\begin{enumerate}
+    \item Introduction \\
+    \quad 1.1 Qu'est-ce que Pangol1 ? \\
+    \quad 1.2 Fonctionnalités Principales
+    
+    \item Démarrage Rapide \\
+    \quad 2.1 Lancer l'Application \\
+    \quad 2.2 Première Utilisation
+    
+    \item Interface Utilisateur \\
+    \quad 3.1 Organisation Générale \\
+    \quad 3.2 Barre de Menus
+    
+    \item Chargement des Données \\
+    \quad 4.1 Importer un Fichier CSV \\
+    \quad 4.2 Format des Fichiers \\
+    \quad 4.3 Changement de Langue
+    
+    \item Exploration des Données \\
+    \quad 5.1 Table Interactive \\
+    \quad 5.2 Tri des Données \\
+    \quad 5.3 Filtrage des Données \\
+    \quad 5.4 Masquage de Colonnes
+    
+    \item Génération de Graphiques \\
+    \quad 6.1 Types de Graphiques Disponibles \\
+    \quad 6.2 Configuration du Graphique \\
+    \quad 6.3 Personnalisation Visuelle
+    
+    \item Fonctionnalités Supplémentaires \\
+    \quad 7.1 Mode Nuit \\
+    \quad 7.2 Fichiers Récents
+    
+    \item Résolution de Problèmes \\
+    \quad 8.1 Problèmes Courants \\
+    \quad 8.2 Conseils d'Utilisation
+    
+    \item Support \\
+    \quad 9.1 Obtenir de l'Aide \\
+    \quad 9.2 Documentation Technique
+\end{enumerate}
+
+\newpage
+
+\section{Introduction}
+
+\subsection{Qu'est-ce que Pangol1 ?}
+\textbf{Pangol1} est une application graphique permettant de générer des graphiques SVG à partir de fichiers CSV. Elle offre une interface intuitive pour charger, explorer et visualiser vos données sous forme de graphiques professionnels.
+
+\subsection{Fonctionnalités Principales}
+\begin{itemize}
+    \item Importation de fichiers CSV depuis votre ordinateur
+    \item Exploration interactive des données via une table
+    \item Génération de trois types de graphiques : Camembert, Barres, Colonnes
+    \item Personnalisation complète de l'apparence des graphiques
+    \item Export des graphiques en format SVG
+    \item Support de 9 langues
+    \item Mode nuit automatique (18h à 6h)
+\end{itemize}
+
+\section{Démarrage Rapide}
+
+\subsection{Lancer l'Application}
+Pangol1 fonctionne sur Windows, Linux et macOS. Pour lancer l'application :
+
+\begin{enumerate}
+    \item Lancez le fichier \textbf{Pangol1.jar} ou exécutez la commande : \texttt{java -jar Pangol1.jar} ou compiler le programme depuis vscode ./pangol1/src/application/Pangol1.java
+    \item L'interface graphique s'affiche
+    \item Vous pouvez maintenant charger vos données et créer des graphiques
+\end{enumerate}
+
+\subsection{Première Utilisation}
+\begin{enumerate}
+    \item Lancez Pangol1
+    \item Allez dans \textbf{File} → \textbf{Open} pour charger un fichier ( CSV , txt, TSV, ZIP, Parquet )
+    \item Sélectionnez un fichier sur votre ordinateur
+    \item Les données s'affichent automatiquement dans la table à droite
+    \item Configurez votre graphique via le panneau de configuration en bas à gauche
+\end{enumerate}
+
+\section{Interface Utilisateur}
+
+\subsection{Organisation Générale}
+L'interface de Pangol1 est organisée en trois zones principales :
+
+\begin{itemize}
+    \item \textbf{Panneau de Configuration (Bas à Gauche)} : Permet de configurer le graphique (type, données, apparence)
+    
+    \item \textbf{Zone de Rendu (Centre Gauche)} : Affiche le graphique généré en temps réel
+    
+    \item \textbf{Table de Données (Droite)} : Affiche les lignes du fichier CSV importé avec système de pagination
+\end{itemize}
+
+\subsection{Barre de Menus}
+La barre de menus contient les options suivantes :
+
+\begin{itemize}
+    \item \textbf{Fichier} : Gestion des fichiers (Ouvrir, Ouvrir fichier récent, Ouvrir URL)
+    \item \textbf{Aide} : Aide et paramètres (Langues, documentation, à propos)
+\end{itemize}
+
+\section{Chargement des Données}
+
+\subsection{Importer un Fichier}
+Pour charger un fichier :
+
+\begin{enumerate}
+    \item Cliquez sur \textbf{Fichier} → \textbf{Ouvrir}
+    \item Une fenêtre de sélection s'ouvre
+    \item Naviguez et sélectionnez votre fichier CSV
+    \item Cliquez sur \textbf{Ouvrir}
+    \item Le fichier est chargé et les données s'affichent dans la table
+\end{enumerate}
+
+\subsection{Format des Fichiers}
+Pangol1 accepte les fichiers au format \textbf{( CSV , txt, TSV, ZIP, Parquet )} (Comma-Separated Values) :
+
+\begin{itemize}
+    \item La première ligne contient généralement les en-têtes de colonnes
+    \item Les fichiers doivent être encodés en UTF-8 pour un fonctionnement optimal
+\end{itemize}
+
+\subsection{Changement de Langue}
+Pour changer la langue de l'interface :
+
+\begin{enumerate}
+    \item Cliquez sur \textbf{Aide} → \textbf{Langues}
+    \item Sélectionnez votre langue parmi les 9 disponibles :
+    \begin{itemize}
+        \item Français
+        \item Anglais
+        \item Chinois simplifié
+        \item Espagnol
+        \item Arabe
+        \item Portugais
+        \item Russe
+        \item Japonais
+        \item Indonésien
+    \end{itemize}
+    \item L'interface se met à jour immédiatement
+\end{enumerate}
+
+\section{Exploration des Données}
+
+\subsection{Table Interactive}
+La table de données à droite affiche le contenu de votre fichier CSV :
+
+\begin{itemize}
+    \item \textbf{Pagination} : Utilisez les boutons \textbf{First, Previous, Next, Last} pour naviguer entre les pages
+    \item \textbf{En-têtes de Colonnes} : Cliquez ( clic Droit ) sur les en-têtes pour accéder aux options de tri et filtrage
+    \item Chaque ligne représente un enregistrement du fichier
+\end{itemize}
+
+\subsection{Tri des Données}
+Pour trier une colonne :
+
+\begin{enumerate}
+    \item Cliquez droit sur l'en-tête de la colonne
+    \item Un menu contextuel apparaît
+    \item Choisissez \textbf{Ascendant} ou \textbf{Descendant}
+    \item Les données se réorganisent automatiquement
+\end{enumerate}
+
+\subsection{Filtrage des Données}
+Pour filtrer les données :
+
+\begin{enumerate}
+    \item Cliquez droit sur l'en-tête de la colonne
+    \item Sélectionnez \textbf{Top N} pour afficher les N valeurs les plus hautes
+    \item Ou sélectionnez \textbf{Bottom N} pour afficher les N valeurs les plus basses
+    \item Seules les lignes correspondantes s'affichent dans la table
+\end{enumerate}
+
+\subsection{Masquage de Colonnes}
+Pour masquer ou renommer une colonne :
+
+\begin{enumerate}
+    \item Cliquez droit sur l'en-tête de la colonne
+    \item Sélectionnez \textbf{Masquer}
+    \item La colonne disparaît de la table
+    \item Ou sélectionnez \textbf{renommer}
+    \item Pour renommer la colonne comme bon vous souhaite
+\end{enumerate}
+
+\subsection{Statistique}
+Pour avoir des statistique sur la colonne :
+
+\begin{enumerate}
+    \item Cliquez droit sur l'en-tête de la colonne
+    \item Sélectionnez \textbf{Statistiques}
+    \item Puis \textbf{Résumé} pour avoir : ( Min, Max, Moyenne, Somme,le nombre de données, le nombre de cellule vide, le type)
+    \item Ou \textbf{Taux de valeur nulles} pour avoir les valeurs nouvelles
+    \item Ou \textbf{Taux de cardinalités} pour avoir les cardinalités
+\end{enumerate}
+
+\section{Génération de Graphiques}
+
+\subsection{Types de Graphiques Disponibles}
+Pangol1 propose trois types de graphiques :
+
+\subsubsection{Camembert (Pie Chart)}
+\begin{itemize}
+    \item Utilisation : Visualiser les proportions et les parts
+    \item Cas d'usage : Répartition de pourcentages, composition d'un ensemble
+\end{itemize}
+
+\subsubsection{Barres Horizontales (Bar Chart)}
+\begin{itemize}
+    \item Utilisation : Comparer des valeurs entre catégories
+    \item Cas d'usage : Comparaisons, classements, benchmarking
+    \item Recommandation : Adapté aux longs labels
+\end{itemize}
+
+\subsubsection{Colonnes Verticales (Columns Chart)}
+\begin{itemize}
+    \item Utilisation : Afficher l'évolution temporelle ou les variations
+    \item Cas d'usage : Série temporelle, tendances, comparaisons verticales
+    \item Recommandation : Standard pour l'analyse temporelle
+\end{itemize}
+
+\subsection{Configuration du Graphique}
+
+\subsubsection{Sélection du Type}
+Dans le panneau de configuration :
+
+\begin{enumerate}
+    \item Localisez la section \textbf{Type}
+    \item Sélectionnez l'un des trois types de graphiques
+    \item Le graphique se met à jour automatiquement
+\end{enumerate}
+
+\subsubsection{Sélection des Données}
+\begin{enumerate}
+    \item Sélectionnez la colonne pour l'axe X (catégories)
+    \item Sélectionnez la colonne pour l'axe Y (valeurs numériques)
+    \item Le graphique se régénère avec les nouvelles données
+\end{enumerate}
+
+\subsection{Personnalisation Visuelle}
+
+\subsubsection{Couleurs}
+\begin{itemize}
+    \item Dans la section \textbf{Design}, sélectionnez une couleur de remplissage
+    \item Chaque graphique a sa propre palette de couleurs
+    \item Les modifications s'appliquent immédiatement
+\end{itemize}
+
+\subsubsection{Transparence (Opacity)}
+\begin{itemize}
+    \item Ajustez le niveau de transparence des éléments graphiques
+    \item Valeurs de 0\% (invisible) à 100\% (opaque)
+    \item Utile pour visualiser les données qui se chevauchent
+\end{itemize}
+
+\subsubsection{Épaisseur du Trait (Stroke Width)}
+\begin{itemize}
+    \item Contrôle l'épaisseur des bordures des éléments
+    \item Valeurs recommandées : 1 à 5 pixels
+    \item Augmentez pour une meilleure visibilité sur petit écran
+\end{itemize}
+
+\subsubsection{Labels des Axes}
+\begin{itemize}
+    \item \textbf{X Label} : Titre de l'axe horizontal
+    \item \textbf{Y Label} : Titre de l'axe vertical
+    \item Ces labels s'affichent sur le graphique généré
+\end{itemize}
+
+\subsubsection{Nombre de Graduations}
+\begin{itemize}
+    \item \textbf{Tick Count} : Nombre de marques sur les axes
+    \item Augmentez pour plus de détails
+    \item Diminuez pour une meilleure lisibilité
+\end{itemize}
+
+\subsubsection{Échelle du Graphique}
+\begin{itemize}
+    \item \textbf{Linéaire} : Échelle proportionnelle standard
+    \item \textbf{Logarithmique} : Pour les données avec grande disparité
+    \item La scale logarithmique améliore la lisibilité quand certaines valeurs dominent d'autres
+\end{itemize}
+
+\section{Fonctionnalités Supplémentaires}
+
+\subsection{Mode Nuit}
+\begin{itemize}
+    \item Pangol1 active automatiquement le thème sombre entre 18h et 6h
+    \item Réduit la fatigue visuelle lors des longues sessions
+    \item Le mode peut également être activé manuellement selon vos préférences
+\end{itemize}
+
+\subsection{Fichiers Récents}
+\begin{itemize}
+    \item Pangol1 conserve l'historique des fichiers récemment ouverts
+    \item Ces fichiers sont automatiquement rechargés au démarrage
+    \item Permet une reprise rapide de votre travail
+\end{itemize}
+
+\section{Résolution de Problèmes}
+
+\subsection{Problèmes Courants}
+
+\subsubsection{Le fichier CSV ne s'ouvre pas}
+\begin{itemize}
+    \item Vérifiez que le fichier existe et n'est pas corrompu
+    \item Assurez-vous que le fichier est au format CSV valide
+    \item Vérifiez l'encodage du fichier (UTF-8 recommandé)
+    \item Les fichiers très volumineux peuvent nécessiter plus de temps de chargement
+\end{itemize}
+
+\subsubsection{Le graphique ne s'affiche pas}
+\begin{itemize}
+    \item Vérifiez que vous avez sélectionné les colonnes X et Y
+    \item Assurez-vous que la colonne Y contient des valeurs numériques
+    \item Vérifiez que les données ne sont pas filtrées de manière à être vides
+    \item Redémarrez l'application si le problème persiste
+\end{itemize}
+
+\subsubsection{Les données n'apparaissent pas correctement}
+\begin{itemize}
+    \item Vérifiez le délimiteur du fichier CSV (virgule ou point-virgule)
+    \item Assurez-vous que la première ligne contient les en-têtes
+    \item Vérifiez qu'il n'y a pas de caractères spéciaux non supportés
+    \item Essayez de nettoyer les données avec un éditeur de texte
+\end{itemize}
+
+\subsection{Conseils d'Utilisation}
+
+\begin{itemize}
+    \item Préparez vos données CSV avant de les importer (supprimez les colonnes inutiles)
+    \item Utilisez des noms de colonnes explicites et concis
+    \item Les colonnes avec données numériques doivent contenir uniquement des nombres
+    \item Évitez les valeurs manquantes ou vides dans les colonnes critiques
+    \item Testez votre graphique avec un petit ensemble de données avant de traiter de gros volumes
+    \item Exportez régulièrement vos graphiques importants
+\end{itemize}
+
+\section{Support}
+
+\subsection{Obtenir de l'Aide}
+\begin{itemize}
+    \item \textbf{Help Menu} : Accès au manuel utilisateur
+    \item \textbf{About} : Informations de version et dépendances
+\end{itemize}
+
+\subsection{Documentation Technique}
+Pour les développeurs et les informations détaillées sur le projet :
+
+\begin{itemize}
+    \item \textbf{README.md} : Vue d'ensemble du projet
+    \item \textbf{DOCUMENTATION.md} : Documentation technique complète
+    \item \textbf{CONTRIBUTING.md} : Guide de contribution
+    \item \textbf{MEMBERS.md} : Liste des contributeurs
+\end{itemize}
+
+\end{document}
