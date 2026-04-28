@@ -11,7 +11,7 @@ import javax.swing.JList;
 import javax.swing.TransferHandler;
 
 import fr.univrennes.istic.l2gen.application.core.notebook.NoteBookValue;
-import fr.univrennes.istic.l2gen.application.core.services.NoteBookService;
+import fr.univrennes.istic.l2gen.application.core.services.notebook.NoteBookService;
 
 final class NoteBookDragDrop extends TransferHandler {
 

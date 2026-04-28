@@ -1,8 +1,8 @@
 package fr.univrennes.istic.l2gen.application.gui.panels.table.view.data;
 
 import fr.univrennes.istic.l2gen.application.core.icon.Ico;
-import fr.univrennes.istic.l2gen.application.core.services.StatisticOp;
-import fr.univrennes.istic.l2gen.application.core.services.StatisticService;
+import fr.univrennes.istic.l2gen.application.core.services.stats.StatisticOp;
+import fr.univrennes.istic.l2gen.application.core.services.stats.StatisticService;
 import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.core.table.DataType;
 import fr.univrennes.istic.l2gen.application.gui.GUIController;

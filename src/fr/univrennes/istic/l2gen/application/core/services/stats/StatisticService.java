@@ -1,4 +1,4 @@
-package fr.univrennes.istic.l2gen.application.core.services;
+package fr.univrennes.istic.l2gen.application.core.services.stats;
 
 import fr.univrennes.istic.l2gen.application.core.config.Log;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;

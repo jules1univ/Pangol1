@@ -17,7 +17,7 @@ import fr.univrennes.istic.l2gen.application.core.notebook.NoteBookChart;
 import fr.univrennes.istic.l2gen.application.core.notebook.NoteBookImage;
 import fr.univrennes.istic.l2gen.application.core.notebook.NoteBookText;
 import fr.univrennes.istic.l2gen.application.core.notebook.NoteBookValue;
-import fr.univrennes.istic.l2gen.application.core.services.NoteBookService;
+import fr.univrennes.istic.l2gen.application.core.services.notebook.NoteBookService;
 import fr.univrennes.istic.l2gen.application.gui.GUIController;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.pages.chart.AxisSettingsPanel;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.pages.chart.ChartSettingsPanel;

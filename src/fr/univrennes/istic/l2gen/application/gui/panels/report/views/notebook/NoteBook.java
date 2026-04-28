@@ -4,19 +4,23 @@ import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.swing.Box;
 import javax.swing.DefaultListModel;
 import javax.swing.DropMode;
+import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
+import fr.univrennes.istic.l2gen.application.core.icon.Ico;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.core.notebook.NoteBookValue;
-import fr.univrennes.istic.l2gen.application.core.services.NoteBookService;
+import fr.univrennes.istic.l2gen.application.core.services.notebook.NoteBookService;
 import fr.univrennes.istic.l2gen.application.gui.GUIController;
 
 public class NoteBook extends JPanel {
@@ -29,6 +33,11 @@ public class NoteBook extends JPanel {
     private final JMenuItem moveDownItem = new JMenuItem(Lang.get("report.menu.move_down"));
     private final JMenuItem editItem = new JMenuItem(Lang.get("report.menu.edit"));
     private final JMenuItem deleteItem = new JMenuItem(Lang.get("report.menu.delete"));
+
+    private final JToolBar toolBar = new JToolBar();
+    private final JButton undoButton = new JButton(Lang.get("report.toolbar.undo"), Ico.get("icons/undo.svg"));
+    private final JButton redoButton = new JButton(Lang.get("report.toolbar.redo"), Ico.get("icons/redo.svg"));
+    private final JButton exportButton = new JButton(Lang.get("report.toolbar.export"), Ico.get("icons/export.svg"));
 
     public NoteBook() {
         build();
@@ -49,6 +58,7 @@ public class NoteBook extends JPanel {
         list.setTransferHandler(new NoteBookDragDrop(list, model));
 
         buildContextMenu();
+        buildToolBar();
 
         list.addMouseListener(new MouseAdapter() {
             @Override
@@ -80,6 +90,7 @@ public class NoteBook extends JPanel {
         JScrollPane scroll = new JScrollPane(list);
         scroll.setBorder(null);
 
+        add(toolBar, BorderLayout.NORTH);
         add(scroll, BorderLayout.CENTER);
 
         refresh();
@@ -123,6 +134,25 @@ public class NoteBook extends JPanel {
         menu.add(deleteItem);
     }
 
+    private void buildToolBar() {
+        toolBar.setFloatable(false);
+
+        undoButton.addActionListener(event -> {
+            NoteBookService.undo();
+            GUIController.getInstance().getMainView().getReportPanel().refresh();
+        });
+
+        redoButton.addActionListener(event -> {
+            NoteBookService.redo();
+            GUIController.getInstance().getMainView().getReportPanel().refresh();
+        });
+
+        toolBar.add(undoButton);
+        toolBar.add(redoButton);
+        toolBar.add(Box.createHorizontalGlue());
+        toolBar.add(exportButton);
+    }
+
     private void showContextMenu(MouseEvent e) {
         if (!e.isPopupTrigger()) {
             return;
@@ -152,6 +182,12 @@ public class NoteBook extends JPanel {
         for (NoteBookValue value : NoteBookService.getValues()) {
             model.addElement(value);
         }
+        updateUndoRedoButtons();
+    }
+
+    private void updateUndoRedoButtons() {
+        undoButton.setEnabled(NoteBookService.canUndo());
+        redoButton.setEnabled(NoteBookService.canRedo());
     }
 
 }

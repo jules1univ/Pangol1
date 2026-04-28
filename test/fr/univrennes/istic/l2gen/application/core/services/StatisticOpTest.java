@@ -3,6 +3,8 @@ package fr.univrennes.istic.l2gen.application.core.services;
 import org.junit.Assert;
 import org.junit.Test;
 
+import fr.univrennes.istic.l2gen.application.core.services.stats.StatisticOp;
+
 public class StatisticOpTest {
 
     @Test

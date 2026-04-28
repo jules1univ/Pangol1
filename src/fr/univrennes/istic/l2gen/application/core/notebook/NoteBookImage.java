@@ -1,7 +1,5 @@
 package fr.univrennes.istic.l2gen.application.core.notebook;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.awt.Image;
 import java.io.ByteArrayOutputStream;
 import java.io.File;

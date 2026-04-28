@@ -1,4 +1,4 @@
-package fr.univrennes.istic.l2gen.application.core.services;
+package fr.univrennes.istic.l2gen.application.core.services.stats;
 
 public enum StatisticOp {
     MIN,
