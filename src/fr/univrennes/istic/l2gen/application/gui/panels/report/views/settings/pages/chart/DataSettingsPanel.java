@@ -109,12 +109,6 @@ public final class DataSettingsPanel extends SettingSectionPanel {
         System.arraycopy(allCols, 0, colsWithNone, 1, allCols.length);
 
         biggerGroupColumn = new JComboBox<>(colsWithNone);
-        biggerGroupColumn.addItemListener(e -> {
-            int index = biggerGroupColumn.getSelectedIndex();
-            shared.chart().getTitleField().setEnabled(index != 0);
-            shared.legend().setVisible(index != 0);
-            shared.axis().setVisible(index != 0);
-        });
         addRow(new SettingRowPanel(Lang.get("report.setting.data.col_bigger_group"), biggerGroupColumn));
 
     }

@@ -47,23 +47,4 @@ public final class NoteBookImage implements NoteBookValue {
         }
     }
 
-    @Override
-    public void save(DataOutputStream out) {
-        try {
-            out.writeUTF("IMAGE");
-            out.writeUTF(file.getAbsolutePath());
-        } catch (Exception e) {
-            Log.debug("Failed to save image", e);
-        }
-    }
-
-    @Override
-    public void load(DataInputStream in) {
-        try {
-            this.file = new File(in.readUTF());
-        } catch (Exception e) {
-            Log.debug("Failed to load image", e);
-        }
-    }
-
 }

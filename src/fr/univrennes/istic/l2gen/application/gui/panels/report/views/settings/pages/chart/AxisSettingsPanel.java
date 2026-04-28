@@ -57,7 +57,6 @@ public final class AxisSettingsPanel extends SettingSectionPanel {
         addRow(new SettingRowPanel(Lang.get("report.setting.chart.y_label"),
                 yAxisLabelField));
 
-        setVisible(false);
     }
 
     public int getTickCount() {

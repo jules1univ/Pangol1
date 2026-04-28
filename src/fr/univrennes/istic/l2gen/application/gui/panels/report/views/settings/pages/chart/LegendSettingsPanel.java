@@ -29,7 +29,6 @@ public final class LegendSettingsPanel extends SettingSectionPanel {
         addRow(new SettingRowPanel(Lang.get("report.setting.chart.direction_legend"),
                 directionLegend));
 
-        setVisible(false);
     }
 
     public boolean isLegendVisible() {

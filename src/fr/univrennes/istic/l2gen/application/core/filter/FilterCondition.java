@@ -1,6 +1,9 @@
 package fr.univrennes.istic.l2gen.application.core.filter;
 
-public record FilterCondition(FilterOperator operator, String value, FilterFunction func) {
+import java.io.Serializable;
+
+public record FilterCondition(FilterOperator operator, String value, FilterFunction func) implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     public FilterCondition(FilterOperator operator) {
         this(operator, null, FilterFunction.NONE);

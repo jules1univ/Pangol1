@@ -1,8 +1,5 @@
 package fr.univrennes.istic.l2gen.application.core.notebook;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,7 +18,6 @@ import fr.univrennes.istic.l2gen.application.core.config.Log;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterBuilder;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
-import fr.univrennes.istic.l2gen.application.core.services.TableService;
 import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.geometry.Point;
 import fr.univrennes.istic.l2gen.io.svg.SVGExport;
@@ -43,15 +39,6 @@ import fr.univrennes.istic.l2gen.visustats.view.datagroup.PieDataGroupView;
 import fr.univrennes.istic.l2gen.visustats.view.datagroup.ScatterDataGroupView;
 import fr.univrennes.istic.l2gen.visustats.view.datagroup.SpiderDataGroupView;
 import fr.univrennes.istic.l2gen.visustats.view.datagroup.axis.DataAxisViewScaleType;
-import fr.univrennes.istic.l2gen.visustats.view.dataset.AreaDataSetView;
-import fr.univrennes.istic.l2gen.visustats.view.dataset.BarDataSetView;
-import fr.univrennes.istic.l2gen.visustats.view.dataset.ColumnsDataSetView;
-import fr.univrennes.istic.l2gen.visustats.view.dataset.HeatMapDataSetView;
-import fr.univrennes.istic.l2gen.visustats.view.dataset.IDataSetView;
-import fr.univrennes.istic.l2gen.visustats.view.dataset.LineDataSetView;
-import fr.univrennes.istic.l2gen.visustats.view.dataset.PieDataSetView;
-import fr.univrennes.istic.l2gen.visustats.view.dataset.ScatterDataSetView;
-import fr.univrennes.istic.l2gen.visustats.view.dataset.SpiderDataSetView;
 
 public final class NoteBookChart implements NoteBookValue {
     private static final int MAX_GROUP_LENGTH = 20;
@@ -156,6 +143,45 @@ public final class NoteBookChart implements NoteBookValue {
         }
     }
 
+    private AbstractDataGroupView buildChart(DataGroup dataGroup) throws Exception {
+        AbstractDataGroupView chart = switch (type) {
+            case PIE -> new PieDataGroupView(dataGroup, new Point(), 50, 200, horizontalLegend);
+            case BAR -> new BarDataGroupView(dataGroup, new Point(), 50, 20, 400, horizontalLegend);
+            case COLUMNS -> new ColumnsDataGroupView(dataGroup, new Point(), 50, 20, 400, horizontalLegend);
+            case SCATTER -> new ScatterDataGroupView(dataGroup, new Point(), 50, 20, 400, 5, horizontalLegend);
+            case LINE -> new LineDataGroupView(dataGroup, new Point(), 50, 20, 400, 5, horizontalLegend);
+            case AREA -> new AreaDataGroupView(dataGroup, new Point(), 50, 20, 400, 5, stacked, horizontalLegend);
+            case SPIDER -> new SpiderDataGroupView(dataGroup, new Point(), 50, 200, horizontalLegend);
+            case HEATMAP -> new HeatMapDataGroupView(dataGroup, new Point(), 50, 20, 400, horizontalLegend);
+            default -> throw new Exception("Unsupported chart type: " + type);
+        };
+
+        chart.setAxisStepCount(tickCount);
+        chart.setAxisScaleType(scale);
+        chart.setShowXAxis(showXAxis);
+        chart.setXAxisLabel(xAxisLabel);
+        chart.setShowYAxis(showYAxis);
+        chart.setYAxisLabel(yAxisLabel);
+
+        return chart;
+    }
+
+    private String wrapInSVG(AbstractDataGroupView chart) {
+        int margin = 50;
+        XMLTag svgTag = new XMLTag("svg");
+        svgTag.addAttribute(new XMLAttribute("xmlns", "http://www.w3.org/2000/svg"));
+        svgTag.addAttribute(new XMLAttribute("version", "1.1"));
+        svgTag.addAttribute(new XMLAttribute("width", String.valueOf(chart.getWidth() + 2 * margin)));
+        svgTag.addAttribute(new XMLAttribute("height", String.valueOf(chart.getHeight() + 2 * margin)));
+
+        chart.move(chart.getWidth() / 2 + margin, chart.getHeight() / 2 + margin);
+
+        XMLTag chartTag = SVGExport.convert(chart);
+        svgTag.appendChild(chartTag);
+
+        return svgTag.toString();
+    }
+
     private void createDataSetViewShape() {
         if (groupColumn < 0 || valueColumn < 0) {
             this.cachedSVG = SVG_CHAR_ERROR.replace("ERROR_MESSAGE", Lang.get("report.setting.chart.no_data"));
@@ -185,61 +211,32 @@ public final class NoteBookChart implements NoteBookValue {
 
             ResultSet resultSet = statement.executeQuery(query);
             DataSet dataSet = new DataSet(new Label(title));
+            Map<String, Color> legendColors = new LinkedHashMap<>();
+
             boolean hasRows = false;
             int colorIndex = 0;
             while (resultSet.next()) {
                 if (colors.size() <= colorIndex) {
                     colors.add(Color.random());
                 }
+
                 Color color = colors.get(colorIndex++);
                 dataSet.values().add(new Value(resultSet.getDouble(2), color));
+                legendColors.put(resultSet.getString(1), color);
                 hasRows = true;
             }
 
             if (hasRows) {
-                IDataSetView chart;
-                switch (type) {
-                    case PIE -> {
-                        chart = new PieDataSetView(new Point(), 200);
+                DataGroup dataGroup = new DataGroup(new Label(title));
+                dataGroup.add(dataSet);
+
+                if (showLegend) {
+                    for (Map.Entry<String, Color> entry : legendColors.entrySet()) {
+                        dataGroup.add(new Label(entry.getKey()));
                     }
-                    case BAR -> {
-                        chart = new BarDataSetView(new Point(), 20, 400);
-                    }
-                    case COLUMNS -> {
-                        chart = new ColumnsDataSetView(new Point(), 10, 20, 400);
-                    }
-                    case SCATTER -> {
-                        chart = new ScatterDataSetView(new Point(), 20, 400, 5);
-                    }
-                    case LINE -> {
-                        chart = new LineDataSetView(new Point(), 20, 400, 5);
-                    }
-                    case AREA -> {
-                        chart = new AreaDataSetView(new Point(), 20, 400, 5);
-                    }
-                    case SPIDER -> {
-                        chart = new SpiderDataSetView(new Point(), 200, 5, 5);
-                    }
-                    case HEATMAP -> {
-                        chart = new HeatMapDataSetView(new Point(), 20, 400);
-                    }
-                    default -> throw new Exception("Unsupported chart type: " + type);
                 }
 
-                chart.setData(dataSet);
-
-                int margin = 50;
-                XMLTag svgTag = new XMLTag("svg");
-                svgTag.addAttribute(new XMLAttribute("xmlns", "http://www.w3.org/2000/svg"));
-                svgTag.addAttribute(new XMLAttribute("version", "1.1"));
-                svgTag.addAttribute(new XMLAttribute("width", String.valueOf(chart.getWidth() + 2 * margin)));
-                svgTag.addAttribute(new XMLAttribute("height", String.valueOf(chart.getHeight() + 2 * margin)));
-
-                chart.move(chart.getWidth() / 2 + margin, chart.getHeight() / 2 + margin);
-
-                XMLTag chartTag = SVGExport.convert(chart);
-                svgTag.appendChild(chartTag);
-                this.cachedSVG = svgTag.toString();
+                this.cachedSVG = wrapInSVG(buildChart(dataGroup));
             } else {
                 throw new Exception("No data to display");
             }
@@ -276,13 +273,9 @@ public final class NoteBookChart implements NoteBookValue {
 
         StringBuilder queryBuilder = FilterBuilder.base(sqlSelectClause.toString(), table, false);
         queryBuilder.append(" GROUP BY ")
-                .append(biggerGroupColumnName)
-                .append(", ")
-                .append(groupColumnName);
+                .append(biggerGroupColumnName).append(", ").append(groupColumnName);
         queryBuilder.append(" ORDER BY ")
-                .append(biggerGroupColumnName)
-                .append(", ")
-                .append(groupColumnName);
+                .append(biggerGroupColumnName).append(", ").append(groupColumnName);
         String query = queryBuilder.toString();
 
         try (DuckDBConnection connection = (DuckDBConnection) DriverManager.getConnection("jdbc:duckdb:");
@@ -342,58 +335,7 @@ public final class NoteBookChart implements NoteBookValue {
                     }
                 }
 
-                AbstractDataGroupView chart;
-                switch (type) {
-                    case PIE -> {
-                        chart = new PieDataGroupView(dataGroup, new Point(), 50, 200, horizontalLegend);
-                    }
-                    case BAR -> {
-                        chart = new BarDataGroupView(dataGroup, new Point(), 50, 20, 400, horizontalLegend);
-                    }
-                    case COLUMNS -> {
-                        chart = new ColumnsDataGroupView(dataGroup, new Point(), 50, 20, 400, horizontalLegend);
-                    }
-                    case SCATTER -> {
-                        chart = new ScatterDataGroupView(dataGroup, new Point(), 50, 20, 400, 5, horizontalLegend);
-                    }
-                    case LINE -> {
-                        chart = new LineDataGroupView(dataGroup, new Point(), 50, 20, 400, 5, horizontalLegend);
-                    }
-                    case AREA -> {
-                        chart = new AreaDataGroupView(dataGroup, new Point(), 50, 20, 400, 5, stacked,
-                                horizontalLegend);
-                    }
-                    case SPIDER -> {
-                        chart = new SpiderDataGroupView(dataGroup, new Point(), 50, 200, horizontalLegend);
-                    }
-                    case HEATMAP -> {
-                        chart = new HeatMapDataGroupView(dataGroup, new Point(), 50, 20, 400, horizontalLegend);
-                    }
-                    default -> throw new Exception("Unsupported chart type: " + type);
-                }
-
-                chart.setAxisStepCount(tickCount);
-                chart.setAxisScaleType(scale);
-                chart.setShowXAxis(showXAxis);
-                chart.setXAxisLabel(xAxisLabel);
-                chart.setShowYAxis(showYAxis);
-                chart.setYAxisLabel(yAxisLabel);
-
-                int margin = 50;
-                XMLTag svgTag = new XMLTag("svg");
-                svgTag.addAttribute(new XMLAttribute("xmlns", "http://www.w3.org/2000/svg"));
-                svgTag.addAttribute(new XMLAttribute("version", "1.1"));
-                svgTag.addAttribute(new XMLAttribute("width", String.valueOf(chart.getWidth() + 2 * margin)));
-                svgTag.addAttribute(new XMLAttribute("height", String.valueOf(chart.getHeight() + 2 * margin)));
-
-                chart.move(chart.getWidth() / 2 + margin, chart.getHeight() / 2 + margin);
-
-                XMLTag chartTag = SVGExport.convert(chart);
-                svgTag.appendChild(chartTag);
-
-                SVGExport.export(chartTag, "test.svg");
-
-                this.cachedSVG = svgTag.toString();
+                this.cachedSVG = wrapInSVG(buildChart(dataGroup));
             } else {
                 throw new Exception("No data to display");
             }
@@ -404,7 +346,6 @@ public final class NoteBookChart implements NoteBookValue {
             if (e instanceof SQLException) {
                 Log.debug(query);
             }
-
             this.cachedSVG = SVG_CHAR_ERROR.replace("ERROR_MESSAGE", Lang.get("report.setting.chart.no_data"));
             Log.debug("Failed to create chart SVG", e);
         }
@@ -491,57 +432,7 @@ public final class NoteBookChart implements NoteBookValue {
 
     @Override
     public void exportHTML(StringBuilder html) {
-
+        html.append(getSVG());
     }
 
-    @Override
-    public void save(DataOutputStream out) {
-        try {
-            out.writeUTF("CHART");
-            out.writeUTF(type == null ? "" : type.name());
-            out.writeUTF(title == null ? "" : title);
-            out.writeBoolean(showLegend);
-            out.writeInt(tickCount);
-            out.writeUTF(scale == null ? "" : scale.name());
-            out.writeBoolean(showXAxis);
-            out.writeUTF(xAxisLabel == null ? "" : xAxisLabel);
-            out.writeBoolean(showYAxis);
-            out.writeUTF(yAxisLabel == null ? "" : yAxisLabel);
-            out.writeUTF(table != null && table.getPath() != null ? table.getPath().getAbsolutePath() : "");
-            out.writeInt(groupColumn);
-            out.writeInt(valueColumn);
-            out.writeBoolean(includeFilters);
-        } catch (Exception e) {
-            Log.debug("Failed to save chart", e);
-        }
-    }
-
-    @Override
-    public void load(DataInputStream in) {
-        try {
-            String typeName = in.readUTF();
-            this.type = typeName.isEmpty() ? null : DataViewType.valueOf(typeName);
-            String loadedTitle = in.readUTF();
-            this.title = loadedTitle.isEmpty() ? null : loadedTitle;
-            this.showLegend = in.readBoolean();
-            this.tickCount = in.readInt();
-            String scaleName = in.readUTF();
-            this.scale = scaleName.isEmpty() ? null : DataAxisViewScaleType.valueOf(scaleName);
-            this.showXAxis = in.readBoolean();
-            String loadedXAxisLabel = in.readUTF();
-            this.xAxisLabel = loadedXAxisLabel.isEmpty() ? null : loadedXAxisLabel;
-            this.showYAxis = in.readBoolean();
-            String loadedYAxisLabel = in.readUTF();
-            this.yAxisLabel = loadedYAxisLabel.isEmpty() ? null : loadedYAxisLabel;
-            String tablePath = in.readUTF();
-            this.table = tablePath.isEmpty() ? null : TableService.get(new File(tablePath));
-            int loadedGroupColumn = in.readInt();
-            this.groupColumn = loadedGroupColumn == -1 ? null : loadedGroupColumn;
-            int loadedValueColumn = in.readInt();
-            this.valueColumn = loadedValueColumn == -1 ? null : loadedValueColumn;
-            this.includeFilters = in.readBoolean();
-        } catch (Exception e) {
-            Log.debug("Failed to load chart", e);
-        }
-    }
 }

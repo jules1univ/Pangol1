@@ -1,11 +1,13 @@
 package fr.univrennes.istic.l2gen.application.core.filter;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Filter {
+public final class Filter implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final int columnIndex;
@@ -13,7 +15,7 @@ public final class Filter {
     private FilterSort sort = FilterSort.NONE;
     private FilterLogic operator = FilterLogic.AND;
 
-    private final List<FilterCondition> conditions = new ArrayList<>();
+    private final ArrayList<FilterCondition> conditions = new ArrayList<>();
 
     public Filter(int columnIndex) {
         this.columnIndex = columnIndex;

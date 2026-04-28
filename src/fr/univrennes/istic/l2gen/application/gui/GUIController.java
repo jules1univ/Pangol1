@@ -90,6 +90,11 @@ public final class GUIController extends CoreController {
             }
         }
 
+        if (!parsedDefaultTableFile.exists() || !parsedDefaultTableFile.isFile()) {
+            parsedDefaultTableFile = null;
+            parsedDefaultTableUri = URI.create(stableURI);
+        }
+
         final URI defaultTableUri = parsedDefaultTableUri;
         final File defaultTableFile = parsedDefaultTableFile;
 

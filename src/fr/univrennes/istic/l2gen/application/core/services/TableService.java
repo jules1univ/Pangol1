@@ -60,6 +60,22 @@ public final class TableService {
         return loaded.values().stream().toList();
     }
 
+    public static void removeLoaded(File file) {
+        DataTable table = loaded.remove(file);
+        if (table != null) {
+            table.close();
+        }
+    }
+
+    public static void updateLoadedPath(File oldPath, File newPath, DataTable table) {
+        if (oldPath != null) {
+            loaded.remove(oldPath);
+        }
+        if (newPath != null && table != null) {
+            loaded.put(newPath, table);
+        }
+    }
+
     public static List<DataTable> load(File file, File targetDir) {
         if (!file.exists()) {
             return List.of();

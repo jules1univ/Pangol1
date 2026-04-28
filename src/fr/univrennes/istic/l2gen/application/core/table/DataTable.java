@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.stream.Collectors;
 
 import org.duckdb.DuckDBConnection;
 
@@ -21,7 +22,7 @@ import fr.univrennes.istic.l2gen.application.core.config.Log;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterBuilder;
 import fr.univrennes.istic.l2gen.application.core.services.FileService;
-import fr.univrennes.istic.l2gen.application.core.services.FilterService;
+import fr.univrennes.istic.l2gen.application.core.services.ObjectService;
 
 public final class DataTable {
     private static final int BLOCK_SIZE = 10_000;
@@ -32,8 +33,8 @@ public final class DataTable {
 
     private DuckDBConnection connection;
 
-    private final String tableName;
-    private final File tablePath;
+    private String tableName;
+    private File tablePath;
     private String alias;
 
     private final List<String> columnNames;
@@ -43,7 +44,7 @@ public final class DataTable {
     private final long columnCount;
     private int blockCount;
 
-    private final List<Filter> filters;
+    private final ArrayList<Filter> filters;
 
     public static DataTable of(File file) throws IOException {
         if (!file.canRead() || !file.isFile() || file.length() == 0
@@ -82,6 +83,7 @@ public final class DataTable {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public DataTable(File file, String alias, List<String> columnNames, List<DataType> columnTypes, long rowCount,
             long columnCount)
             throws IOException {
@@ -114,7 +116,9 @@ public final class DataTable {
             throw new IOException("Failed to open DuckDB connection", e);
         }
 
-        this.filters = FilterService.load(file);
+        this.filters = ObjectService
+                .load(new File(FileService.getAppDataDir(), "filters_" + alias + ".ser"), ArrayList.class)
+                .orElse(new ArrayList<>());
 
         for (int i = 0; i < columnNames.size(); i++) {
             if (columnTypes.get(i) != DataType.STRING && columnTypes.get(i) != DataType.EMPTY) {
@@ -224,8 +228,14 @@ public final class DataTable {
 
     public void setAlias(String alias) {
         this.alias = alias;
+        File newPath = new File(tablePath.getParentFile(), alias + ".parquet");
         try {
-            this.tablePath.renameTo(new File(tablePath.getParentFile(), alias + ".parquet"));
+            if (tablePath.renameTo(newPath)) {
+                tablePath = newPath;
+                tableName = newPath.getAbsolutePath().replace("\\", "/");
+            } else {
+                Log.debug("Failed to rename file for alias change");
+            }
         } catch (Exception e) {
             Log.debug("Failed to rename file for alias change", e);
         }
@@ -352,7 +362,7 @@ public final class DataTable {
 
     public void addFilters(List<Filter> newFilters) {
         filters.addAll(newFilters);
-        FilterService.save(this);
+        ObjectService.save(new File(FileService.getAppDataDir(), "filters_" + alias + ".ser"), filters);
 
         invalidateCache();
         refreshRowCount();
@@ -360,7 +370,7 @@ public final class DataTable {
 
     public void addFilter(Filter filter) {
         filters.add(filter);
-        FilterService.save(this);
+        ObjectService.save(new File(FileService.getAppDataDir(), "filters_" + alias + ".ser"), filters);
 
         invalidateCache();
         refreshRowCount();
@@ -378,7 +388,7 @@ public final class DataTable {
 
     public void clearColumnFilter(int columnIndex) {
         filters.removeIf(f -> f.getColumnIndex() == columnIndex);
-        FilterService.save(this);
+        ObjectService.save(new File(FileService.getAppDataDir(), "filters_" + alias + ".ser"), filters);
 
         invalidateCache();
         refreshRowCount();
@@ -386,7 +396,7 @@ public final class DataTable {
 
     public void clearFilters() {
         filters.clear();
-        FilterService.save(this);
+        ObjectService.save(new File(FileService.getAppDataDir(), "filters_" + alias + ".ser"), filters);
 
         invalidateCache();
         refreshRowCount();

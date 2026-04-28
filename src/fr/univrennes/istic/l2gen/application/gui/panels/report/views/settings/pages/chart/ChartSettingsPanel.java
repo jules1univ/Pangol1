@@ -57,7 +57,6 @@ public final class ChartSettingsPanel extends SettingSectionPanel implements IRe
                 addRow(new SettingRowPanel(Lang.get("report.setting.chart.type"), chartTypeCombo));
 
                 titleField = new JTextField(Lang.get("report.setting.chart.default_title"));
-                titleField.setEnabled(false);
                 addRow(new SettingRowPanel(Lang.get("report.setting.chart.title"), titleField));
 
                 stackedCheckBox = new JCheckBox();
