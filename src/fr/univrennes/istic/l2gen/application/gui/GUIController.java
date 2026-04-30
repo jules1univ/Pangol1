@@ -71,7 +71,7 @@ public final class GUIController extends CoreController {
         String stableURI = "https://www.data.gouv.fr/api/1/datasets/r/99a26050-b94f-4ffc-9eb0-73ed28a895d1";
         ///
 
-        String defaultTable = Config.get().get("default_table", stableURI);
+        String defaultTable = Config.get().get("settings.startup.default_table_source", stableURI);
         URI parsedDefaultTableUri = null;
         File parsedDefaultTableFile = null;
 
@@ -115,7 +115,7 @@ public final class GUIController extends CoreController {
                 try {
                     DataTable table = get();
                     if (table != null) {
-                        Config.get().put("default_table", table.getPath().getAbsolutePath());
+                        Config.get().put("settings.startup.default_table_source", table.getPath().getAbsolutePath());
                         setTable(table);
                     }
                 } catch (Exception e) {
@@ -444,7 +444,7 @@ public final class GUIController extends CoreController {
         }
 
         Lang.setLocale(locale);
-        Config.get().put("language", locale.toLanguageTag());
+        Config.get().put("settings.general.language", locale.toLanguageTag());
         SwingUtilities.invokeLater(() -> {
 
             MainView oldView = mainView;

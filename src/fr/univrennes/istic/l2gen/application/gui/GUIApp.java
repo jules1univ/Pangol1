@@ -37,7 +37,7 @@ public final class GUIApp extends CoreApp<GUIController> {
                     JOptionPane.ERROR_MESSAGE);
         }
 
-        String langTag = Config.get().get("language", Lang.getDefaultLocale().toLanguageTag());
+        String langTag = Config.get().get("settings.general.language", Lang.getDefaultLocale().toLanguageTag());
         Locale locale = Locale.forLanguageTag(langTag);
         if (Lang.isSupported(locale)) {
             Lang.setLocale(locale);

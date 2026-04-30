@@ -146,7 +146,7 @@ public final class TableService {
 
             List<String> columnNames = new ArrayList<>();
             List<DataType> columnTypes = new ArrayList<>();
-            float castSensitivity = Config.get().getFloat("table.cast_sensitivity", 0.95f);
+            float castSensitivity = Config.get().getFloat("settings.table.cast_sensitivity", 0.95f);
 
             try (Statement statement = connection.createStatement()) {
                 statement.execute(String.format(
@@ -401,9 +401,9 @@ public final class TableService {
     }
 
     public static void loadRecents() {
-        Config.get().getByteArray("recents", new byte[0]);
+        Config.get().getByteArray("settings.startup.recent_tables", new byte[0]);
         try (Scanner scanner = new Scanner(
-                new ByteArrayInputStream(Config.get().getByteArray("recents", new byte[0])))) {
+                new ByteArrayInputStream(Config.get().getByteArray("settings.startup.recent_tables", new byte[0])))) {
             int i = 0;
             while (scanner.hasNextLine() && i < MAX_RECENTS) {
                 recents.add(new File(scanner.nextLine()));
@@ -419,7 +419,7 @@ public final class TableService {
                 sb.append(recent.getAbsolutePath()).append("\n");
             }
         }
-        Config.get().putByteArray("recents", sb.toString().getBytes());
+        Config.get().putByteArray("settings.startup.recent_tables", sb.toString().getBytes());
     }
 
 }

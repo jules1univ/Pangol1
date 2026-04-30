@@ -14,7 +14,7 @@ import javax.swing.border.EmptyBorder;
 public final class SettingsRowPanel extends JPanel {
 
     public static final int ROW_HEIGHT = 32;
-    public static final int LABEL_WIDTH = 220;
+    public static final int LABEL_WIDTH = 270;
 
     public SettingsRowPanel(String labelText, Component control) {
         this(labelText, new Component[] { control });

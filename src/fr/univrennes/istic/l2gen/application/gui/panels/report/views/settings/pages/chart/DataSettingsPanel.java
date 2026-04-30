@@ -33,8 +33,6 @@ public final class DataSettingsPanel extends SettingSectionPanel {
     private JCheckBox filterInclude;
     private JCheckBox percentageCheck;
 
-    private SharedChartSettings shared;
-
     public DataSettingsPanel() {
         super(Lang.get("report.setting.data"));
         build();
@@ -131,10 +129,6 @@ public final class DataSettingsPanel extends SettingSectionPanel {
             }
             return names.toArray(new String[0]);
         }).orElse(new String[] {});
-    }
-
-    public void setSharedSetting(SharedChartSettings shared) {
-        this.shared = shared;
     }
 
     public DataTable getTable() {
