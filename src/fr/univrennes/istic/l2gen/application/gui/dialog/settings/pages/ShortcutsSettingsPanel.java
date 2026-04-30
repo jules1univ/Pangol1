@@ -30,6 +30,9 @@ public final class ShortcutsSettingsPanel extends JPanel implements SettingsPage
 
             { Lang.get("settings.shortcuts.sort"), Lang.get("settings.shortcuts.sort.sort_asc"), "Ctrl+Shift+A" },
             { Lang.get("settings.shortcuts.sort"), Lang.get("settings.shortcuts.sort.sort_desc"), "Ctrl+Shift+D" },
+
+            { Lang.get("settings.shortcuts.undo"), Lang.get("settings.shortcuts.notebook.undo"), "Ctrl+Z" },
+            { Lang.get("settings.shortcuts.redo"), Lang.get("settings.shortcuts.notebook.redo"), "Ctrl+Y" }
     };
 
     public ShortcutsSettingsPanel() {

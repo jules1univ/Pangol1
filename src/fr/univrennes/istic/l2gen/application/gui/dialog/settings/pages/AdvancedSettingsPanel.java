@@ -2,6 +2,7 @@ package fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages;
 
 import javax.swing.JCheckBox;
 
+import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.AbstractSettingsPanel;
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.SettingsRowPanel;
@@ -16,8 +17,10 @@ public final class AdvancedSettingsPanel extends AbstractSettingsPanel {
         public AdvancedSettingsPanel() {
 
                 enableDebugLogCheckBox = new JCheckBox();
+                enableDebugLogCheckBox.setSelected(Config.get().getBoolean("settings.advanced.debug_log", false));
 
                 enableDevModeCheckBox = new JCheckBox();
+                enableDevModeCheckBox.setSelected(Config.get().getBoolean("settings.advanced.dev_mode", false));
 
                 SettingsSectionPanel logSection = new SettingsSectionPanel(Lang.get("settings.advanced.section.log"));
                 logSection.addRow(new SettingsRowPanel(Lang.get("settings.advanced.debug_log"),
@@ -33,5 +36,7 @@ public final class AdvancedSettingsPanel extends AbstractSettingsPanel {
 
         @Override
         public void applySettings() {
+                Config.get().putBoolean("settings.advanced.debug_log", enableDebugLogCheckBox.isSelected());
+                Config.get().putBoolean("settings.advanced.dev_mode", enableDevModeCheckBox.isSelected());
         }
 }
