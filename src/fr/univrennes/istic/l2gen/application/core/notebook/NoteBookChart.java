@@ -19,6 +19,8 @@ import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterBuilder;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.core.table.DataTable;
+import fr.univrennes.istic.l2gen.application.gui.GUIController;
+import fr.univrennes.istic.l2gen.application.gui.dialog.task.TaskStatus;
 import fr.univrennes.istic.l2gen.geometry.Point;
 import fr.univrennes.istic.l2gen.io.svg.SVGExport;
 import fr.univrennes.istic.l2gen.io.xml.model.XMLAttribute;
@@ -188,6 +190,9 @@ public final class NoteBookChart implements NoteBookValue {
             return;
         }
 
+        String taskLoad = GUIController.getInstance().addTask(Lang.get("task.chart.load"), TaskStatus.PENDING);
+        String taskCreate = GUIController.getInstance().addTask(Lang.get("task.chart.create"), TaskStatus.PENDING);
+
         String groupColumnName = table.getSQLColumnName(groupColumn);
         String valueColumnName = table.getSQLColumnName(valueColumn);
 
@@ -209,7 +214,12 @@ public final class NoteBookChart implements NoteBookValue {
         try (DuckDBConnection connection = (DuckDBConnection) DriverManager.getConnection("jdbc:duckdb:");
                 Statement statement = connection.createStatement()) {
 
+            GUIController.getInstance().updateTaskStatus(taskLoad, TaskStatus.RUNNING);
             ResultSet resultSet = statement.executeQuery(query);
+
+            GUIController.getInstance().updateTaskStatus(taskLoad, TaskStatus.SUCCESS);
+            GUIController.getInstance().updateTaskStatus(taskCreate, TaskStatus.RUNNING);
+
             DataSet dataSet = new DataSet(new Label(title));
             Map<String, Color> legendColors = new LinkedHashMap<>();
 
@@ -240,7 +250,11 @@ public final class NoteBookChart implements NoteBookValue {
             } else {
                 throw new Exception("No data to display");
             }
+
+            GUIController.getInstance().updateTaskStatus(taskCreate, TaskStatus.SUCCESS);
         } catch (Exception e) {
+            GUIController.getInstance().updateTaskStatus(taskLoad, TaskStatus.FAILED);
+            GUIController.getInstance().updateTaskStatus(taskCreate, TaskStatus.FAILED);
             if (e instanceof SQLException) {
                 Log.debug(query);
             }
@@ -254,6 +268,9 @@ public final class NoteBookChart implements NoteBookValue {
             this.cachedSVG = SVG_CHAR_ERROR.replace("ERROR_MESSAGE", Lang.get("report.setting.chart.no_data"));
             return;
         }
+
+        String taskLoad = GUIController.getInstance().addTask(Lang.get("task.chart.load"), TaskStatus.PENDING);
+        String taskCreate = GUIController.getInstance().addTask(Lang.get("task.chart.create"), TaskStatus.PENDING);
 
         String biggerGroupColumnName = table.getSQLColumnName(biggerGroupColumn.get());
         String groupColumnName = table.getSQLColumnName(groupColumn);
@@ -281,7 +298,11 @@ public final class NoteBookChart implements NoteBookValue {
         try (DuckDBConnection connection = (DuckDBConnection) DriverManager.getConnection("jdbc:duckdb:");
                 Statement statement = connection.createStatement()) {
 
+            GUIController.getInstance().updateTaskStatus(taskLoad, TaskStatus.RUNNING);
             ResultSet resultSet = statement.executeQuery(query);
+
+            GUIController.getInstance().updateTaskStatus(taskLoad, TaskStatus.SUCCESS);
+            GUIController.getInstance().updateTaskStatus(taskCreate, TaskStatus.RUNNING);
 
             Map<String, Map<String, Double>> groupedValues = new LinkedHashMap<>();
             Map<String, Color> legendColors = new LinkedHashMap<>();
@@ -339,10 +360,18 @@ public final class NoteBookChart implements NoteBookValue {
             } else {
                 throw new Exception("No data to display");
             }
+
+            GUIController.getInstance().updateTaskStatus(taskCreate, TaskStatus.SUCCESS);
         } catch (SizeLimitExceededException e) {
+            GUIController.getInstance().updateTaskStatus(taskLoad, TaskStatus.FAILED);
+            GUIController.getInstance().updateTaskStatus(taskCreate, TaskStatus.FAILED);
+
             this.cachedSVG = SVG_CHAR_ERROR.replace("ERROR_MESSAGE", Lang.get("report.setting.chart.size_limit"));
             Log.debug("Failed to create chart SVG: too much groups", e);
         } catch (Exception e) {
+            GUIController.getInstance().updateTaskStatus(taskLoad, TaskStatus.FAILED);
+            GUIController.getInstance().updateTaskStatus(taskCreate, TaskStatus.FAILED);
+
             if (e instanceof SQLException) {
                 Log.debug(query);
             }

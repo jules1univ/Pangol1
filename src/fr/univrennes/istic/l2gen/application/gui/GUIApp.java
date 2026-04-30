@@ -11,11 +11,14 @@ import fr.univrennes.istic.l2gen.application.gui.main.SplashScreen;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.Locale;
+import java.awt.Font;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+
 import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
 
 public final class GUIApp extends CoreApp<GUIController> {
 
@@ -84,8 +87,15 @@ public final class GUIApp extends CoreApp<GUIController> {
             }
         }
 
+        int fontSize = Config.get().getInt("settings.appearance.font_size", 12);
+        String fontFamily = Config.get().get("settings.appearance.font_family",
+                UIManager.getFont("Label.font").getFamily());
+
+        UIManager.put("defaultFont", new FontUIResource(fontFamily, Font.PLAIN, fontSize));
+
         SwingUtilities.invokeLater(() -> {
             SplashScreen splash = new SplashScreen();
+            splash.setVisible(Config.get().getBoolean("settings.startup.show_welcome", true));
 
             new Thread(() -> {
                 splash.setStatus(Lang.get("app.loading.recents"));
