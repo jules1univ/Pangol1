@@ -1,7 +1,10 @@
 package fr.univrennes.istic.l2gen.application.gui.dialog.settings.pages;
 
 import javax.swing.JCheckBox;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
+import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.AbstractSettingsPanel;
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.SettingsRowPanel;
@@ -9,72 +12,109 @@ import fr.univrennes.istic.l2gen.application.gui.dialog.settings.SettingsSection
 
 public final class TableSettingsPanel extends AbstractSettingsPanel {
 
-    private final JCheckBox manualTypingCheckBox;
-    private final JCheckBox readOnlyCheckBox;
-    private final JCheckBox showRowNumbersCheckBox;
-    private final JCheckBox showNullValuesCheckBox;
-    private final JCheckBox stickyHeadersCheckBox;
+        private final JCheckBox manualTypingCheckBox;
+        private final JCheckBox readOnlyCheckBox;
+        private final JSpinner castSensitivity;
+        private final JCheckBox showRowNumbersCheckBox;
+        private final JCheckBox showNullValuesCheckBox;
+        private final JCheckBox stickyHeadersCheckBox;
 
-    private final JCheckBox hideEmptyColumnsCheckBox;
-    private final JCheckBox showColumnTypesCheckBox;
-    private final JCheckBox autoResizeColumnsCheckBox;
-    private final JCheckBox calculateStatisticsCheckBox;
+        private final JCheckBox hideEmptyColumnsCheckBox;
+        private final JCheckBox showColumnTypesCheckBox;
+        private final JCheckBox autoResizeColumnsCheckBox;
+        private final JCheckBox calculateStatisticsCheckBox;
 
-    public TableSettingsPanel() {
+        public TableSettingsPanel() {
 
-        SettingsSectionPanel modeSection = new SettingsSectionPanel(
-                Lang.get("settings.table.section.mode"));
+                SettingsSectionPanel modeSection = new SettingsSectionPanel(
+                                Lang.get("settings.table.section.mode"));
 
-        readOnlyCheckBox = new JCheckBox();
-        modeSection.addRow(new SettingsRowPanel(Lang.get("settings.table.read_only"), readOnlyCheckBox));
+                readOnlyCheckBox = new JCheckBox();
+                readOnlyCheckBox.setSelected(Config.get().getBoolean("settings.table.read_only", false));
+                modeSection.addRow(new SettingsRowPanel(Lang.get("settings.table.read_only"), readOnlyCheckBox));
 
-        manualTypingCheckBox = new JCheckBox();
-        modeSection.addRow(new SettingsRowPanel(Lang.get("settings.table.manual_typing"), manualTypingCheckBox));
+                manualTypingCheckBox = new JCheckBox();
+                manualTypingCheckBox.setSelected(Config.get().getBoolean("settings.table.manual_typing", false));
+                modeSection.addRow(
+                                new SettingsRowPanel(Lang.get("settings.table.manual_typing"), manualTypingCheckBox));
 
-        SettingsSectionPanel displaySection = new SettingsSectionPanel(
-                Lang.get("settings.table.section.display"));
+                castSensitivity = new JSpinner(new SpinnerNumberModel(0.95, 0.5, 1.0, 0.01));
+                castSensitivity.setValue((double) Config.get().getFloat("settings.table.cast_sensitivity", 0.95f));
+                modeSection.addRow(new SettingsRowPanel(Lang.get("settings.table.cast_sensitivity"), castSensitivity));
 
-        showRowNumbersCheckBox = new JCheckBox();
-        displaySection
-                .addRow(new SettingsRowPanel(Lang.get("settings.table.show_row_numbers"), showRowNumbersCheckBox));
+                SettingsSectionPanel displaySection = new SettingsSectionPanel(
+                                Lang.get("settings.table.section.display"));
 
-        showNullValuesCheckBox = new JCheckBox();
-        displaySection
-                .addRow(new SettingsRowPanel(Lang.get("settings.table.show_null_values"), showNullValuesCheckBox));
+                showRowNumbersCheckBox = new JCheckBox();
+                showRowNumbersCheckBox.setSelected(Config.get().getBoolean("settings.table.show_row_numbers", false));
+                displaySection
+                                .addRow(new SettingsRowPanel(Lang.get("settings.table.show_row_numbers"),
+                                                showRowNumbersCheckBox));
 
-        stickyHeadersCheckBox = new JCheckBox();
-        displaySection.addRow(new SettingsRowPanel(Lang.get("settings.table.sticky_headers"), stickyHeadersCheckBox));
+                showNullValuesCheckBox = new JCheckBox();
+                showNullValuesCheckBox.setSelected(Config.get().getBoolean("settings.table.show_null_values", false));
+                displaySection
+                                .addRow(new SettingsRowPanel(Lang.get("settings.table.show_null_values"),
+                                                showNullValuesCheckBox));
 
-        SettingsSectionPanel columnsSection = new SettingsSectionPanel(
-                Lang.get("settings.table.section.columns"));
+                stickyHeadersCheckBox = new JCheckBox();
+                stickyHeadersCheckBox.setSelected(Config.get().getBoolean("settings.table.sticky_headers", false));
+                displaySection.addRow(
+                                new SettingsRowPanel(Lang.get("settings.table.sticky_headers"), stickyHeadersCheckBox));
 
-        hideEmptyColumnsCheckBox = new JCheckBox();
-        columnsSection
-                .addRow(new SettingsRowPanel(Lang.get("settings.table.columns.hide_empty"), hideEmptyColumnsCheckBox));
+                SettingsSectionPanel columnsSection = new SettingsSectionPanel(
+                                Lang.get("settings.table.section.columns"));
 
-        showColumnTypesCheckBox = new JCheckBox();
-        columnsSection
-                .addRow(new SettingsRowPanel(Lang.get("settings.table.columns.show_types"), showColumnTypesCheckBox));
+                hideEmptyColumnsCheckBox = new JCheckBox();
+                hideEmptyColumnsCheckBox.setSelected(
+                                Config.get().getBoolean("settings.table.columns.hide_empty", false));
+                columnsSection
+                                .addRow(new SettingsRowPanel(Lang.get("settings.table.columns.hide_empty"),
+                                                hideEmptyColumnsCheckBox));
 
-        autoResizeColumnsCheckBox = new JCheckBox();
-        columnsSection.addRow(
-                new SettingsRowPanel(Lang.get("settings.table.columns.auto_resize"), autoResizeColumnsCheckBox));
+                showColumnTypesCheckBox = new JCheckBox();
+                showColumnTypesCheckBox.setSelected(
+                                Config.get().getBoolean("settings.table.columns.show_types", false));
+                columnsSection
+                                .addRow(new SettingsRowPanel(Lang.get("settings.table.columns.show_types"),
+                                                showColumnTypesCheckBox));
 
-        SettingsSectionPanel statsSection = new SettingsSectionPanel(
-                Lang.get("settings.table.section.statistics"));
+                autoResizeColumnsCheckBox = new JCheckBox();
+                autoResizeColumnsCheckBox.setSelected(
+                                Config.get().getBoolean("settings.table.columns.auto_resize", false));
+                columnsSection.addRow(
+                                new SettingsRowPanel(Lang.get("settings.table.columns.auto_resize"),
+                                                autoResizeColumnsCheckBox));
 
-        calculateStatisticsCheckBox = new JCheckBox();
-        statsSection.addRow(new SettingsRowPanel(
-                Lang.get("settings.table.columns.calculate_statistics"),
-                calculateStatisticsCheckBox));
+                SettingsSectionPanel statsSection = new SettingsSectionPanel(
+                                Lang.get("settings.table.section.statistics"));
 
-        addSection(modeSection);
-        addSection(displaySection);
-        addSection(columnsSection);
-        addSection(statsSection);
-    }
+                calculateStatisticsCheckBox = new JCheckBox();
+                calculateStatisticsCheckBox.setSelected(
+                                Config.get().getBoolean("settings.table.columns.calculate_statistics", false));
+                statsSection.addRow(new SettingsRowPanel(
+                                Lang.get("settings.table.columns.calculate_statistics"),
+                                calculateStatisticsCheckBox));
 
-    @Override
-    public void applySettings() {
-    }
+                addSection(modeSection);
+                addSection(displaySection);
+                addSection(columnsSection);
+                addSection(statsSection);
+        }
+
+        @Override
+        public void applySettings() {
+                Config.get().putBoolean("settings.table.read_only", readOnlyCheckBox.isSelected());
+                Config.get().putBoolean("settings.table.manual_typing", manualTypingCheckBox.isSelected());
+                Config.get().putFloat("settings.table.cast_sensitivity",
+                                ((Double) castSensitivity.getValue()).floatValue());
+                Config.get().putBoolean("settings.table.show_row_numbers", showRowNumbersCheckBox.isSelected());
+                Config.get().putBoolean("settings.table.show_null_values", showNullValuesCheckBox.isSelected());
+                Config.get().putBoolean("settings.table.sticky_headers", stickyHeadersCheckBox.isSelected());
+                Config.get().putBoolean("settings.table.columns.hide_empty", hideEmptyColumnsCheckBox.isSelected());
+                Config.get().putBoolean("settings.table.columns.show_types", showColumnTypesCheckBox.isSelected());
+                Config.get().putBoolean("settings.table.columns.auto_resize", autoResizeColumnsCheckBox.isSelected());
+                Config.get().putBoolean("settings.table.columns.calculate_statistics",
+                                calculateStatisticsCheckBox.isSelected());
+        }
 }
