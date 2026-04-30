@@ -84,15 +84,11 @@ public final class GUIController extends CoreController {
         } catch (Exception e) {
             try {
                 parsedDefaultTableFile = new File(defaultTable);
+                parsedDefaultTableUri = null;
             } catch (Exception ex) {
-                Log.debug("Failed to parse default table path: " + defaultTable, ex);
-                return;
+                parsedDefaultTableFile = null;
+                parsedDefaultTableUri = URI.create(stableURI);
             }
-        }
-
-        if (!parsedDefaultTableFile.exists() || !parsedDefaultTableFile.isFile()) {
-            parsedDefaultTableFile = null;
-            parsedDefaultTableUri = URI.create(stableURI);
         }
 
         final URI defaultTableUri = parsedDefaultTableUri;

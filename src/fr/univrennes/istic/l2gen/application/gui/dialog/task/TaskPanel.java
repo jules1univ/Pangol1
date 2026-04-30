@@ -25,6 +25,8 @@ import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
+import fr.univrennes.istic.l2gen.application.core.lang.Lang;
+
 public final class TaskPanel extends JPanel {
 
     private static final int DONE_REMOVAL_DELAY_MS = 5000;
@@ -52,7 +54,7 @@ public final class TaskPanel extends JPanel {
         headerPanel.setBorder(new EmptyBorder(6, 10, 6, 10));
         headerPanel.setOpaque(false);
 
-        JLabel titleLabel = new JLabel("Background tasks");
+        JLabel titleLabel = new JLabel(Lang.get("task.title"));
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 11f));
 
         taskCountLabel = new JLabel("");
