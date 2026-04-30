@@ -2,6 +2,7 @@ package fr.univrennes.istic.l2gen.application.gui;
 
 import fr.univrennes.istic.l2gen.application.core.CoreApp;
 import fr.univrennes.istic.l2gen.application.core.config.Config;
+import fr.univrennes.istic.l2gen.application.core.config.Log;
 import fr.univrennes.istic.l2gen.application.core.lang.Lang;
 import fr.univrennes.istic.l2gen.application.core.services.TableService;
 import fr.univrennes.istic.l2gen.application.gui.main.MainView;
@@ -30,7 +31,8 @@ public final class GUIApp extends CoreApp<GUIController> {
     public void start() {
         FlatLaf.setGlobalExtraDefaults(Collections.singletonMap("@accentColor", "#39B763"));
 
-        if (!FlatLightLaf.setup()) {
+        boolean useFlatLaf = Config.get().getBoolean("settings.appearance.use_flatlaf", true);
+        if (useFlatLaf && !FlatLightLaf.setup()) {
             JOptionPane.showMessageDialog(null,
                     Lang.get("error.initfl_message"),
                     Lang.get("error.initfl_title"),
@@ -43,14 +45,42 @@ public final class GUIApp extends CoreApp<GUIController> {
             Lang.setLocale(locale);
         }
 
-        int hour = LocalTime.now().getHour();
-        if (hour >= 18 || hour < 6) {
-            try {
+        if (useFlatLaf) {
+            int hour = LocalTime.now().getHour();
+            int minHour = Config.get().getInt("settings.appearance.auto_start", 18);
+            int maxHour = Config.get().getInt("settings.appearance.auto_end", 6);
 
-                UIManager.setLookAndFeel(new FlatDarkLaf());
-                Config.DARK_MODE = true;
+            minHour = Math.min(minHour, maxHour);
+            maxHour = Math.max(minHour, maxHour);
+
+            int theme = Config.get().getInt("settings.appearance.theme", 3);
+
+            try {
+                switch (theme) {
+                    case 0 -> {
+                        UIManager.setLookAndFeel(new FlatLightLaf());
+                        Config.DARK_MODE = false;
+                    }
+                    case 1 -> {
+                        UIManager.setLookAndFeel(new FlatDarkLaf());
+                        Config.DARK_MODE = true;
+                    }
+                    case 2 -> {
+                        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                        Config.DARK_MODE = UIManager.getLookAndFeel() instanceof FlatDarkLaf;
+                    }
+                    default -> {
+                        if (hour >= maxHour && hour < minHour) {
+                            UIManager.setLookAndFeel(new FlatDarkLaf());
+                            Config.DARK_MODE = true;
+                        } else {
+                            UIManager.setLookAndFeel(new FlatLightLaf());
+                            Config.DARK_MODE = false;
+                        }
+                    }
+                }
             } catch (Exception e) {
-                return;
+                Log.debug("Failed to set Flatlaf theme", e);
             }
         }
 

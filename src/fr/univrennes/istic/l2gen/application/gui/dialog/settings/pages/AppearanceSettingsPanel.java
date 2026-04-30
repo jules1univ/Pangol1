@@ -30,8 +30,7 @@ public final class AppearanceSettingsPanel extends AbstractSettingsPanel {
                                 Lang.get("settings.appearance.theme.system"),
                                 Lang.get("settings.appearance.theme.auto")
                 });
-                themeComboBox.setSelectedItem(Config.get().get("settings.appearance.theme",
-                                Lang.get("settings.appearance.theme.auto")));
+                themeComboBox.setSelectedIndex(Config.get().getInt("settings.appearance.theme", 3));
 
                 themeStartHourSlider = new JSlider(0, 23, 18);
                 themeStartHourSlider.setMajorTickSpacing(1);
@@ -60,6 +59,19 @@ public final class AppearanceSettingsPanel extends AbstractSettingsPanel {
 
                 useFlatLafCheckBox = new JCheckBox();
                 useFlatLafCheckBox.setSelected(Config.get().getBoolean("settings.appearance.use_flatlaf", true));
+                useFlatLafCheckBox.addActionListener(e -> {
+                        boolean selected = useFlatLafCheckBox.isSelected();
+                        themeComboBox.setEnabled(selected);
+                        if (!selected) {
+                                themeStartHourSlider.setEnabled(false);
+                                themeEndHourSlider.setEnabled(false);
+                        } else {
+                                String selectedTheme = (String) themeComboBox.getSelectedItem();
+                                boolean auto = selectedTheme.equals(Lang.get("settings.appearance.theme.auto"));
+                                themeStartHourSlider.setEnabled(auto);
+                                themeEndHourSlider.setEnabled(auto);
+                        }
+                });
 
                 fontSizeSlider = new JSlider(8, 24, 12);
                 fontSizeSlider.setMajorTickSpacing(1);
@@ -98,7 +110,7 @@ public final class AppearanceSettingsPanel extends AbstractSettingsPanel {
 
         @Override
         public void applySettings() {
-                Config.get().put("settings.appearance.theme", (String) themeComboBox.getSelectedItem());
+                Config.get().putInt("settings.appearance.theme", themeComboBox.getSelectedIndex());
                 Config.get().putInt("settings.appearance.auto_start", themeStartHourSlider.getValue());
                 Config.get().putInt("settings.appearance.auto_end", themeEndHourSlider.getValue());
 
