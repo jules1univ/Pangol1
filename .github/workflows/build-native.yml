@@ -29,6 +29,20 @@ jobs:
           wget -q https://download2.gluonhq.com/openjfx/21.0.3/openjfx-21.0.3_linux-x64_bin-jmods.zip -O javafx-jmods.zip
           unzip -q javafx-jmods.zip -d javafx-jmods
 
+      - name: Detect required modules
+        run: |
+          DETECTED=$(jdeps \
+            --class-path staging/Pangol1-1.0-SNAPSHOT.jar \
+            --multi-release 21 \
+            --ignore-missing-deps \
+            --print-module-deps \
+            staging/Pangol1-1.0-SNAPSHOT.jar 2>/dev/null || true)
+          MODULES="javafx.controls,javafx.web,javafx.swing,javafx.fxml,java.desktop,java.logging,java.naming,java.sql,java.xml,jdk.unsupported"
+          if [ -n "$DETECTED" ]; then
+            MODULES="$MODULES,$DETECTED"
+          fi
+          echo "JPACKAGE_MODULES=$MODULES" >> $GITHUB_ENV
+
       - name: Create native installer (Linux deb)
         run: |
           jpackage \
@@ -41,7 +55,7 @@ jobs:
             --type deb \
             --dest dist \
             --module-path javafx-jmods/javafx-jmods-21.0.3 \
-            --add-modules javafx.controls,javafx.web,javafx.swing,javafx.fxml,java.desktop,jdk.unsupported \
+            --add-modules $JPACKAGE_MODULES \
             --java-options "--add-opens=java.base/java.nio=ALL-UNNAMED" \
             --java-options "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
 
@@ -77,6 +91,20 @@ jobs:
           wget -q https://download2.gluonhq.com/openjfx/21.0.3/openjfx-21.0.3_osx-x64_bin-jmods.zip -O javafx-jmods.zip
           unzip -q javafx-jmods.zip -d javafx-jmods
 
+      - name: Detect required modules
+        run: |
+          DETECTED=$(jdeps \
+            --class-path staging/Pangol1-1.0-SNAPSHOT.jar \
+            --multi-release 21 \
+            --ignore-missing-deps \
+            --print-module-deps \
+            staging/Pangol1-1.0-SNAPSHOT.jar 2>/dev/null || true)
+          MODULES="javafx.controls,javafx.web,javafx.swing,javafx.fxml,java.desktop,java.logging,java.naming,java.sql,java.xml,jdk.unsupported"
+          if [ -n "$DETECTED" ]; then
+            MODULES="$MODULES,$DETECTED"
+          fi
+          echo "JPACKAGE_MODULES=$MODULES" >> $GITHUB_ENV
+
       - name: Create native installer (macOS dmg)
         run: |
           jpackage \
@@ -89,7 +117,7 @@ jobs:
             --type dmg \
             --dest dist \
             --module-path javafx-jmods/javafx-jmods-21.0.3 \
-            --add-modules javafx.controls,javafx.web,javafx.swing,javafx.fxml,java.desktop,jdk.unsupported \
+            --add-modules $JPACKAGE_MODULES \
             --java-options "--add-opens=java.base/java.nio=ALL-UNNAMED" \
             --java-options "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
 
@@ -127,6 +155,23 @@ jobs:
           Invoke-WebRequest -Uri "https://download2.gluonhq.com/openjfx/21.0.3/openjfx-21.0.3_windows-x64_bin-jmods.zip" -OutFile "javafx-jmods.zip"
           Expand-Archive -Path "javafx-jmods.zip" -DestinationPath "javafx-jmods"
 
+      - name: Detect required modules
+        shell: pwsh
+        run: |
+          $detected = & jdeps `
+            --class-path staging\Pangol1-1.0-SNAPSHOT.jar `
+            --multi-release 21 `
+            --ignore-missing-deps `
+            --print-module-deps `
+            staging\Pangol1-1.0-SNAPSHOT.jar 2>$null
+          $baseModules = "javafx.controls,javafx.web,javafx.swing,javafx.fxml,java.desktop,java.logging,java.naming,java.sql,java.xml,jdk.unsupported"
+          if ($detected -and $detected.Trim() -ne "") {
+            $allModules = "$baseModules,$($detected.Trim())"
+          } else {
+            $allModules = $baseModules
+          }
+          echo "JPACKAGE_MODULES=$allModules" >> $env:GITHUB_ENV
+
       - name: Create native installer (Windows msi)
         shell: pwsh
         run: |
@@ -140,11 +185,10 @@ jobs:
             --type msi `
             --dest dist `
             --module-path javafx-jmods/javafx-jmods-21.0.3 `
-            --add-modules javafx.controls,javafx.web,javafx.swing,javafx.fxml,java.desktop,jdk.unsupported `
+            --add-modules $env:JPACKAGE_MODULES `
             --java-options "--add-opens=java.base/java.nio=ALL-UNNAMED" `
             --java-options "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED" `
             --java-options "-Djava.library.path=${"$"}APPDIR" `
-            --win-console `
             --win-menu `
             --win-shortcut
 
