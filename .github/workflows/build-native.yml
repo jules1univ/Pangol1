@@ -31,7 +31,7 @@ jobs:
             --main-jar Pangol1-1.0-SNAPSHOT.jar \
             --main-class fr.univrennes.istic.l2gen.application.Pangol1 \
             --name Pangol1 \
-            --app-version 0.0.1 \
+            --app-version 1.0.0 \
             --icon src/resources/icons/logo.png \
             --type deb \
             --dest dist \
@@ -46,11 +46,6 @@ jobs:
         with:
           name: Pangol1-linux
           path: dist/*.deb
-
-      - name: Attach to release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/*.deb
 
   build-macos:
     runs-on: macos-latest
@@ -80,7 +75,7 @@ jobs:
             --main-jar Pangol1-1.0-SNAPSHOT.jar \
             --main-class fr.univrennes.istic.l2gen.application.Pangol1 \
             --name Pangol1 \
-            --app-version 0.0.1 \
+            --app-version 1.0.0 \
             --icon src/resources/icons/logo.png \
             --type dmg \
             --dest dist \
@@ -95,11 +90,6 @@ jobs:
         with:
           name: Pangol1-macos
           path: dist/*.dmg
-
-      - name: Attach to release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/*.dmg
 
   build-windows:
     runs-on: windows-latest
@@ -131,7 +121,7 @@ jobs:
             --main-jar Pangol1-1.0-SNAPSHOT.jar `
             --main-class fr.univrennes.istic.l2gen.application.Pangol1 `
             --name Pangol1 `
-            --app-version 0.0.1 `
+            --app-version 1.0.0 `
             --icon src/resources/icons/logo.ico `
             --type msi `
             --dest dist `
@@ -147,9 +137,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Pangol1-windows
-          path: dist/*.msi
-
-      - name: Attach to release
-        uses: actions/upload-artifact@v4
-        with:
           path: dist/*.msi
