@@ -144,6 +144,7 @@ jobs:
             --java-options "--add-opens=java.base/java.nio=ALL-UNNAMED" `
             --java-options "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED" `
             --java-options "-Djava.library.path=${"$"}APPDIR" `
+            --win-console `
             --win-menu `
             --win-shortcut
 
