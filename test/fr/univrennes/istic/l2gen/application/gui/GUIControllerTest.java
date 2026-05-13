@@ -16,7 +16,7 @@ public class GUIControllerTest {
 
     @After
     public void clearLanguageSetting() {
-        Config.remove("settings.general.language");
+        Config.clear("settings.general.language");
     }
 
     /**
@@ -106,7 +106,7 @@ public class GUIControllerTest {
 
         GUIController.getInstance().onLanguageChange(current);
 
-        assertEquals("fr-FR", Config.get("settings.general.language", "missing"));
+        assertEquals("fr-FR", Config.getString("settings.general.language", "missing"));
     }
 
 }

@@ -1,7 +1,7 @@
 package fr.univrennes.istic.l2gen.application.gui.panels.table.view.data;
 
 import fr.univrennes.istic.l2gen.application.core.config.Config;
-import fr.univrennes.istic.l2gen.application.core.config.Ico;
+
 import fr.univrennes.istic.l2gen.application.core.config.Lang;
 import fr.univrennes.istic.l2gen.application.core.services.statistic.DateStatisticService;
 import fr.univrennes.istic.l2gen.application.core.services.statistic.NumericStatisticService;
@@ -285,6 +285,14 @@ public final class TableDataView extends JPanel {
         tableView.setColumnSelectionInterval(viewIndex, viewIndex);
     }
 
+    public int getSelectedColumnTableIndex() {
+        int viewIndex = tableView.getSelectedColumn();
+        if (viewIndex < 0) {
+            return -1;
+        }
+        return getViewToTableIndex(viewIndex);
+    }
+
     private void applyRowHeaderVisibility() {
         boolean showRowNumbers = Config.getBoolean("settings.table.show_row_numbers", false);
         if (showRowNumbers && tableModel.getTable().isPresent()) {
@@ -302,7 +310,7 @@ public final class TableDataView extends JPanel {
             return;
         }
 
-        Icon filterIcon = Ico.get("icons/filter_on.svg");
+        Icon filterIcon = Config.getIcon("icons/filter_on.svg");
         for (int tableIndex = 0; tableIndex < table.getColumnCount(); tableIndex++) {
             int viewIndex = getTableToViewIndex(tableIndex);
             if (viewIndex == -1) {

@@ -40,7 +40,7 @@ public final class GUIApp extends CoreApp<GUIController> {
                     JOptionPane.ERROR_MESSAGE);
         }
 
-        String langTag = Config.get("settings.general.language", Lang.getDefaultLocale().toLanguageTag());
+        String langTag = Config.getString("settings.general.language", Lang.getDefaultLocale().toLanguageTag());
         Locale locale = Locale.forLanguageTag(langTag);
         if (Lang.isSupported(locale)) {
             Lang.setLocale(locale);
@@ -86,7 +86,7 @@ public final class GUIApp extends CoreApp<GUIController> {
         }
 
         int fontSize = Config.getInt("settings.appearance.font_size", 12);
-        String fontFamily = Config.get("settings.appearance.font_family",
+        String fontFamily = Config.getString("settings.appearance.font_family",
                 UIManager.getFont("Label.font").getFamily());
 
         UIManager.put("defaultFont", new FontUIResource(fontFamily, Font.PLAIN, fontSize));

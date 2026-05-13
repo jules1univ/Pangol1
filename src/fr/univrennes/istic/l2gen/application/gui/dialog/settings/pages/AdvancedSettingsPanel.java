@@ -46,8 +46,8 @@ public final class AdvancedSettingsPanel extends AbstractSettingsPanel {
                         changed = true;
                 }
 
-                Config.putBoolean("settings.advanced.debug_log", enableDebugLogCheckBox.isSelected());
-                Config.putBoolean("settings.advanced.dev_mode", enableDevModeCheckBox.isSelected());
+                Config.put("settings.advanced.debug_log", enableDebugLogCheckBox.isSelected());
+                Config.put("settings.advanced.dev_mode", enableDevModeCheckBox.isSelected());
 
                 return changed;
         }

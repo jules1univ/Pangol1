@@ -10,7 +10,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JSplitPane;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import fr.univrennes.istic.l2gen.application.core.config.Lang;
@@ -18,6 +17,7 @@ import fr.univrennes.istic.l2gen.application.core.services.TableService;
 import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.gui.GUIController;
 import fr.univrennes.istic.l2gen.application.gui.dialog.settings.SettingsDialog;
+import fr.univrennes.istic.l2gen.application.gui.shortcuts.Shortcuts;
 
 public final class TopBar extends JMenuBar {
 
@@ -32,7 +32,7 @@ public final class TopBar extends JMenuBar {
         fileMenu.setMnemonic(KeyEvent.VK_F);
 
         JMenuItem openItem = new JMenuItem(Lang.get("menu.file.open"));
-        openItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
+        openItem.setAccelerator(Shortcuts.getKeyStroke(Shortcuts.KEY_TABLE_OPEN, Shortcuts.DEFAULT_TABLE_OPEN));
         openItem.addActionListener(e -> GUIController.getInstance().onOpenFileDialog());
         fileMenu.add(openItem);
 
@@ -57,14 +57,15 @@ public final class TopBar extends JMenuBar {
 
         JMenuItem openUrlItem = new JMenuItem(Lang.get("menu.file.open_url"));
         openUrlItem.setAccelerator(
-                KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
+                Shortcuts.getKeyStroke(Shortcuts.KEY_FILE_OPEN_URL, Shortcuts.DEFAULT_FILE_OPEN_URL));
         openUrlItem.addActionListener(e -> GUIController.getInstance().onOpenUrlDialog());
         fileMenu.add(openUrlItem);
 
         fileMenu.addSeparator();
 
         JMenuItem settingsItem = new JMenuItem(Lang.get("menu.file.settings"));
-        settingsItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, KeyEvent.CTRL_DOWN_MASK));
+        settingsItem.setAccelerator(
+                Shortcuts.getKeyStroke(Shortcuts.KEY_VIEW_SETTINGS, Shortcuts.DEFAULT_VIEW_SETTINGS));
         settingsItem.addActionListener(e -> {
             Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(this);
             new SettingsDialog(parentFrame).setVisible(true);
@@ -74,7 +75,7 @@ public final class TopBar extends JMenuBar {
         fileMenu.addSeparator();
 
         JMenuItem exitItem = new JMenuItem(Lang.get("menu.file.exit"));
-        exitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.CTRL_DOWN_MASK));
+        exitItem.setAccelerator(Shortcuts.getKeyStroke(Shortcuts.KEY_FILE_EXIT, Shortcuts.DEFAULT_FILE_EXIT));
         exitItem.addActionListener(e -> System.exit(0));
         fileMenu.add(exitItem);
 
@@ -190,7 +191,8 @@ public final class TopBar extends JMenuBar {
         helpMenu.addSeparator();
 
         JMenuItem documentationItem = new JMenuItem(Lang.get("menu.help.documentation"));
-        documentationItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
+        documentationItem.setAccelerator(
+                Shortcuts.getKeyStroke(Shortcuts.KEY_HELP_DOCUMENTATION, Shortcuts.DEFAULT_HELP_DOCUMENTATION));
         documentationItem.addActionListener(e -> GUIController.getInstance().onOpenDocDialog());
         helpMenu.add(documentationItem);
 

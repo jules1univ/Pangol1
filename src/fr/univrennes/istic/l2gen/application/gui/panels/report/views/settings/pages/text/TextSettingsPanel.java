@@ -19,7 +19,7 @@ import java.util.Base64;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.univrennes.istic.l2gen.application.core.config.Ico;
+import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.config.Lang;
 import fr.univrennes.istic.l2gen.application.core.notebook.NoteBookText;
 import fr.univrennes.istic.l2gen.application.core.notebook.NoteBookValue;
@@ -48,41 +48,41 @@ public final class TextSettingsPanel extends SettingSectionPanel implements IRep
         JToolBar toolbar = new JToolBar();
         toolbar.setFloatable(false);
 
-        JButton boldButton = new JButton(Ico.get("icons/bold.svg"));
+        JButton boldButton = new JButton(Config.getIcon("icons/bold.svg"));
         boldButton.setFont(boldButton.getFont().deriveFont(Font.BOLD));
         boldButton.setToolTipText(Lang.get("report.settings.text.bold"));
         boldButton.addActionListener(event -> applyBold());
 
-        JButton italicButton = new JButton(Ico.get("icons/italic.svg"));
+        JButton italicButton = new JButton(Config.getIcon("icons/italic.svg"));
         italicButton.setFont(italicButton.getFont().deriveFont(Font.ITALIC));
         italicButton.setToolTipText(Lang.get("report.settings.text.italic"));
         italicButton.addActionListener(event -> applyItalic());
 
-        JButton underlineButton = new JButton(Ico.get("icons/underlined.svg"));
+        JButton underlineButton = new JButton(Config.getIcon("icons/underlined.svg"));
         underlineButton.setToolTipText(Lang.get("report.settings.text.underline"));
         underlineButton.addActionListener(event -> applyUnderline());
 
-        JButton strikethroughButton = new JButton(Ico.get("icons/strikethrough.svg"));
+        JButton strikethroughButton = new JButton(Config.getIcon("icons/strikethrough.svg"));
         strikethroughButton.setToolTipText(Lang.get("report.settings.text.strikethrough"));
         strikethroughButton.addActionListener(event -> applyStrikethrough());
 
-        JButton alignLeftButton = new JButton(Ico.get("icons/alignleft.svg"));
+        JButton alignLeftButton = new JButton(Config.getIcon("icons/alignleft.svg"));
         alignLeftButton.setToolTipText(Lang.get("report.settings.text.alignleft"));
         alignLeftButton.addActionListener(event -> applyAlignment(StyleConstants.ALIGN_LEFT));
 
-        JButton alignCenterButton = new JButton(Ico.get("icons/aligncenter.svg"));
+        JButton alignCenterButton = new JButton(Config.getIcon("icons/aligncenter.svg"));
         alignCenterButton.setToolTipText(Lang.get("report.settings.text.aligncenter"));
         alignCenterButton.addActionListener(event -> applyAlignment(StyleConstants.ALIGN_CENTER));
 
-        JButton alignRightButton = new JButton(Ico.get("icons/alignright.svg"));
+        JButton alignRightButton = new JButton(Config.getIcon("icons/alignright.svg"));
         alignRightButton.setToolTipText(Lang.get("report.settings.text.alignright"));
         alignRightButton.addActionListener(event -> applyAlignment(StyleConstants.ALIGN_RIGHT));
 
-        JButton textColorButton = new JButton(Ico.get("icons/textcolor.svg"));
+        JButton textColorButton = new JButton(Config.getIcon("icons/textcolor.svg"));
         textColorButton.setToolTipText(Lang.get("report.settings.text.textcolor"));
         textColorButton.addActionListener(event -> applyTextColor());
 
-        JButton backgroundColorButton = new JButton(Ico.get("icons/textbackground.svg"));
+        JButton backgroundColorButton = new JButton(Config.getIcon("icons/textbackground.svg"));
         backgroundColorButton.setToolTipText(Lang.get("report.settings.text.backgroundcolor"));
         backgroundColorButton.addActionListener(event -> applyBackgroundColor());
 

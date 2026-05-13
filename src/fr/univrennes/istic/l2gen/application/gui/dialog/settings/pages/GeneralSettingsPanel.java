@@ -123,7 +123,7 @@ public final class GeneralSettingsPanel extends AbstractSettingsPanel {
                         defaultTableSourceTextField.setText("");
                 });
 
-                String defaultTableSource = Config.get("settings.startup.default_table_source", "");
+                String defaultTableSource = Config.getString("settings.startup.default_table_source", "");
                 File defaultTableSourceFile = new File(defaultTableSource);
                 if (defaultTableSource.isEmpty()) {
                         defaultTableSourceComboBox.setSelectedIndex(GeneralSettingsPanel.SOURCE_NONE);
@@ -187,7 +187,7 @@ public final class GeneralSettingsPanel extends AbstractSettingsPanel {
                                 .isSelected()) {
                         changed = true;
                 }
-                String defaultTableSource = Config.get("settings.startup.default_table_source", "");
+                String defaultTableSource = Config.getString("settings.startup.default_table_source", "");
                 if (defaultTableSourceComboBox.getSelectedIndex() == 0) {
                         if (!defaultTableSource.isEmpty()) {
                                 changed = true;
@@ -217,14 +217,14 @@ public final class GeneralSettingsPanel extends AbstractSettingsPanel {
                         GUIController.getInstance().onLanguageChange(Locale.forLanguageTag(selectedLanguage));
                 }
 
-                Config.putBoolean("settings.startup.show_welcome", showWelcomeScreenCheckBox.isSelected());
-                Config.putBoolean("settings.startup.check_update", checkUpdatesCheckBox.isSelected());
-                Config.putBoolean("settings.startup.reopen_tables", reopenLastTablesCheckBox.isSelected());
+                Config.put("settings.startup.show_welcome", showWelcomeScreenCheckBox.isSelected());
+                Config.put("settings.startup.check_update", checkUpdatesCheckBox.isSelected());
+                Config.put("settings.startup.reopen_tables", reopenLastTablesCheckBox.isSelected());
 
                 Config.put("settings.startup.default_table_source", defaultTableSourceTextField.getText());
 
-                Config.putBoolean("settings.closing.confirm_on_close", confirmOnCloseCheckBox.isSelected());
-                Config.putBoolean("settings.closing.confirm_on_table_close",
+                Config.put("settings.closing.confirm_on_close", confirmOnCloseCheckBox.isSelected());
+                Config.put("settings.closing.confirm_on_table_close",
                                 confirmOnTableCloseCheckBox.isSelected());
 
                 return changed;

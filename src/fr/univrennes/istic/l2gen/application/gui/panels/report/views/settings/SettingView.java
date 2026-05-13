@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
-import fr.univrennes.istic.l2gen.application.core.config.Ico;
+import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.config.Lang;
 import fr.univrennes.istic.l2gen.application.core.notebook.NoteBookChart;
 import fr.univrennes.istic.l2gen.application.core.notebook.NoteBookImage;
@@ -181,7 +181,7 @@ public class SettingView extends JPanel {
     }
 
     private JButton buildActionButton(String label, String iconPath, int width) {
-        JButton button = new JButton(label, Ico.get(iconPath));
+        JButton button = new JButton(label, Config.getIcon(iconPath));
         button.setMaximumSize(new Dimension(width,
                 button.getPreferredSize().height * 2));
         button.setAlignmentX(CENTER_ALIGNMENT);
@@ -202,7 +202,7 @@ public class SettingView extends JPanel {
 
         JButton nextButton = registerNextButton(targetCard,
                 new JButton(Lang.get(currentEditedIndex != -1 ? "report.next.edit" : "report.next.add")));
-        nextButton.setIcon(Ico.get(currentEditedIndex != -1 ? "icons/edit.svg" : "icons/add.svg"));
+        nextButton.setIcon(Config.getIcon(currentEditedIndex != -1 ? "icons/edit.svg" : "icons/add.svg"));
         nextButton.setMaximumSize(new Dimension(nextButton.getPreferredSize().width, 24));
         nextButton.setAlignmentX(CENTER_ALIGNMENT);
         nextButton.addActionListener(e -> {

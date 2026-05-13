@@ -8,7 +8,13 @@ import java.util.Locale;
 import java.util.Optional;
 
 import java.awt.Desktop;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
@@ -30,17 +36,18 @@ import fr.univrennes.istic.l2gen.application.gui.dialog.quickstart.QuickStart;
 import fr.univrennes.istic.l2gen.application.gui.dialog.quickstart.QuickStartDialog;
 import fr.univrennes.istic.l2gen.application.gui.dialog.subtable.SubtableDialog;
 import fr.univrennes.istic.l2gen.application.gui.main.MainView;
+import fr.univrennes.istic.l2gen.application.gui.shortcuts.Shortcuts;
 
 public final class GUIController extends CoreController {
     private static final GUIController instance = new GUIController();
-    private static final String stableURI = "https://www.data.gouv.fr/api/1/datasets/r/99a26050-b94f-4ffc-9eb0-73ed28a895d1";
+    private static final String DEFAULT_TABLE = "https://www.data.gouv.fr/api/1/datasets/r/99a26050-b94f-4ffc-9eb0-73ed28a895d1";
 
     private MainView mainView;
     private GUIApp app;
 
     private DataTable currentTable;
     private int loadingIndex = 0;
-    private boolean quickstartShown = false;
+    private boolean quickStartDone = false;
 
     public static GUIController getInstance() {
         return instance;
@@ -52,52 +59,60 @@ public final class GUIController extends CoreController {
     @Override
     public void onStart() {
         setStatus(Lang.get("status.ready"));
-
-        /// REMOVE THIS LATER ARTIFICIAL DELAY
-        if (!Log.DEBUG_MODE) {
+        if (!Config.DEBUG_MODE) {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
             }
         }
-        ///
 
-        // Config.putBoolean("settings.general.quickstart", true);
-        Config.putBooleanIfAbsent("settings.general.quickstart", true);
+        Config.putIfAbsent("settings.general.quickstart", true);
 
-        Config.putBooleanIfAbsent("settings.startup.show_welcome", true);
-        Config.putBooleanIfAbsent("settings.startup.check_update", true);
-        Config.putBooleanIfAbsent("settings.startup.reopen_tables", false);
-        Config.putIfAbsent("settings.startup.default_table_source", stableURI);
+        Config.putIfAbsent("settings.startup.show_welcome", true);
+        Config.putIfAbsent("settings.startup.check_update", true);
+        Config.putIfAbsent("settings.startup.reopen_tables", false);
+        Config.putIfAbsent("settings.startup.default_table_source", DEFAULT_TABLE);
 
-        Config.putBooleanIfAbsent("settings.closing.confirm_on_close", false);
-        Config.putBooleanIfAbsent("settings.closing.confirm_on_table_close", false);
+        Config.putIfAbsent("settings.closing.confirm_on_close", false);
+        Config.putIfAbsent("settings.closing.confirm_on_table_close", false);
 
-        Config.putBooleanIfAbsent("settings.advanced.debug_log", false);
-        Config.putBooleanIfAbsent("settings.advanced.dev_mode", false);
+        Config.putIfAbsent("settings.advanced.debug_log", false);
+        Config.putIfAbsent("settings.advanced.dev_mode", false);
 
-        Config.putIntIfAbsent("settings.appearance.theme", 3);
-        Config.putIntIfAbsent("settings.appearance.auto_start", 6);
-        Config.putIntIfAbsent("settings.appearance.auto_end", 18);
-        Config.putBooleanIfAbsent("settings.appearance.use_flatlaf", true);
-        Config.putIntIfAbsent("settings.appearance.font_size", 12);
+        Config.putIfAbsent("settings.appearance.theme", 3);
+        Config.putIfAbsent("settings.appearance.auto_start", 6);
+        Config.putIfAbsent("settings.appearance.auto_end", 18);
+        Config.putIfAbsent("settings.appearance.use_flatlaf", true);
+        Config.putIfAbsent("settings.appearance.font_size", 12);
         Config.putIfAbsent("settings.appearance.font_family", UIManager.getFont("Label.font").getFamily());
 
-        Config.putBooleanIfAbsent("settings.table.read_only", true);
-        Config.putBooleanIfAbsent("settings.table.manual_typing", true);
-        Config.putFloatIfAbsent("settings.table.cast_sensitivity", 0.95f);
+        Config.putIfAbsent("settings.table.read_only", true);
+        Config.putIfAbsent("settings.table.manual_typing", true);
+        Config.putIfAbsent("settings.table.cast_sensitivity", 0.95f);
 
-        Config.putBooleanIfAbsent("settings.table.show_row_numbers", false);
-        Config.putBooleanIfAbsent("settings.table.show_null_values", false);
+        Config.putIfAbsent("settings.table.show_row_numbers", false);
+        Config.putIfAbsent("settings.table.show_null_values", false);
 
-        Config.putBooleanIfAbsent("settings.table.columns.hide_empty", false);
-        Config.putBooleanIfAbsent("settings.table.columns.show_types", false);
-        Config.putBooleanIfAbsent("settings.table.columns.auto_resize", true);
-        Config.putBooleanIfAbsent("settings.table.columns.calculate_statistics", true);
+        Config.putIfAbsent("settings.table.columns.hide_empty", false);
+        Config.putIfAbsent("settings.table.columns.show_types", false);
+        Config.putIfAbsent("settings.table.columns.auto_resize", true);
+        Config.putIfAbsent("settings.table.columns.calculate_statistics", true);
+
+        Config.putIfAbsent(Shortcuts.KEY_TABLE_OPEN, Shortcuts.DEFAULT_TABLE_OPEN);
+        Config.putIfAbsent(Shortcuts.KEY_TABLE_CLOSE, Shortcuts.DEFAULT_TABLE_CLOSE);
+        Config.putIfAbsent(Shortcuts.KEY_VIEW_FILTER, Shortcuts.DEFAULT_VIEW_FILTER);
+        Config.putIfAbsent(Shortcuts.KEY_VIEW_SETTINGS, Shortcuts.DEFAULT_VIEW_SETTINGS);
+        Config.putIfAbsent(Shortcuts.KEY_SORT_ASC, Shortcuts.DEFAULT_SORT_ASC);
+        Config.putIfAbsent(Shortcuts.KEY_SORT_DESC, Shortcuts.DEFAULT_SORT_DESC);
+        Config.putIfAbsent(Shortcuts.KEY_NOTEBOOK_UNDO, Shortcuts.DEFAULT_NOTEBOOK_UNDO);
+        Config.putIfAbsent(Shortcuts.KEY_NOTEBOOK_REDO, Shortcuts.DEFAULT_NOTEBOOK_REDO);
+        Config.putIfAbsent(Shortcuts.KEY_FILE_OPEN_URL, Shortcuts.DEFAULT_FILE_OPEN_URL);
+        Config.putIfAbsent(Shortcuts.KEY_FILE_EXIT, Shortcuts.DEFAULT_FILE_EXIT);
+        Config.putIfAbsent(Shortcuts.KEY_HELP_DOCUMENTATION, Shortcuts.DEFAULT_HELP_DOCUMENTATION);
 
         mainView.ready();
+        registerGlobalShortcuts();
         openDefaultTable();
-
     }
 
     @Override
@@ -148,10 +163,48 @@ public final class GUIController extends CoreController {
         }
     }
 
+    private void registerGlobalShortcuts() {
+        if (mainView == null) {
+            return;
+        }
+
+        InputMap inputMap = mainView.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = mainView.getRootPane().getActionMap();
+
+        registerShortcutAction(inputMap, actionMap, "shortcut.table.close",
+                Shortcuts.getKeyStroke(Shortcuts.KEY_TABLE_CLOSE, Shortcuts.DEFAULT_TABLE_CLOSE), this::closeTable);
+
+        registerShortcutAction(inputMap, actionMap, "shortcut.view.filter",
+                Shortcuts.getKeyStroke(Shortcuts.KEY_VIEW_FILTER, Shortcuts.DEFAULT_VIEW_FILTER),
+                this::onOpenFilterDialog);
+
+        registerShortcutAction(inputMap, actionMap, "shortcut.sort.asc",
+                Shortcuts.getKeyStroke(Shortcuts.KEY_SORT_ASC, Shortcuts.DEFAULT_SORT_ASC),
+                () -> sortSelectedColumn(true));
+
+        registerShortcutAction(inputMap, actionMap, "shortcut.sort.desc",
+                Shortcuts.getKeyStroke(Shortcuts.KEY_SORT_DESC, Shortcuts.DEFAULT_SORT_DESC),
+                () -> sortSelectedColumn(false));
+    }
+
+    private void registerShortcutAction(InputMap inputMap, ActionMap actionMap, String name, KeyStroke keyStroke,
+            Runnable action) {
+        if (keyStroke == null) {
+            return;
+        }
+        inputMap.put(keyStroke, name);
+        actionMap.put(name, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                action.run();
+            }
+        });
+    }
+
     private void openDefaultTable() {
         File targetDir = FileService.getAppDataDir();
 
-        String defaultTable = Config.get("settings.startup.default_table_source", stableURI);
+        String defaultTable = Config.getString("settings.startup.default_table_source", DEFAULT_TABLE);
         URI parsedDefaultTableUri = null;
         File parsedDefaultTableFile = null;
 
@@ -162,7 +215,7 @@ public final class GUIController extends CoreController {
                 parsedDefaultTableFile = new File(defaultTable);
                 if (!parsedDefaultTableFile.exists()) {
                     parsedDefaultTableFile = null;
-                    parsedDefaultTableUri = URI.create(stableURI);
+                    parsedDefaultTableUri = URI.create(DEFAULT_TABLE);
                 }
             }
         } catch (Exception e) {
@@ -171,7 +224,7 @@ public final class GUIController extends CoreController {
                 parsedDefaultTableUri = null;
             } catch (Exception ex) {
                 parsedDefaultTableFile = null;
-                parsedDefaultTableUri = URI.create(stableURI);
+                parsedDefaultTableUri = URI.create(DEFAULT_TABLE);
             }
         }
 
@@ -274,8 +327,8 @@ public final class GUIController extends CoreController {
         mainView.getTablePanel().refresh();
         mainView.getReportPanel().refresh();
 
-        if (!quickstartShown && Config.getBoolean("settings.general.quickstart", true)) {
-            quickstartShown = true;
+        if (!quickStartDone && Config.getBoolean("settings.general.quickstart", true)) {
+            quickStartDone = true;
             QuickStartDialog.showDialog(mainView, () -> QuickStart.maybeStart(mainView));
         }
 
@@ -315,6 +368,21 @@ public final class GUIController extends CoreController {
         currentTable.clearFilters();
         currentTable.addFilters(filters);
 
+        mainView.getTablePanel().refresh();
+    }
+
+    private void sortSelectedColumn(boolean ascending) {
+        if (currentTable == null) {
+            return;
+        }
+
+        int tableIndex = mainView.getTablePanel().getTableView().getSelectedColumnTableIndex();
+        if (tableIndex < 0) {
+            return;
+        }
+
+        currentTable.clearFilters();
+        currentTable.addFilter(Filter.sort(tableIndex, ascending));
         mainView.getTablePanel().refresh();
     }
 

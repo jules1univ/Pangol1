@@ -14,7 +14,7 @@ import java.util.prefs.BackingStoreException;
 public abstract class SettingsTestSupport {
 
     public static void clearConfig() throws BackingStoreException {
-        Config.get().clear();
+        Config.clear();
     }
 
     public static <T> T getField(Object target, String fieldName, Class<T> type) throws Exception {

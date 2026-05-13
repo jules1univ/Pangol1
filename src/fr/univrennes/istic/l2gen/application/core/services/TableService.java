@@ -434,7 +434,7 @@ public final class TableService {
                 sb.append(recent.getAbsolutePath()).append("\n");
             }
         }
-        Config.putByteArray("settings.startup.recent_tables", sb.toString().getBytes());
+        Config.put("settings.startup.recent_tables", sb.toString().getBytes());
     }
 
 }

@@ -16,7 +16,6 @@ import javax.swing.SwingUtilities;
 
 import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.config.Lang;
-import fr.univrennes.istic.l2gen.application.core.services.notebook.NoteBookService;
 import fr.univrennes.istic.l2gen.application.gui.main.MainView;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.SettingView;
 import fr.univrennes.istic.l2gen.application.gui.panels.table.view.data.TableToolBar;
@@ -129,9 +128,7 @@ public final class QuickStart {
                     settingView.showChartSettings();
                 },
                 () -> {
-                    if (NoteBookService.getValues().isEmpty()) {
-                        settingView.getChartNextButton().doClick();
-                    }
+                    settingView.getChartNextButton().doClick();
                 },
                 settingView::getChartNextButton));
 
@@ -218,7 +215,7 @@ public final class QuickStart {
     }
 
     public void finish() {
-        Config.putBoolean("settings.general.quickstart", false);
+        Config.put("settings.general.quickstart", false);
         dismiss();
 
         if (stepIndex >= 0 && stepIndex < steps.size()) {
@@ -230,7 +227,7 @@ public final class QuickStart {
     }
 
     public void skip() {
-        Config.putBoolean("settings.general.quickstart", false);
+        Config.put("settings.general.quickstart", false);
         dismiss();
     }
 

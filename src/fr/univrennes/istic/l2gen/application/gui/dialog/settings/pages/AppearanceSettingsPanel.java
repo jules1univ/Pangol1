@@ -95,7 +95,7 @@ public final class AppearanceSettingsPanel extends AbstractSettingsPanel {
                         fontFamilies.add(font);
                 }
                 fontFamilyComboBox = new JComboBox<>(fontFamilies.toArray(new String[0]));
-                fontFamilyComboBox.setSelectedItem(Config.get("settings.appearance.font_family",
+                fontFamilyComboBox.setSelectedItem(Config.getString("settings.appearance.font_family",
                                 Lang.get("settings.appearance.ui.default_font")));
 
                 SettingsSectionPanel themeSection = new SettingsSectionPanel(
@@ -135,19 +135,19 @@ public final class AppearanceSettingsPanel extends AbstractSettingsPanel {
                 if (Config.getInt("settings.appearance.font_size", 12) != fontSizeSlider.getValue()) {
                         changed = true;
                 }
-                if (!Config.get("settings.appearance.font_family",
+                if (!Config.getString("settings.appearance.font_family",
                                 Lang.get("settings.appearance.ui.default_font"))
                                 .equals(fontFamilyComboBox.getSelectedItem())) {
                         changed = true;
                 }
 
-                Config.putInt("settings.appearance.theme", themeComboBox.getSelectedIndex());
-                Config.putInt("settings.appearance.auto_start", themeStartHourSlider.getValue());
-                Config.putInt("settings.appearance.auto_end", themeEndHourSlider.getValue());
+                Config.put("settings.appearance.theme", themeComboBox.getSelectedIndex());
+                Config.put("settings.appearance.auto_start", themeStartHourSlider.getValue());
+                Config.put("settings.appearance.auto_end", themeEndHourSlider.getValue());
 
-                Config.putBoolean("settings.appearance.use_flatlaf", useFlatLafCheckBox.isSelected());
+                Config.put("settings.appearance.use_flatlaf", useFlatLafCheckBox.isSelected());
 
-                Config.putInt("settings.appearance.font_size", fontSizeSlider.getValue());
+                Config.put("settings.appearance.font_size", fontSizeSlider.getValue());
                 Config.put("settings.appearance.font_family", (String) fontFamilyComboBox.getSelectedItem());
 
                 return changed;

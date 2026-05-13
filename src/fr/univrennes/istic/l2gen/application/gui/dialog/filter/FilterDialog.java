@@ -5,7 +5,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.NumberFormatter;
 
-import fr.univrennes.istic.l2gen.application.core.config.Ico;
+import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.config.Lang;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterCondition;
@@ -158,7 +158,7 @@ public final class FilterDialog extends JDialog {
         refreshConditionPanel();
 
         JPanel addButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 4));
-        JButton addFilterButton = new JButton(Ico.get("icons/add.svg"));
+        JButton addFilterButton = new JButton(Config.getIcon("icons/add.svg"));
         addFilterButton.addActionListener(event -> addCurrentFilter());
         addButtonPanel.add(addFilterButton);
 

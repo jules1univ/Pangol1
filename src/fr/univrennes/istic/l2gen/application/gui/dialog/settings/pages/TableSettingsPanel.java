@@ -135,16 +135,16 @@ public final class TableSettingsPanel extends AbstractSettingsPanel {
                         changed = true;
                 }
 
-                Config.putBoolean("settings.table.read_only", readOnlyCheckBox.isSelected());
-                Config.putBoolean("settings.table.manual_typing", manualTypingCheckBox.isSelected());
-                Config.putFloat("settings.table.cast_sensitivity",
+                Config.put("settings.table.read_only", readOnlyCheckBox.isSelected());
+                Config.put("settings.table.manual_typing", manualTypingCheckBox.isSelected());
+                Config.put("settings.table.cast_sensitivity",
                                 ((Double) castSensitivity.getValue()).floatValue());
-                Config.putBoolean("settings.table.show_row_numbers", showRowNumbersCheckBox.isSelected());
-                Config.putBoolean("settings.table.show_null_values", showNullValuesCheckBox.isSelected());
-                Config.putBoolean("settings.table.columns.hide_empty", hideEmptyColumnsCheckBox.isSelected());
-                Config.putBoolean("settings.table.columns.show_types", showColumnTypesCheckBox.isSelected());
-                Config.putBoolean("settings.table.columns.auto_resize", autoResizeColumnsCheckBox.isSelected());
-                Config.putBoolean("settings.table.columns.calculate_statistics",
+                Config.put("settings.table.show_row_numbers", showRowNumbersCheckBox.isSelected());
+                Config.put("settings.table.show_null_values", showNullValuesCheckBox.isSelected());
+                Config.put("settings.table.columns.hide_empty", hideEmptyColumnsCheckBox.isSelected());
+                Config.put("settings.table.columns.show_types", showColumnTypesCheckBox.isSelected());
+                Config.put("settings.table.columns.auto_resize", autoResizeColumnsCheckBox.isSelected());
+                Config.put("settings.table.columns.calculate_statistics",
                                 calculateStatisticsCheckBox.isSelected());
 
                 return changed;

@@ -8,7 +8,7 @@ import javax.swing.JToolBar;
 import javax.swing.UIManager;
 
 import fr.univrennes.istic.l2gen.application.core.config.Config;
-import fr.univrennes.istic.l2gen.application.core.config.Ico;
+
 import fr.univrennes.istic.l2gen.application.core.config.Lang;
 import fr.univrennes.istic.l2gen.application.gui.GUIController;
 import fr.univrennes.istic.l2gen.application.gui.panels.table.TablePanel;
@@ -36,11 +36,11 @@ public final class TableToolBar extends JToolBar {
                 setFloatable(false);
 
                 advancedFilterButton = new JButton(Lang.get("table.toolbar.filters"),
-                                Ico.get("icons/filter_on.svg"));
+                                Config.getIcon("icons/filter_on.svg"));
                 advancedFilterButton.addActionListener(e -> GUIController.getInstance().onOpenFilterDialog());
 
                 clearFiltersButton = new JButton(Lang.get("table.toolbar.clear_filters"),
-                                Ico.get("icons/filter_off.svg"));
+                                Config.getIcon("icons/filter_off.svg"));
                 clearFiltersButton.addActionListener(e -> {
                         GUIController.getInstance().getTable().ifPresent(table -> {
                                 table.clearFilters();
@@ -51,11 +51,11 @@ public final class TableToolBar extends JToolBar {
                                 tableView.getTableModel().getTable().map(t -> !t.getFilters().isEmpty()).orElse(false));
 
                 subtableButton = new JButton(Lang.get("table.toolbar.subtable"),
-                                Ico.get("icons/subtable.svg"));
+                                Config.getIcon("icons/subtable.svg"));
                 subtableButton.addActionListener(e -> GUIController.getInstance().onOpenSubtableDialog());
 
                 showAllColumnsButton = new JButton(Lang.get("table.toolbar.show_all_columns"),
-                                Ico.get("icons/show.svg"));
+                                Config.getIcon("icons/show.svg"));
                 showAllColumnsButton.addActionListener(e -> {
                         tableView.showAllColumns();
                         showAllColumnsButton.setVisible(false);
@@ -64,7 +64,7 @@ public final class TableToolBar extends JToolBar {
                 showAllColumnsButton.setVisible(tableView.hasHiddenColumns());
 
                 hideEmptyColumnsButton = new JButton(Lang.get("table.toolbar.hide_empty_columns"),
-                                Ico.get("icons/hide.svg"));
+                                Config.getIcon("icons/hide.svg"));
                 hideEmptyColumnsButton.addActionListener(e -> {
                         tableView.hideEmptyColumns();
                         showAllColumnsButton.setVisible(true);

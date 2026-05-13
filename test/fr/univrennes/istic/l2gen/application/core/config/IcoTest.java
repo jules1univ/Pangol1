@@ -10,7 +10,7 @@ public class IcoTest {
     public void testGetIconInDarkMode() {
         Config.DARK_MODE = true;
 
-        FlatSVGIcon icon = Ico.get("home.svg");
+        FlatSVGIcon icon = Config.getIcon("home.svg");
 
         assertEquals("home_light.svg", icon.getName());
     }
@@ -19,14 +19,14 @@ public class IcoTest {
     public void testGetIconInLightMode() {
         Config.DARK_MODE = false;
 
-        FlatSVGIcon icon = Ico.get("settings.svg");
+        FlatSVGIcon icon = Config.getIcon("settings.svg");
 
         assertEquals("settings_dark.svg", icon.getName());
     }
 
     @Test
     public void testIconSize() {
-        FlatSVGIcon icon = Ico.get("test.svg");
+        FlatSVGIcon icon = Config.getIcon("test.svg");
 
         assertEquals(14, icon.getIconWidth());
         assertEquals(14, icon.getIconHeight());

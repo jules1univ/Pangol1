@@ -1,7 +1,5 @@
 name: Build Native
-on:
-  push:
-    branches: [main]
+on: [release]
 jobs:
    build-windows:
     runs-on: windows-latest

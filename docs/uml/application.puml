@@ -838,9 +838,9 @@ class NoteBook {
   -editItem: JMenuItem = new JMenuItem(Lang.get("report.menu.edit"))
   -deleteItem: JMenuItem = new JMenuItem(Lang.get("report.menu.delete"))
   -toolBar: JToolBar = new JToolBar()
-  -undoButton: JButton = new JButton(Lang.get("report.toolbar.undo"), Ico.get("icons/undo.svg"))
-  -redoButton: JButton = new JButton(Lang.get("report.toolbar.redo"), Ico.get("icons/redo.svg"))
-  -exportButton: JButton = new JButton(Lang.get("report.toolbar.export"), Ico.get("icons/export.svg"))
+  -undoButton: JButton = new JButton(Lang.get("report.toolbar.undo"), Config.getIcon("icons/undo.svg"))
+  -redoButton: JButton = new JButton(Lang.get("report.toolbar.redo"), Config.getIcon("icons/redo.svg"))
+  -exportButton: JButton = new JButton(Lang.get("report.toolbar.export"), Config.getIcon("icons/export.svg"))
   --
   +NoteBook()
   -build(): void

@@ -1,9 +1,7 @@
 package fr.univrennes.istic.l2gen.application.gui.panels.report.views.notebook;
 
 import java.awt.BorderLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -23,12 +21,13 @@ import javax.swing.KeyStroke;
 import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
 
-import fr.univrennes.istic.l2gen.application.core.config.Ico;
+import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.config.Lang;
 import fr.univrennes.istic.l2gen.application.core.notebook.NoteBookValue;
 import fr.univrennes.istic.l2gen.application.core.services.notebook.NoteBookService;
 import fr.univrennes.istic.l2gen.application.gui.dialog.export.ExportDialog;
 import fr.univrennes.istic.l2gen.application.gui.GUIController;
+import fr.univrennes.istic.l2gen.application.gui.shortcuts.Shortcuts;
 
 public class NoteBook extends JPanel {
 
@@ -42,9 +41,10 @@ public class NoteBook extends JPanel {
     private final JMenuItem deleteItem = new JMenuItem(Lang.get("report.menu.delete"));
 
     private final JToolBar toolBar = new JToolBar();
-    private final JButton undoButton = new JButton(Lang.get("report.toolbar.undo"), Ico.get("icons/undo.svg"));
-    private final JButton redoButton = new JButton(Lang.get("report.toolbar.redo"), Ico.get("icons/redo.svg"));
-    private final JButton exportButton = new JButton(Lang.get("report.toolbar.export"), Ico.get("icons/export.svg"));
+    private final JButton undoButton = new JButton(Lang.get("report.toolbar.undo"), Config.getIcon("icons/undo.svg"));
+    private final JButton redoButton = new JButton(Lang.get("report.toolbar.redo"), Config.getIcon("icons/redo.svg"));
+    private final JButton exportButton = new JButton(Lang.get("report.toolbar.export"),
+            Config.getIcon("icons/export.svg"));
 
     public NoteBook() {
         build();
@@ -164,10 +164,10 @@ public class NoteBook extends JPanel {
     }
 
     private void registerShortcuts() {
-        int menuMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
-
-        list.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-                .put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, menuMask), "notebook.undo");
+        KeyStroke undoKey = Shortcuts.getKeyStroke(Shortcuts.KEY_NOTEBOOK_UNDO, Shortcuts.DEFAULT_NOTEBOOK_UNDO);
+        if (undoKey != null) {
+            list.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(undoKey, "notebook.undo");
+        }
         list.getActionMap().put("notebook.undo", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -179,8 +179,10 @@ public class NoteBook extends JPanel {
             }
         });
 
-        list.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-                .put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, menuMask), "notebook.redo");
+        KeyStroke redoKey = Shortcuts.getKeyStroke(Shortcuts.KEY_NOTEBOOK_REDO, Shortcuts.DEFAULT_NOTEBOOK_REDO);
+        if (redoKey != null) {
+            list.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(redoKey, "notebook.redo");
+        }
         list.getActionMap().put("notebook.redo", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
