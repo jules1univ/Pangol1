@@ -16,8 +16,10 @@ import javax.swing.SwingUtilities;
 
 import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.config.Lang;
+import fr.univrennes.istic.l2gen.application.core.services.notebook.NoteBookService;
 import fr.univrennes.istic.l2gen.application.gui.main.MainView;
 import fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.SettingView;
+import fr.univrennes.istic.l2gen.application.gui.panels.table.view.data.TableToolBar;
 
 public final class QuickStart {
 
@@ -127,11 +129,54 @@ public final class QuickStart {
                     settingView.showChartSettings();
                 },
                 () -> {
-                    if (settingView.isChartSettingsVisible()) {
+                    if (NoteBookService.getValues().isEmpty()) {
                         settingView.getChartNextButton().doClick();
                     }
                 },
                 settingView::getChartNextButton));
+
+        stepList.add(new Step(
+                Lang.get("quickstart.step4.title"),
+                Lang.get("quickstart.step4.body", Lang.get("report.toolbar.export")),
+                () -> {
+                    ensurePanelsVisible();
+                    mainView.getReportPanel().getNoteBook().setVisible(true);
+                    mainView.getReportPanel().refresh();
+                },
+                () -> mainView.getReportPanel().getNoteBook().getExportButton()));
+
+        stepList.add(new Step(
+                Lang.get("quickstart.step5.title"),
+                Lang.get("quickstart.step5.body", Lang.get("table.toolbar.filters")),
+                () -> {
+                    mainView.getTablePanel().setVisible(true);
+                    mainView.resetSplit();
+                },
+                () -> mainView.getTablePanel().getTableView().getToolBar().getFilterButton()));
+
+        stepList.add(new Step(
+                Lang.get("quickstart.step6.title"),
+                Lang.get("quickstart.step6.body", Lang.get("table.toolbar.subtable")),
+                () -> {
+                    mainView.getTablePanel().setVisible(true);
+                    mainView.resetSplit();
+                },
+                () -> mainView.getTablePanel().getTableView().getToolBar().getSubtableButton()));
+
+        stepList.add(new Step(
+                Lang.get("quickstart.step7.title"),
+                Lang.get("quickstart.step7.body"),
+                () -> {
+                    mainView.getTablePanel().setVisible(true);
+                    mainView.resetSplit();
+                },
+                () -> {
+                    TableToolBar toolBar = mainView.getTablePanel().getTableView().getToolBar();
+                    if (toolBar.getHideEmptyColumnsButton().isVisible()) {
+                        return toolBar.getHideEmptyColumnsButton();
+                    }
+                    return toolBar.getShowAllColumnsButton();
+                }));
 
         return stepList;
     }
@@ -158,6 +203,12 @@ public final class QuickStart {
     }
 
     public void nextStep() {
+        if (stepIndex >= 0 && stepIndex < steps.size()) {
+            Step current = steps.get(stepIndex);
+            if (current.onClose() != null) {
+                current.onClose().run();
+            }
+        }
         int nextIndex = stepIndex + 1;
         if (nextIndex < steps.size()) {
             goToStep(nextIndex);
@@ -206,9 +257,6 @@ public final class QuickStart {
                 return;
             }
             detachAutoAdvance();
-            if (step.onClose() != null) {
-                step.onClose().run();
-            }
             if (index >= steps.size() - 1) {
                 finish();
             } else {

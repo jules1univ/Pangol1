@@ -230,4 +230,8 @@ public class NoteBook extends JPanel {
         redoButton.setEnabled(NoteBookService.canRedo());
     }
 
+    public JButton getExportButton() {
+        return exportButton;
+    }
+
 }

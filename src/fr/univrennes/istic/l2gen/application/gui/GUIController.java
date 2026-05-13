@@ -62,8 +62,8 @@ public final class GUIController extends CoreController {
         }
         ///
 
-        Config.putBoolean("settings.general.quickstart", true);
-        // Config.putBooleanIfAbsent("settings.general.quickstart", true);
+        // Config.putBoolean("settings.general.quickstart", true);
+        Config.putBooleanIfAbsent("settings.general.quickstart", true);
 
         Config.putBooleanIfAbsent("settings.startup.show_welcome", true);
         Config.putBooleanIfAbsent("settings.startup.check_update", true);

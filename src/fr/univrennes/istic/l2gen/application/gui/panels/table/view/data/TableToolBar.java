@@ -107,4 +107,20 @@ public final class TableToolBar extends JToolBar {
                 clearFiltersButton.setVisible(
                                 tableView.getTableModel().getTable().map(t -> !t.getFilters().isEmpty()).orElse(false));
         }
+
+        public JButton getFilterButton() {
+                return advancedFilterButton;
+        }
+
+        public JButton getSubtableButton() {
+                return subtableButton;
+        }
+
+        public JButton getHideEmptyColumnsButton() {
+                return hideEmptyColumnsButton;
+        }
+
+        public JButton getShowAllColumnsButton() {
+                return showAllColumnsButton;
+        }
 }
