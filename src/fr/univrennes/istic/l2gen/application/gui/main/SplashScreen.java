@@ -56,8 +56,18 @@ public class SplashScreen extends JWindow {
 
         background.add(centerPanel, BorderLayout.CENTER);
         background.add(bottom, BorderLayout.SOUTH);
+    }
 
-        setVisible(true);
+    public void display() {
+        if (SwingUtilities.isEventDispatchThread()) {
+            setVisible(true);
+        } else {
+            try {
+                SwingUtilities.invokeAndWait(() -> setVisible(true));
+            } catch (Exception exception) {
+                setVisible(true);
+            }
+        }
     }
 
     public void setStatus(String text) {

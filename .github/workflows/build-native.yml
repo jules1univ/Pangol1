@@ -17,7 +17,12 @@ jobs:
           cache: 'maven'
 
       - name: Build shaded JAR
-        run:  mvn -B clean package -DskipTests -U
+        run: mvn -B clean package -DskipTests -U
+
+      - name: Prepare staging directory
+        run: |
+          mkdir -p staging
+          cp target/Pangol1-1.0-SNAPSHOT.jar staging/
 
       - name: Download JavaFX jmods for Linux
         run: |
@@ -27,7 +32,7 @@ jobs:
       - name: Create native installer (Linux deb)
         run: |
           jpackage \
-            --input target \
+            --input staging \
             --main-jar Pangol1-1.0-SNAPSHOT.jar \
             --main-class fr.univrennes.istic.l2gen.application.Pangol1 \
             --name Pangol1 \
@@ -36,7 +41,7 @@ jobs:
             --type deb \
             --dest dist \
             --module-path javafx-jmods/javafx-jmods-21.0.3 \
-            --add-modules javafx.controls,javafx.web,javafx.swing,javafx.fxml \
+            --add-modules javafx.controls,javafx.web,javafx.swing,javafx.fxml,java.desktop,jdk.unsupported \
             --java-options "--add-opens=java.base/java.nio=ALL-UNNAMED" \
             --java-options "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
 
@@ -60,7 +65,12 @@ jobs:
           cache: 'maven'
 
       - name: Build shaded JAR
-        run:  mvn -B clean package -DskipTests -U
+        run: mvn -B clean package -DskipTests -U
+
+      - name: Prepare staging directory
+        run: |
+          mkdir -p staging
+          cp target/Pangol1-1.0-SNAPSHOT.jar staging/
 
       - name: Download JavaFX jmods for macOS
         run: |
@@ -70,7 +80,7 @@ jobs:
       - name: Create native installer (macOS dmg)
         run: |
           jpackage \
-            --input target \
+            --input staging \
             --main-jar Pangol1-1.0-SNAPSHOT.jar \
             --main-class fr.univrennes.istic.l2gen.application.Pangol1 \
             --name Pangol1 \
@@ -79,7 +89,7 @@ jobs:
             --type dmg \
             --dest dist \
             --module-path javafx-jmods/javafx-jmods-21.0.3 \
-            --add-modules javafx.controls,javafx.web,javafx.swing,javafx.fxml \
+            --add-modules javafx.controls,javafx.web,javafx.swing,javafx.fxml,java.desktop,jdk.unsupported \
             --java-options "--add-opens=java.base/java.nio=ALL-UNNAMED" \
             --java-options "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
 
@@ -103,7 +113,13 @@ jobs:
           cache: 'maven'
 
       - name: Build shaded JAR
-        run:  mvn -B clean package -DskipTests -U
+        run: mvn -B clean package -DskipTests -U
+
+      - name: Prepare staging directory
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path staging
+          Copy-Item target\Pangol1-1.0-SNAPSHOT.jar staging\
 
       - name: Download JavaFX jmods for Windows
         shell: pwsh
@@ -115,7 +131,7 @@ jobs:
         shell: pwsh
         run: |
           jpackage `
-            --input target `
+            --input staging `
             --main-jar Pangol1-1.0-SNAPSHOT.jar `
             --main-class fr.univrennes.istic.l2gen.application.Pangol1 `
             --name Pangol1 `
@@ -124,9 +140,10 @@ jobs:
             --type msi `
             --dest dist `
             --module-path javafx-jmods/javafx-jmods-21.0.3 `
-            --add-modules javafx.controls,javafx.web,javafx.swing,javafx.fxml `
+            --add-modules javafx.controls,javafx.web,javafx.swing,javafx.fxml,java.desktop,jdk.unsupported `
             --java-options "--add-opens=java.base/java.nio=ALL-UNNAMED" `
             --java-options "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED" `
+            --java-options "-Djava.library.path=${"$"}APPDIR" `
             --win-menu `
             --win-shortcut
 

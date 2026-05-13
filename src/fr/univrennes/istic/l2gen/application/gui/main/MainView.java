@@ -37,7 +37,7 @@ public final class MainView extends JFrame {
     }
 
     private void build() {
-        splash.setVisible(true);
+        splash.display();
 
         setVisible(false);
         setTitle(Lang.get("app.title"));
