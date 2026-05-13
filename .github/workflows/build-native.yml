@@ -1,7 +1,7 @@
 name: Build Native
 on:
-  release:
-    types: [created]
+  push:
+    branches: [main]
 jobs:
   build-linux:
     runs-on: ubuntu-latest
