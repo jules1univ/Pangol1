@@ -16,11 +16,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
-/**
- * Tests pour InputSelectDialog.
- */
 public class InputSelectDialogTest {
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testBuildReadAndInvalidSelection() throws Exception {
         List<String> options = Arrays.asList("alpha", "beta", "gamma");
@@ -45,7 +43,6 @@ public class InputSelectDialogTest {
             dialog.readValue();
             fail("Une selection vide doit etre refusee");
         } catch (IllegalArgumentException expected) {
-            // attendu
         }
 
         dialog.onInvalidInput();

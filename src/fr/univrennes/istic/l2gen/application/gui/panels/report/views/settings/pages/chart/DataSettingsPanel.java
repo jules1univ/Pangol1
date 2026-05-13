@@ -84,13 +84,15 @@ public final class DataSettingsPanel extends SettingSectionPanel {
     private void updateColumnComboBoxes() {
         String[] valueCols = getColumnNames(
                 (table, i) -> {
-                    if (table.getColumnType(i).isNumeric() || table.getColumnType(i).isDate()) {
+                    if (table.getColumnType(i).isNumeric()) {
                         return true;
                     } else {
                         removedValueColumns.add(i);
                         return false;
                     }
                 }, true);
+
+        valueColumn.setEnabled(valueCols.length != 0);
         valueColumn.setModel(new JComboBox<>(valueCols).getModel());
 
         String[] groupCols = getColumnNames((table, i) -> {

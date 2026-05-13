@@ -40,6 +40,14 @@ public class SettingView extends JPanel {
     private ImageSettingsPanel imageSettingsPanel;
     private TextSettingsPanel textSettingsPanel;
 
+    private JButton addChartButton;
+    private JButton addImageButton;
+    private JButton addTextButton;
+
+    private JButton chartNextButton;
+    private JButton imageNextButton;
+    private JButton textNextButton;
+
     private int currentEditedIndex = -1;
     private SettingViewType currentView = SettingViewType.BASE;
 
@@ -86,21 +94,21 @@ public class SettingView extends JPanel {
 
         content.add(Box.createVerticalGlue());
 
-        JButton addChartButton = buildActionButton(Lang.get("report.add.chart"), "icons/add_chart.svg", fixWidth);
+        addChartButton = buildActionButton(Lang.get("report.add.chart"), "icons/add_chart.svg", fixWidth);
         addChartButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         addChartButton.addActionListener(e -> showCard(SettingViewType.CHART));
         content.add(addChartButton);
 
         content.add(Box.createVerticalStrut(6));
 
-        JButton addImageButton = buildActionButton(Lang.get("report.add.image"), "icons/add_image.svg", fixWidth);
+        addImageButton = buildActionButton(Lang.get("report.add.image"), "icons/add_image.svg", fixWidth);
         addImageButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         addImageButton.addActionListener(e -> showCard(SettingViewType.IMAGE));
         content.add(addImageButton);
 
         content.add(Box.createVerticalStrut(6));
 
-        JButton addTextButton = buildActionButton(Lang.get("report.add.text"), "icons/add_text.svg", fixWidth);
+        addTextButton = buildActionButton(Lang.get("report.add.text"), "icons/add_text.svg", fixWidth);
         addTextButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         addTextButton.addActionListener(e -> showCard(SettingViewType.TEXT));
         content.add(addTextButton);
@@ -192,7 +200,8 @@ public class SettingView extends JPanel {
         backButton.setAlignmentX(CENTER_ALIGNMENT);
         backButton.addActionListener(e -> showCard(SettingViewType.BASE));
 
-        JButton nextButton = new JButton(Lang.get(currentEditedIndex != -1 ? "report.next.edit" : "report.next.add"));
+        JButton nextButton = registerNextButton(targetCard,
+                new JButton(Lang.get(currentEditedIndex != -1 ? "report.next.edit" : "report.next.add")));
         nextButton.setIcon(Ico.get(currentEditedIndex != -1 ? "icons/edit.svg" : "icons/add.svg"));
         nextButton.setMaximumSize(new Dimension(nextButton.getPreferredSize().width, 24));
         nextButton.setAlignmentX(CENTER_ALIGNMENT);
@@ -209,6 +218,26 @@ public class SettingView extends JPanel {
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
         panel.setAlignmentX(CENTER_ALIGNMENT);
         return panel;
+    }
+
+    private JButton registerNextButton(SettingViewType targetCard, JButton button) {
+        switch (targetCard) {
+            case CHART: {
+                chartNextButton = button;
+                return chartNextButton;
+            }
+            case IMAGE: {
+                imageNextButton = button;
+                return imageNextButton;
+            }
+            case TEXT: {
+                textNextButton = button;
+                return textNextButton;
+            }
+            default: {
+                return button;
+            }
+        }
     }
 
     private void handleNext(SettingViewType type) {
@@ -266,6 +295,34 @@ public class SettingView extends JPanel {
         build();
         revalidate();
         repaint();
+    }
+
+    public void showBase() {
+        showCard(SettingViewType.BASE);
+    }
+
+    public void showChartSettings() {
+        showCard(SettingViewType.CHART);
+    }
+
+    public boolean isChartSettingsVisible() {
+        return currentView == SettingViewType.CHART;
+    }
+
+    public JButton getAddChartButton() {
+        return addChartButton;
+    }
+
+    public JButton getChartNextButton() {
+        return chartNextButton;
+    }
+
+    public JButton getImageNextButton() {
+        return imageNextButton;
+    }
+
+    public JButton getTextNextButton() {
+        return textNextButton;
     }
 
     public DataSettingsPanel getDataSettingsPanel() {

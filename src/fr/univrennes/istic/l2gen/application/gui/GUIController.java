@@ -26,6 +26,8 @@ import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.core.table.DataTableWorkerStatus;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.gui.dialog.filter.FilterDialog;
+import fr.univrennes.istic.l2gen.application.gui.dialog.quickstart.QuickStart;
+import fr.univrennes.istic.l2gen.application.gui.dialog.quickstart.QuickStartDialog;
 import fr.univrennes.istic.l2gen.application.gui.dialog.subtable.SubtableDialog;
 import fr.univrennes.istic.l2gen.application.gui.main.MainView;
 
@@ -38,6 +40,7 @@ public final class GUIController extends CoreController {
 
     private DataTable currentTable;
     private int loadingIndex = 0;
+    private boolean quickstartShown = false;
 
     public static GUIController getInstance() {
         return instance;
@@ -58,6 +61,9 @@ public final class GUIController extends CoreController {
             }
         }
         ///
+
+        Config.putBoolean("settings.general.quickstart", true);
+        // Config.putBooleanIfAbsent("settings.general.quickstart", true);
 
         Config.putBooleanIfAbsent("settings.startup.show_welcome", true);
         Config.putBooleanIfAbsent("settings.startup.check_update", true);
@@ -87,7 +93,7 @@ public final class GUIController extends CoreController {
         Config.putBooleanIfAbsent("settings.table.columns.hide_empty", false);
         Config.putBooleanIfAbsent("settings.table.columns.show_types", false);
         Config.putBooleanIfAbsent("settings.table.columns.auto_resize", true);
-        Config.putBooleanIfAbsent("settings.table.columns.calculate_statistics", false);
+        Config.putBooleanIfAbsent("settings.table.columns.calculate_statistics", true);
 
         mainView.ready();
         openDefaultTable();
@@ -267,6 +273,11 @@ public final class GUIController extends CoreController {
         mainView.getTablePanel().open(table);
         mainView.getTablePanel().refresh();
         mainView.getReportPanel().refresh();
+
+        if (!quickstartShown && Config.getBoolean("settings.general.quickstart", true)) {
+            quickstartShown = true;
+            QuickStartDialog.showDialog(mainView, () -> QuickStart.maybeStart(mainView));
+        }
 
         SwingUtilities.invokeLater(() -> {
             mainView.getBottomBar().setTableInfo(

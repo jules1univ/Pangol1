@@ -74,6 +74,7 @@ public final class ChartSettingsPanel extends SettingSectionPanel implements IRe
 
         @Override
         public NoteBookValue createNoteBook() {
+                System.out.println(shared.data().getTable().getPath());
                 NoteBookChart chart = new NoteBookChart(
                                 DataViewType.values()[chartTypeCombo.getSelectedIndex()],
                                 titleField.getText(),
