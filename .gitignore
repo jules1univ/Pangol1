@@ -9,6 +9,7 @@
 
 # Resultat de l'app
 /*.svg
+/*.log
 /output
 
 # Java docs 

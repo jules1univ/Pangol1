@@ -273,12 +273,34 @@ public final class TableService {
 
         } catch (Exception e) {
             Pangol1.getController().updateTaskStatus(taskId, TaskStatus.FAILED);
+            Log.debug("Failed to convert table from " + inputPath + " to " + outputPath, e);
+            return convertSafe(inputPath, outputPath);
+        }
+    }
 
+    private static DataTable convertSafe(File inputPath, File outputPath) {
+        String taskId = Pangol1.getController().addTask(Lang.get("task.convert_safe", inputPath.getName()),
+                TaskStatus.PENDING);
+
+        String tableIn = inputPath.getAbsolutePath().replace("\\", "/");
+        String tableOut = outputPath.getAbsolutePath().replace("\\", "/");
+        try (DuckDBConnection connection = (DuckDBConnection) DriverManager.getConnection("jdbc:duckdb:")) {
+            try (Statement statement = connection.createStatement()) {
+                Pangol1.getController().updateTaskStatus(taskId, TaskStatus.RUNNING);
+                statement.execute(String.format(
+                        "COPY read_csv_auto('%s', header=true, nullstr=['',' '], ignore_errors=true) TO '%s' (FORMAT PARQUET, CODEC 'SNAPPY')",
+                        tableIn, tableOut));
+            }
+
+            Pangol1.getController().updateTaskStatus(taskId, TaskStatus.SUCCESS);
+            return DataTable.of(outputPath);
+        } catch (Exception e) {
             Log.mode(() -> {
-                Log.debug("Failed to convert table from " + inputPath + " to " + outputPath, e);
+                Log.debug("Failed to convert table from " + inputPath + " to " + outputPath + " using safe mode", e);
             }, () -> {
                 Pangol1.getController().onException(e);
             });
+            Pangol1.getController().updateTaskStatus(taskId, TaskStatus.FAILED);
             return null;
         }
     }
