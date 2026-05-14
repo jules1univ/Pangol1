@@ -45,6 +45,7 @@ public final class AxisSettingsPanel extends SettingSectionPanel {
                 showXAxisCheck));
 
         xAxisLabelField = new JTextField(Lang.get("report.settings.chart.default_labelx"));
+
         addRow(new SettingRowPanel(Lang.get("report.settings.chart.x_label"),
                 xAxisLabelField));
 

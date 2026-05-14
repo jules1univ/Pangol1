@@ -32,6 +32,7 @@ import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.core.table.DataTableWorkerStatus;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.gui.dialog.filter.FilterDialog;
+import fr.univrennes.istic.l2gen.application.gui.dialog.merge.MergeDialog;
 import fr.univrennes.istic.l2gen.application.gui.dialog.quickstart.QuickStart;
 import fr.univrennes.istic.l2gen.application.gui.dialog.quickstart.QuickStartDialog;
 import fr.univrennes.istic.l2gen.application.gui.dialog.subtable.SubtableDialog;
@@ -394,6 +395,17 @@ public final class GUIController extends CoreController {
         DataTable subtable = SubtableDialog.show(mainView, currentTable);
         if (subtable != null) {
             setTable(subtable);
+        }
+    }
+
+    public void onOpenMergetableDialog() {
+        if (currentTable == null) {
+            return;
+        }
+
+        DataTable mergedTable = MergeDialog.show(mainView, currentTable);
+        if (mergedTable != null) {
+            setTable(mergedTable);
         }
     }
 

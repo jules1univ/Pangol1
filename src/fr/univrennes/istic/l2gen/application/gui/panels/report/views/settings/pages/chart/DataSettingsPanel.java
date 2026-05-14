@@ -143,19 +143,16 @@ public final class DataSettingsPanel extends SettingSectionPanel {
         }
 
         if (shared.axis().isXVisible()
-                && shared.axis().getXLabel().equals(Lang.get("report.settings.chart.default_labelx"))
                 && newAxisValueX != null) {
             shared.axis().setXLabel(newAxisValueX);
         }
 
         if (shared.axis().isYVisible()
-                && shared.axis().getYLabel().equals(Lang.get("report.settings.chart.default_labely"))
                 && newAxisValueY != null) {
             shared.axis().setYLabel(newAxisValueY);
         }
 
-        if (shared.chart().getTitleField().getText().equals(Lang.get("report.settings.chart.default_title"))
-                && newAxisValueX != null && newAxisValueY != null) {
+        if (newAxisValueX != null && newAxisValueY != null) {
             shared.chart().getTitleField()
                     .setText(Lang.get("report.settings.chart.generated_title", newAxisValueX, newAxisValueY));
         }

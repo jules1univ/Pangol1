@@ -19,6 +19,7 @@ public final class TableToolBar extends JToolBar {
         private JButton clearFiltersButton;
 
         private JButton subtableButton;
+        private JButton mergetableButton;
 
         private JButton showAllColumnsButton;
         private JButton hideEmptyColumnsButton;
@@ -53,6 +54,10 @@ public final class TableToolBar extends JToolBar {
                 subtableButton = new JButton(Lang.get("table.toolbar.subtable"),
                                 Config.getIcon("icons/subtable.svg"));
                 subtableButton.addActionListener(e -> GUIController.getInstance().onOpenSubtableDialog());
+
+                mergetableButton = new JButton(Lang.get("table.toolbar.mergetable"),
+                                Config.getIcon("icons/merge.svg"));
+                mergetableButton.addActionListener(e -> GUIController.getInstance().onOpenMergetableDialog());
 
                 showAllColumnsButton = new JButton(Lang.get("table.toolbar.show_all_columns"),
                                 Config.getIcon("icons/show.svg"));
@@ -94,6 +99,8 @@ public final class TableToolBar extends JToolBar {
                 add(clearFiltersButton);
                 addSeparator();
                 add(subtableButton);
+                addSeparator();
+                add(mergetableButton);
                 addSeparator();
                 add(showAllColumnsButton);
                 add(hideEmptyColumnsButton);
