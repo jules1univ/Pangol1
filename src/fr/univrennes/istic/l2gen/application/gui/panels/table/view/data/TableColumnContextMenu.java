@@ -565,6 +565,12 @@ public final class TableColumnContextMenu extends JPopupMenu {
                                                 formatDouble(StatisticService.getNullRate(table, tableIndex)))));
                 stats.add(nullRateItem);
 
+                JMenuItem nullCountItem = new JMenuItem(Lang.get("table.column.menu.stats.null_count"));
+                nullCountItem.addActionListener(e -> onOpenStatisticDialog(
+                                Lang.get("table.column.menu.stats.null_count.title", columnName),
+                                Lang.get("table.column.menu.stats.null_count.content",
+                                                formatInteger(StatisticService.getNullCount(table, tableIndex)))));
+                stats.add(nullCountItem);
                 JMenuItem cardinalityRatioItem = new JMenuItem(Lang.get("table.column.menu.stats.cardinality_ratio"));
                 cardinalityRatioItem.addActionListener(e -> onOpenStatisticDialog(
                                 Lang.get("table.column.menu.stats.cardinality_ratio.title", columnName),

@@ -17,13 +17,21 @@ public final class StatisticService {
 
         public static Optional<Double> getNonNullCount(DataTable table, int columnIndex) {
                 return ExecuteStatistic.queryDouble(String.format(
-                                "SELECT COUNT(%s) FROM %s",
-                                table.getSQLColumnName(columnIndex), table.getSQLName()));
+                                "SELECT COUNT(%s) FROM %s WHERE %s IS NOT NULL",
+                                table.getSQLColumnName(columnIndex),
+                                table.getSQLName(),
+                                table.getSQLColumnName(columnIndex)));
         }
 
         public static Optional<Double> getNullRate(DataTable table, int columnIndex) {
                 return ExecuteStatistic.queryDouble(String.format(
                                 "SELECT COUNT(*) FILTER (WHERE %s IS NULL) * 1.0 / NULLIF(COUNT(*), 0) FROM %s",
+                                table.getSQLColumnName(columnIndex), table.getSQLName()));
+        }
+
+        public static Optional<Integer> getNullCount(DataTable table, int columnIndex) {
+                return ExecuteStatistic.queryInteger(String.format(
+                                "SELECT COUNT(*) FILTER (WHERE %s IS NULL) FROM %s",
                                 table.getSQLColumnName(columnIndex), table.getSQLName()));
         }
 

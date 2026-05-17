@@ -1,6 +1,7 @@
 package fr.univrennes.istic.l2gen.application.core.config;
 
 import java.lang.management.ManagementFactory;
+import java.util.List;
 import java.util.prefs.Preferences;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -24,6 +25,14 @@ public final class Config {
     public static FlatSVGIcon getIcon(String path, float scale) {
         String newPath = path.replace(".svg", Config.DARK_MODE ? "_light.svg" : "_dark.svg");
         return new FlatSVGIcon(newPath, (int) (14 * scale), (int) (14 * scale));
+    }
+
+    public static List<String> getSettingKeys() {
+        try {
+            return List.of(prefs.keys());
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     public static boolean getBoolean(String key, boolean defaultValue) {

@@ -17,6 +17,7 @@ import java.util.concurrent.RejectedExecutionException;
 
 import org.duckdb.DuckDBConnection;
 
+import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.config.Log;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterBuilder;
@@ -113,9 +114,10 @@ public final class DataTable {
         this.columnTypes = columnTypes;
         this.columnCount = columnCount;
 
-        this.filters = ObjectService
-                .load(new File(FileService.getAppDataDir(), "filters_" + alias + ".ser"), ArrayList.class)
-                .orElse(new ArrayList<>());
+        this.filters = Config.getBoolean("settings.table.filters.save_with_table",
+                true) ? ObjectService
+                        .load(new File(FileService.getAppDataDir(), "filters_" + alias + ".ser"), ArrayList.class)
+                        .orElse(new ArrayList<>()) : new ArrayList<>();
 
         this.rowCount = rowCount;
         this.blockCount = (int) Math.ceil((double) rowCount / BLOCK_SIZE);
@@ -514,18 +516,25 @@ public final class DataTable {
         }
     }
 
+    private void saveFilters() {
+        if (Config.getBoolean("settings.table.filters.save_with_table",
+                true)) {
+            ObjectService.save(new File(FileService.getAppDataDir(), "filters_" + alias + ".ser"), filters);
+        }
+    }
+
     public void addFilters(List<Filter> newFilters) {
         filters.addAll(newFilters);
-        ObjectService.save(new File(FileService.getAppDataDir(), "filters_" + alias + ".ser"), filters);
 
+        saveFilters();
         invalidateCache();
         refreshRowCount();
     }
 
     public void addFilter(Filter filter) {
         filters.add(filter);
-        ObjectService.save(new File(FileService.getAppDataDir(), "filters_" + alias + ".ser"), filters);
 
+        saveFilters();
         invalidateCache();
         refreshRowCount();
     }
@@ -542,16 +551,16 @@ public final class DataTable {
 
     public void clearColumnFilter(int columnIndex) {
         filters.removeIf(f -> f.getColumnIndex() == columnIndex);
-        ObjectService.save(new File(FileService.getAppDataDir(), "filters_" + alias + ".ser"), filters);
 
+        saveFilters();
         invalidateCache();
         refreshRowCount();
     }
 
     public void clearFilters() {
         filters.clear();
-        ObjectService.save(new File(FileService.getAppDataDir(), "filters_" + alias + ".ser"), filters);
 
+        saveFilters();
         invalidateCache();
         refreshRowCount();
     }
