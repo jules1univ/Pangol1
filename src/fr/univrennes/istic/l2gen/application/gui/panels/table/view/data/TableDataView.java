@@ -25,9 +25,10 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 public final class TableDataView extends JPanel {
 
@@ -39,7 +40,7 @@ public final class TableDataView extends JPanel {
     private final TableToolBar toolBar;
     private final TablePagination paginationBar;
 
-    private List<Integer> hiddenViewIndex = new ArrayList<>();
+    private Set<Integer> hiddenViewIndex = new TreeSet<>();
 
     public TableDataView(TablePanel tablePanel) {
         super(new BorderLayout());
@@ -240,7 +241,7 @@ public final class TableDataView extends JPanel {
         }
         int tableIndex = getViewToTableIndex(viewIndex);
         tableView.removeColumn(columnModel.getColumn(viewIndex));
-        addHiddenTableIndex(tableIndex);
+        hiddenViewIndex.add(tableIndex);
         updateHeaderIcons();
     }
 
@@ -336,17 +337,6 @@ public final class TableDataView extends JPanel {
             }
         }
         tableView.getTableHeader().repaint();
-    }
-
-    private void addHiddenTableIndex(int tableIndex) {
-        int insertIndex = 0;
-        while (insertIndex < hiddenViewIndex.size() && hiddenViewIndex.get(insertIndex) < tableIndex) {
-            insertIndex++;
-        }
-        if (insertIndex < hiddenViewIndex.size() && hiddenViewIndex.get(insertIndex) == tableIndex) {
-            return;
-        }
-        hiddenViewIndex.add(insertIndex, tableIndex);
     }
 
     private void adjustColumnWidths() {

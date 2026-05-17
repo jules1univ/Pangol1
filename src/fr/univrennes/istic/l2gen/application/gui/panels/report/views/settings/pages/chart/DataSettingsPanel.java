@@ -5,6 +5,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.swing.JCheckBox;
@@ -25,8 +27,8 @@ public final class DataSettingsPanel extends SettingSectionPanel {
     private JComboBox<String> groupColumn;
     private JComboBox<String> valueColumn;
 
-    private List<Integer> removedGroupColumns = new ArrayList<>();
-    private List<Integer> removedValueColumns = new ArrayList<>();
+    private Set<Integer> removedGroupColumns = new TreeSet<>();
+    private Set<Integer> removedValueColumns = new TreeSet<>();
 
     private File currentTablePath = null;
 
@@ -47,15 +49,19 @@ public final class DataSettingsPanel extends SettingSectionPanel {
     private void build() {
         removedGroupColumns.clear();
         removedValueColumns.clear();
+        currentTablePath = null;
 
-        List<String> tablesPath = TableService.get().stream().map(table -> {
-            if (table.getPath().equals(GUIController.getInstance().getTable().map(t -> t.getPath()).orElse(null))) {
-                currentTablePath = table.getPath();
-                return Lang.get("report.settings.data.current_table");
-            } else {
-                return table.getPath().toString();
-            }
-        }).collect(Collectors.toList());
+        List<String> tablesPath = new ArrayList<>();
+        DataTable currentTable = GUIController.getInstance().getTable().orElse(null);
+        if (currentTable != null) {
+            currentTablePath = currentTable.getPath();
+            tablesPath.add(Lang.get("report.settings.data.current_table"));
+        }
+        tablesPath.addAll(TableService.get().stream()
+                .map(DataTable::getPath)
+                .map(File::toString)
+                .filter(p -> currentTablePath == null || !p.equals(currentTablePath.toString()))
+                .collect(Collectors.toList()));
 
         tables = new JComboBox<>(tablesPath.toArray(new String[0]));
         tables.addItemListener(e -> {
@@ -76,9 +82,19 @@ public final class DataSettingsPanel extends SettingSectionPanel {
         addRow(new SettingSeparatorRow(Lang.get("report.settings.data.columns")));
 
         valueColumn = new JComboBox<>(new String[0]);
+        valueColumn.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                updateLabels();
+            }
+        });
         addRow(new SettingRowPanel(Lang.get("report.settings.data.col_value"), valueColumn));
 
         groupColumn = new JComboBox<>(new String[0]);
+        groupColumn.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                updateLabels();
+            }
+        });
         addRow(new SettingRowPanel(Lang.get("report.settings.data.col_group"), groupColumn));
 
         biggerGroupColumn = new JComboBox<>(new String[0]);
@@ -89,92 +105,84 @@ public final class DataSettingsPanel extends SettingSectionPanel {
     }
 
     private void updateColumnComboBoxes() {
-        String[] valueCols = getColumnNames(
-                (table, i) -> {
-                    if (table.getColumnType(i).isNumeric()) {
-                        return true;
-                    } else {
-                        removedValueColumns.add(i);
-                        return false;
-                    }
-                }, true);
+        removedGroupColumns.clear();
+        removedValueColumns.clear();
 
-        valueColumn.setEnabled(valueCols.length != 0);
-        valueColumn.setModel(new JComboBox<>(valueCols).getModel());
+        DataTable table = getTable();
+        if (table == null) {
+            return;
+        }
 
-        String[] groupCols = getColumnNames((table, i) -> {
-            if (table.getColumnType(i).isCategorical()) {
+        String[] valueCols = getColumnNames((t, i) -> {
+            if (t.getColumnType(i).isNumeric())
                 return true;
-            } else {
-                removedGroupColumns.add(i);
-                return false;
-            }
-        }, false);
-        groupColumn.setModel(new JComboBox<>(groupCols).getModel());
-        groupColumn.setEnabled(groupCols.length != 0);
+            removedValueColumns.add(i);
+            return false;
+        }, true);
 
-        String[] allCols = getColumnNames((table, i) -> true, true);
+        valueColumn.setModel(new JComboBox<>(valueCols).getModel());
+        valueColumn.setEnabled(valueCols.length > 0);
+
+        String[] groupCols = getColumnNames((t, i) -> {
+            if (t.getColumnType(i).isCategorical())
+                return true;
+            removedGroupColumns.add(i);
+            return false;
+        }, false);
+
+        groupColumn.setModel(new JComboBox<>(groupCols).getModel());
+        groupColumn.setEnabled(groupCols.length > 0);
+
+        String[] allCols = getColumnNames((t, i) -> true, true);
         String[] colsWithNone = new String[allCols.length + 1];
         colsWithNone[0] = Lang.get("report.settings.data.col_none");
         System.arraycopy(allCols, 0, colsWithNone, 1, allCols.length);
 
         biggerGroupColumn.setModel(new JComboBox<>(colsWithNone).getModel());
-
-        valueColumn.addItemListener(e -> {
-            updateLabels();
-        });
-
-        groupColumn.addItemListener(e -> {
-            updateLabels();
-        });
     }
 
     private void updateLabels() {
-        if (shared == null) {
+        if (shared == null)
             return;
-        }
 
-        String newAxisValueX = null;
-        String newAxisValueY = null;
         DataTable table = getTable();
-        if (table != null) {
-            newAxisValueX = table.getColumnName(getValueColumn());
-            newAxisValueY = table.getColumnName(getGroupColumn());
+        if (table == null)
+            return;
+
+        int valueIdx = getValueColumn();
+        int groupIdx = getGroupColumn();
+
+        String xLabel = table.getColumnName(valueIdx);
+        String yLabel = table.getColumnName(groupIdx);
+
+        if (xLabel != null && shared.axis().isXVisible()) {
+            shared.axis().setXLabel(xLabel);
+        }
+        if (yLabel != null && shared.axis().isYVisible()) {
+            shared.axis().setYLabel(yLabel);
         }
 
-        if (shared.axis().isXVisible()
-                && newAxisValueX != null) {
-            shared.axis().setXLabel(newAxisValueX);
-        }
-
-        if (shared.axis().isYVisible()
-                && newAxisValueY != null) {
-            shared.axis().setYLabel(newAxisValueY);
-        }
-
-        if (newAxisValueX != null && newAxisValueY != null) {
+        if (xLabel != null && yLabel != null) {
             shared.chart().getTitleField()
-                    .setText(Lang.get("report.settings.chart.generated_title", newAxisValueX, newAxisValueY));
+                    .setText(Lang.get("report.settings.chart.generated_title", xLabel, yLabel));
         }
     }
 
-    private static interface ColumnFilter {
+    private interface ColumnFilter {
         boolean run(DataTable table, int columnIndex);
     }
 
     private String[] getColumnNames(ColumnFilter func, boolean showTypes) {
         DataTable table = getTable();
-        if (table == null) {
+        if (table == null)
             return new String[0];
-        }
+
         List<String> names = new ArrayList<>();
         for (int i = 0; i < table.getColumnCount(); i++) {
             if (func.run(table, i)) {
-                if (showTypes) {
-                    names.add(String.format("(%s) %s", table.getColumnType(i).toString(), table.getColumnName(i)));
-                } else {
-                    names.add(table.getColumnName(i));
-                }
+                names.add(showTypes
+                        ? String.format("(%s) %s", table.getColumnType(i), table.getColumnName(i))
+                        : table.getColumnName(i));
             }
         }
         return names.toArray(new String[0]);
@@ -182,6 +190,7 @@ public final class DataSettingsPanel extends SettingSectionPanel {
 
     public DataTable getTable() {
         String selected = (String) tables.getSelectedItem();
+
         if (selected == null || selected.equals(Lang.get("report.settings.data.current_table"))) {
             return GUIController.getInstance().getTable().orElse(null);
         }
@@ -191,31 +200,41 @@ public final class DataSettingsPanel extends SettingSectionPanel {
 
     public Optional<Integer> getBiggerGroupColumn() {
         int index = biggerGroupColumn.getSelectedIndex();
-        if (index == 0) {
-            return Optional.empty();
-        } else {
-            return Optional.of(index - 1);
-        }
+        return index <= 0 ? Optional.empty() : Optional.of(index - 1);
     }
 
     public int getGroupColumn() {
-        int realIndex = groupColumn.getSelectedIndex();
-        for (int removed : removedGroupColumns) {
-            if (realIndex >= removed) {
-                realIndex++;
+        int idx = groupColumn.getSelectedIndex();
+        if (idx < 0) {
+            return -1;
+        }
+
+        for (int hidden : removedGroupColumns) {
+            if (hidden <= idx) {
+                idx++;
+
+            } else {
+                break;
             }
         }
-        return realIndex;
+        return idx;
     }
 
     public int getValueColumn() {
-        int realIndex = valueColumn.getSelectedIndex();
-        for (int removed : removedValueColumns) {
-            if (realIndex >= removed) {
-                realIndex++;
+        int idx = valueColumn.getSelectedIndex();
+        if (idx < 0) {
+            return -1;
+        }
+
+        for (int hidden : removedValueColumns) {
+            if (hidden <= idx) {
+                idx++;
+
+            } else {
+                break;
             }
         }
-        return realIndex;
+        return idx;
     }
 
     public boolean isIncludeFilters() {
@@ -235,23 +254,25 @@ public final class DataSettingsPanel extends SettingSectionPanel {
     }
 
     public void setGroupColumn(int index) {
-        int removedBefore = (int) removedGroupColumns.stream().filter(removed -> removed <= index).count();
-        int realIndex = index - removedBefore;
-        if (realIndex >= 0 && realIndex < groupColumn.getItemCount()) {
-            groupColumn.setSelectedIndex(realIndex);
+        int removedBefore = (int) removedGroupColumns.stream().filter(r -> r <= index).count();
+        int real = index - removedBefore;
+
+        if (real >= 0 && real < groupColumn.getItemCount()) {
+            groupColumn.setSelectedIndex(real);
         }
     }
 
     public void setValueColumn(int index) {
-        int removedBefore = (int) removedValueColumns.stream().filter(removed -> removed <= index).count();
-        int realIndex = index - removedBefore;
-        if (realIndex >= 0 && realIndex < valueColumn.getItemCount()) {
-            valueColumn.setSelectedIndex(realIndex);
+        int removedBefore = (int) removedValueColumns.stream().filter(r -> r <= index).count();
+        int real = index - removedBefore;
+
+        if (real >= 0 && real < valueColumn.getItemCount()) {
+            valueColumn.setSelectedIndex(real);
         }
     }
 
     public void setBiggerGroupColumn(Optional<Integer> index) {
-        if (index.isPresent() && biggerGroupColumn.getItemCount() > index.get() + 1) {
+        if (index.isPresent() && index.get() + 1 < biggerGroupColumn.getItemCount()) {
             biggerGroupColumn.setSelectedIndex(index.get() + 1);
         } else {
             biggerGroupColumn.setSelectedIndex(0);
@@ -259,9 +280,9 @@ public final class DataSettingsPanel extends SettingSectionPanel {
     }
 
     public void setTable(DataTable table) {
-        if (table == null) {
+        if (table == null)
             return;
-        }
+
         String path = table.getPath().toString();
         if (currentTablePath != null && currentTablePath.equals(table.getPath())) {
             tables.setSelectedIndex(0);
@@ -270,9 +291,12 @@ public final class DataSettingsPanel extends SettingSectionPanel {
 
         for (int i = 0; i < tables.getItemCount(); i++) {
             String item = tables.getItemAt(i);
-            if (item.equals(path) || (item.equals(Lang.get("report.settings.data.current_table"))
-                    && GUIController.getInstance().getTable().map(t -> t.getPath()).orElse(null)
-                            .equals(table.getPath()))) {
+
+            if (item.equals(path) ||
+                    (item.equals(Lang.get("report.settings.data.current_table"))
+                            && GUIController.getInstance().getTable()
+                                    .map(t -> t.getPath()).orElse(null)
+                                    .equals(table.getPath()))) {
                 tables.setSelectedIndex(i);
                 break;
             }
@@ -283,5 +307,6 @@ public final class DataSettingsPanel extends SettingSectionPanel {
         clearRows();
         build();
         revalidate();
+        repaint();
     }
 }
