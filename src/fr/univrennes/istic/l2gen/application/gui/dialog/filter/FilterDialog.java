@@ -24,6 +24,7 @@ public final class FilterDialog extends JDialog {
 
     private final DataTable table;
     private final List<String> columnNames;
+    private final List<Integer> selectableColumnIndices;
 
     private final List<Filter> result = new ArrayList<>();
     private final List<FilterCardPanel> filterCards = new ArrayList<>();
@@ -41,9 +42,9 @@ public final class FilterDialog extends JDialog {
         super(parent, Lang.get("filter.title"), true);
         this.table = table;
         this.columnNames = table.getColumnNames();
+        this.selectableColumnIndices = buildSelectableColumnIndices();
         build();
         pack();
-
         setSize((int) (DialogBase.WIDTH * 1.4), DialogBase.HEIGHT);
         setMinimumSize(new Dimension(DialogBase.WIDTH, DialogBase.HEIGHT));
         setLocationRelativeTo(parent);
@@ -104,7 +105,10 @@ public final class FilterDialog extends JDialog {
         labelGbc.gridy = 0;
         fieldGbc.gridy = 0;
         panel.add(new JLabel(Lang.get("filter.column")), labelGbc);
-        columnComboBox = new JComboBox<>(columnNames.toArray(new String[0]));
+        String[] selectableNames = selectableColumnIndices.stream()
+                .map(columnNames::get)
+                .toArray(String[]::new);
+        columnComboBox = new JComboBox<>(selectableNames);
         panel.add(columnComboBox, fieldGbc);
 
         labelGbc.gridy = 1;
@@ -148,7 +152,8 @@ public final class FilterDialog extends JDialog {
 
     private void appendConditionInputRow(boolean showLogicToggle) {
         DataType columnType = getSelectedColumnType();
-        ConditionInputRow row = new ConditionInputRow(this, columnType, showLogicToggle, conditionInputRows.size());
+        int realColumnIndex = getSelectedRealColumnIndex();
+        ConditionInputRow row = new ConditionInputRow(this, columnType, realColumnIndex, showLogicToggle);
         conditionInputRows.add(row);
         conditionRowsPanel.add(row.getPanel());
         conditionRowsPanel.revalidate();
@@ -237,8 +242,9 @@ public final class FilterDialog extends JDialog {
 
     private void refreshAllConditionOperators() {
         DataType newType = getSelectedColumnType();
+        int newRealColumnIndex = getSelectedRealColumnIndex();
         for (ConditionInputRow row : conditionInputRows) {
-            row.updateColumnType(newType);
+            row.updateColumnType(newType, newRealColumnIndex);
         }
     }
 
@@ -248,9 +254,9 @@ public final class FilterDialog extends JDialog {
             return;
         }
 
-        int selectedColumnIndex = columnComboBox.getSelectedIndex();
+        int realColumnIndex = getSelectedRealColumnIndex();
         FilterLogic selectedRowLogic = rowLogicComboBox.getSelectedIndex() == 0 ? FilterLogic.AND : FilterLogic.OR;
-        Filter filter = new Filter(selectedColumnIndex);
+        Filter filter = new Filter(realColumnIndex);
         filter.setOperator(selectedRowLogic);
 
         try {
@@ -300,17 +306,21 @@ public final class FilterDialog extends JDialog {
             return;
         }
         Filter filter = card.getFilter();
-        columnComboBox.setSelectedIndex(filter.getColumnIndex());
+        int comboBoxIndex = selectableColumnIndices.indexOf(filter.getColumnIndex());
+        if (comboBoxIndex >= 0) {
+            columnComboBox.setSelectedIndex(comboBoxIndex);
+        }
         rowLogicComboBox.setSelectedIndex(filter.getOperator() == FilterLogic.AND ? 0 : 1);
 
         conditionInputRows.clear();
         conditionRowsPanel.removeAll();
 
         List<FilterCondition> conditions = filter.getConditions();
+        int realColumnIndex = filter.getColumnIndex();
+        DataType columnType = table.getColumnType(realColumnIndex);
         for (int i = 0; i < conditions.size(); i++) {
             FilterCondition condition = conditions.get(i);
-            DataType columnType = table.getColumnType(filter.getColumnIndex());
-            ConditionInputRow row = new ConditionInputRow(this, columnType, i > 0, i);
+            ConditionInputRow row = new ConditionInputRow(this, columnType, realColumnIndex, i > 0);
             row.loadCondition(condition);
             conditionInputRows.add(row);
             conditionRowsPanel.add(row.getPanel());
@@ -333,7 +343,7 @@ public final class FilterDialog extends JDialog {
             card.setIndex(i + 1);
 
             if (i > 0) {
-                JLabel separatorLabel = new JLabel("- " + globalLogic.name() + " -", SwingConstants.CENTER);
+                JLabel separatorLabel = new JLabel(globalLogic.name(), SwingConstants.CENTER);
                 separatorLabel.setForeground(UIManager.getColor("Label.disabledForeground"));
                 separatorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
                 separatorLabel.setBorder(new EmptyBorder(2, 0, 2, 0));
@@ -382,12 +392,30 @@ public final class FilterDialog extends JDialog {
         updateSqlPreview();
     }
 
+    private int getSelectedRealColumnIndex() {
+        int comboBoxIndex = columnComboBox.getSelectedIndex();
+        if (comboBoxIndex < 0 || comboBoxIndex >= selectableColumnIndices.size()) {
+            return -1;
+        }
+        return selectableColumnIndices.get(comboBoxIndex);
+    }
+
     private DataType getSelectedColumnType() {
-        int selectedIndex = columnComboBox.getSelectedIndex();
-        if (selectedIndex < 0) {
+        int realColumnIndex = getSelectedRealColumnIndex();
+        if (realColumnIndex < 0) {
             return DataType.EMPTY;
         }
-        return table.getColumnType(selectedIndex);
+        return table.getColumnType(realColumnIndex);
+    }
+
+    private List<Integer> buildSelectableColumnIndices() {
+        List<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < columnNames.size(); i++) {
+            if (table.getColumnType(i) != DataType.EMPTY) {
+                indices.add(i);
+            }
+        }
+        return indices;
     }
 
     private void showValidationError(String message) {

@@ -4,6 +4,7 @@ import fr.univrennes.istic.l2gen.application.core.config.Lang;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterCondition;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterLogic;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterOperator;
+import fr.univrennes.istic.l2gen.application.core.services.statistic.StringStatisticService;
 import fr.univrennes.istic.l2gen.application.core.table.DataType;
 
 import javax.swing.*;
@@ -13,14 +14,18 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public final class ConditionInputRow {
 
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private static final FilterOperator[] STRING_OPERATORS = {
+    private static final FilterOperator[] STRING_FREE_OPERATORS = {
             FilterOperator.EQUAL, FilterOperator.LIKE, FilterOperator.NOT_EQUAL,
             FilterOperator.IS_NULL, FilterOperator.NOT_NULL
+    };
+    private static final FilterOperator[] STRING_CATEGORICAL_OPERATORS = {
+            FilterOperator.EQUAL, FilterOperator.IS_NULL, FilterOperator.NOT_NULL
     };
     private static final FilterOperator[] NUMERIC_OPERATORS = {
             FilterOperator.EQUAL, FilterOperator.NOT_EQUAL,
@@ -38,8 +43,16 @@ public final class ConditionInputRow {
             FilterOperator.EQUAL, FilterOperator.IS_NULL, FilterOperator.NOT_NULL
     };
 
+    private static final String CARD_TEXT = "TEXT";
+    private static final String CARD_CATEGORY = "CATEGORY";
+    private static final String CARD_NUMERIC = "NUMERIC";
+    private static final String CARD_DATE = "DATE";
+    private static final String CARD_BOOLEAN = "BOOLEAN";
+    private static final String CARD_NONE = "NONE";
+
     private final FilterDialog owner;
     private DataType columnType;
+    private int realColumnIndex;
     private final boolean showLogicToggle;
 
     private JPanel panel;
@@ -48,20 +61,16 @@ public final class ConditionInputRow {
     private JPanel valuePanel;
     private CardLayout valueCardLayout;
 
-    private static final String CARD_TEXT = "TEXT";
-    private static final String CARD_NUMERIC = "NUMERIC";
-    private static final String CARD_DATE = "DATE";
-    private static final String CARD_BOOLEAN = "BOOLEAN";
-    private static final String CARD_NONE = "NONE";
-
     private JTextField textValueField;
+    private JComboBox<String> categoryComboBox;
     private JSpinner numericValueSpinner;
     private JSpinner dateValueSpinner;
     private JComboBox<String> booleanValueComboBox;
 
-    public ConditionInputRow(FilterDialog owner, DataType columnType, boolean showLogicToggle, int rowIndex) {
+    public ConditionInputRow(FilterDialog owner, DataType columnType, int realColumnIndex, boolean showLogicToggle) {
         this.owner = owner;
         this.columnType = columnType;
+        this.realColumnIndex = realColumnIndex;
         this.showLogicToggle = showLogicToggle;
         buildPanel();
     }
@@ -89,7 +98,7 @@ public final class ConditionInputRow {
             leftSection.add(placeholderLabel);
         }
 
-        operatorComboBox = new JComboBox<>(buildOperatorModels(columnType));
+        operatorComboBox = new JComboBox<>(buildOperatorArray(columnType));
         operatorComboBox.setRenderer(new FilterOperatorRenderer());
         operatorComboBox.setPreferredSize(new Dimension(120, 26));
         operatorComboBox.addActionListener(event -> refreshValueVisibility());
@@ -102,6 +111,10 @@ public final class ConditionInputRow {
         textValueField = new JTextField();
         textValueField.setPreferredSize(new Dimension(120, 26));
         valuePanel.add(textValueField, CARD_TEXT);
+
+        categoryComboBox = new JComboBox<>();
+        categoryComboBox.setPreferredSize(new Dimension(120, 26));
+        valuePanel.add(categoryComboBox, CARD_CATEGORY);
 
         numericValueSpinner = FilterDialog.createDoubleSpinner();
         valuePanel.add(numericValueSpinner, CARD_NUMERIC);
@@ -123,17 +136,45 @@ public final class ConditionInputRow {
         panel.add(valuePanel, BorderLayout.CENTER);
         panel.add(removeButton, BorderLayout.EAST);
 
-        refreshValueVisibility();
+        refreshOperatorsAndValues();
     }
 
-    private FilterOperator[] buildOperatorModels(DataType type) {
+    private FilterOperator[] buildOperatorArray(DataType type) {
         return switch (type) {
-            case STRING -> STRING_OPERATORS;
+            case STRING -> isCurrentColumnCategorical() ? STRING_CATEGORICAL_OPERATORS : STRING_FREE_OPERATORS;
             case INTEGER, DOUBLE -> NUMERIC_OPERATORS;
             case DATE -> DATE_OPERATORS;
             case BOOLEAN -> BOOLEAN_OPERATORS;
-            case EMPTY -> new FilterOperator[] {};
+            case EMPTY -> new FilterOperator[] { FilterOperator.IS_NULL, FilterOperator.NOT_NULL };
         };
+    }
+
+    private boolean isCurrentColumnCategorical() {
+        if (columnType != DataType.STRING || realColumnIndex < 0) {
+            return false;
+        }
+        return StringStatisticService.hasCategories(owner.getTable(), realColumnIndex);
+    }
+
+    private void refreshOperatorsAndValues() {
+        FilterOperator previouslySelected = (FilterOperator) operatorComboBox.getSelectedItem();
+        operatorComboBox.setModel(new DefaultComboBoxModel<>(buildOperatorArray(columnType)));
+
+        if (previouslySelected != null) {
+            for (int i = 0; i < operatorComboBox.getItemCount(); i++) {
+                if (operatorComboBox.getItemAt(i) == previouslySelected) {
+                    operatorComboBox.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+
+        if (columnType == DataType.STRING && isCurrentColumnCategorical()) {
+            List<String> categories = StringStatisticService.getCategories(owner.getTable(), realColumnIndex);
+            categoryComboBox.setModel(new DefaultComboBoxModel<>(categories.toArray(new String[0])));
+        }
+
+        refreshValueVisibility();
     }
 
     private void refreshValueVisibility() {
@@ -142,10 +183,7 @@ public final class ConditionInputRow {
             return;
         }
 
-        boolean noValueNeeded = selectedOperator == FilterOperator.IS_NULL
-                || selectedOperator == FilterOperator.NOT_NULL;
-
-        if (noValueNeeded) {
+        if (selectedOperator == FilterOperator.IS_NULL || selectedOperator == FilterOperator.NOT_NULL) {
             valueCardLayout.show(valuePanel, CARD_NONE);
             return;
         }
@@ -154,17 +192,17 @@ public final class ConditionInputRow {
             case INTEGER, DOUBLE -> CARD_NUMERIC;
             case DATE -> CARD_DATE;
             case BOOLEAN -> CARD_BOOLEAN;
-            default -> CARD_TEXT;
+            case STRING -> isCurrentColumnCategorical() ? CARD_CATEGORY : CARD_TEXT;
+            default -> CARD_NONE;
         };
 
         valueCardLayout.show(valuePanel, card);
     }
 
-    public void updateColumnType(DataType newType) {
+    public void updateColumnType(DataType newType, int newRealColumnIndex) {
         this.columnType = newType;
-        FilterOperator[] operators = buildOperatorModels(newType);
-        operatorComboBox.setModel(new DefaultComboBoxModel<>(operators));
-        refreshValueVisibility();
+        this.realColumnIndex = newRealColumnIndex;
+        refreshOperatorsAndValues();
     }
 
     public void loadCondition(FilterCondition condition) {
@@ -178,6 +216,7 @@ public final class ConditionInputRow {
 
         String value = condition.value();
         if (value == null || value.isEmpty()) {
+            refreshValueVisibility();
             return;
         }
 
@@ -195,12 +234,15 @@ public final class ConditionInputRow {
                 } catch (Exception ignored) {
                 }
             }
-            case BOOLEAN -> {
-                booleanValueComboBox.setSelectedItem(value);
+            case BOOLEAN -> booleanValueComboBox.setSelectedItem(value);
+            case STRING -> {
+                if (isCurrentColumnCategorical()) {
+                    categoryComboBox.setSelectedItem(value);
+                } else {
+                    textValueField.setText(value);
+                }
             }
-            default -> {
-                textValueField.setText(value);
-            }
+            default -> textValueField.setText(value);
         }
 
         refreshValueVisibility();
@@ -233,10 +275,14 @@ public final class ConditionInputRow {
                 yield timestamp.toLocalDateTime().format(TIMESTAMP_FORMATTER);
             }
             case BOOLEAN -> (String) booleanValueComboBox.getSelectedItem();
-            default -> {
+            case STRING -> {
+                if (isCurrentColumnCategorical()) {
+                    yield (String) categoryComboBox.getSelectedItem();
+                }
                 String text = textValueField.getText().trim();
                 yield text.isEmpty() ? null : text;
             }
+            default -> null;
         };
     }
 

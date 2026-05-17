@@ -1,5 +1,6 @@
 package fr.univrennes.istic.l2gen.application.gui.dialog.filter;
 
+import fr.univrennes.istic.l2gen.application.core.config.Config;
 import fr.univrennes.istic.l2gen.application.core.config.Lang;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterCondition;
@@ -89,11 +90,11 @@ public final class FilterCardPanel {
             panel.repaint();
         });
 
-        JButton editButton = new JButton(Lang.get("filter.edit"));
+        JButton editButton = new JButton(Config.getIcon("icons/edit.svg"));
         editButton.setPreferredSize(new Dimension(60, 22));
         editButton.addActionListener(event -> owner.editFilterCard(this));
 
-        JButton removeButton = new JButton(Lang.get("filter.remove"));
+        JButton removeButton = new JButton(Config.getIcon("icons/remove.svg"));
         removeButton.setPreferredSize(new Dimension(60, 22));
         removeButton.addActionListener(event -> owner.removeFilterCard(this));
 
