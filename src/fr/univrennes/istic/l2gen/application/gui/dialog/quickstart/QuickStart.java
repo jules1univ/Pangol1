@@ -162,7 +162,16 @@ public final class QuickStart {
 
         stepList.add(new Step(
                 Lang.get("quickstart.step7.title"),
-                Lang.get("quickstart.step7.body"),
+                Lang.get("quickstart.step7.body", Lang.get("table.toolbar.mergetable")),
+                () -> {
+                    mainView.getTablePanel().setVisible(true);
+                    mainView.resetSplit();
+                },
+                () -> mainView.getTablePanel().getTableView().getToolBar().getMergeButton()));
+
+        stepList.add(new Step(
+                Lang.get("quickstart.step8.title"),
+                Lang.get("quickstart.step8.body"),
                 () -> {
                     mainView.getTablePanel().setVisible(true);
                     mainView.resetSplit();

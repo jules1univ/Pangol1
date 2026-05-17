@@ -126,6 +126,10 @@ public final class TableToolBar extends JToolBar {
                 return subtableButton;
         }
 
+        public JButton getMergeButton() {
+                return mergetableButton;
+        }
+
         public JButton getHideEmptyColumnsButton() {
                 return hideEmptyColumnsButton;
         }
