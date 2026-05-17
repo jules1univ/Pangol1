@@ -1,8 +1,9 @@
 package fr.univrennes.istic.l2gen.application.gui.panels.report.views.settings.pages.chart;
 
 import java.awt.Dimension;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -20,8 +21,7 @@ import fr.univrennes.istic.l2gen.svg.color.Color;
 public final class ColorSettingsPanel extends SettingSectionPanel {
     private static final int SWATCH_SIZE = 18;
 
-    private List<Color> colors = new ArrayList<>();
-    private List<String> labels = new ArrayList<>();
+    private Map<String, Color> colorMap = new LinkedHashMap<>();
 
     public ColorSettingsPanel() {
         super(Lang.get("report.settings.chart.colors"));
@@ -29,17 +29,16 @@ public final class ColorSettingsPanel extends SettingSectionPanel {
     }
 
     private void build() {
-        for (int i = 0; i < colors.size(); i++) {
-            Color color = colors.get(i);
-            int index = i;
-            String label = labels.size() > i ? labels.get(i) : Lang.get("report.settings.chart.color") + " " + (i + 1);
-            addRow(new SettingRowPanel(label, createColorControl(index, color)));
+        for (Map.Entry<String, Color> entry : colorMap.entrySet()) {
+            String label = entry.getKey();
+            Color color = entry.getValue();
+            addRow(new SettingRowPanel(label, createColorControl(label, color)));
         }
 
-        setVisible(colors.size() > 0);
+        setVisible(colorMap.size() > 0);
     }
 
-    private JComponent createColorControl(int index, Color color) {
+    private JComponent createColorControl(String label, Color color) {
         JPanel control = new JPanel();
         control.setOpaque(false);
         control.setLayout(new BoxLayout(control, BoxLayout.X_AXIS));
@@ -57,11 +56,10 @@ public final class ColorSettingsPanel extends SettingSectionPanel {
                 return;
             }
 
-            if (index >= 0 && index < colors.size()) {
-                colors.set(index, Color.fromAWT(selectedColor));
-                swatch.setBackground(selectedColor);
-                swatch.repaint();
-            }
+            Color newColor = Color.fromAWT(selectedColor);
+            colorMap.put(label, newColor);
+            swatch.setBackground(selectedColor);
+            swatch.repaint();
         });
 
         control.add(chooseColorButton);
@@ -82,18 +80,16 @@ public final class ColorSettingsPanel extends SettingSectionPanel {
         return swatch;
     }
 
-    public void setColorLabels(List<Color> newColors, List<String> newLabels) {
-        this.colors = newColors != null ? newColors : new ArrayList<>();
-        this.labels = newLabels != null ? newLabels : new ArrayList<>();
-
+    public void setColorMap(Map<String, Color> newColorMap) {
+        this.colorMap = newColorMap != null ? newColorMap : new HashMap<>();
         clearRows();
         build();
         revalidate();
         repaint();
     }
 
-    public List<Color> getColors() {
-        return colors;
+    public Map<String, Color> getColorMap() {
+        return new HashMap<>(colorMap);
     }
 
 }

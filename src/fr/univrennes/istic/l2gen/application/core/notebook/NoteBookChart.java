@@ -70,8 +70,7 @@ public final class NoteBookChart implements NoteBookValue {
     private final int groupColumn;
     private final int valueColumn;
 
-    private List<Color> colors;
-    private List<String> labels;
+    private Map<String, Color> colorMap = new LinkedHashMap<>();
 
     private String cachedSVG;
 
@@ -100,14 +99,14 @@ public final class NoteBookChart implements NoteBookValue {
             boolean includeFilters,
             boolean percentage,
 
-            List<Color> colors) {
+            Map<String, Color> colorMap) {
 
         this.type = type;
         this.title = title;
 
         this.showLegend = showLegend;
         this.horizontalLegend = horizontalLegend;
-        this.colors = colors;
+        this.colorMap = colorMap;
 
         this.stacked = stacked;
         this.gridLevel = gridLevel;
@@ -227,18 +226,16 @@ public final class NoteBookChart implements NoteBookValue {
             Map<String, Color> legendColors = new LinkedHashMap<>();
 
             boolean hasRows = false;
-            int colorIndex = 0;
             while (resultSet.next()) {
-                if (colors.size() <= colorIndex) {
-                    colors.add(Color.random());
+                if (!colorMap.containsKey(resultSet.getString(1))) {
+                    colorMap.put(resultSet.getString(1), Color.random());
                 }
 
-                Color color = colors.get(colorIndex++);
+                Color color = colorMap.get(resultSet.getString(1));
                 dataSet.values().add(new Value(resultSet.getDouble(2), color));
                 legendColors.put(resultSet.getString(1), color);
                 hasRows = true;
             }
-            labels = new ArrayList<>(legendColors.keySet());
 
             if (hasRows) {
                 DataGroup dataGroup = new DataGroup(new Label(title));
@@ -313,7 +310,6 @@ public final class NoteBookChart implements NoteBookValue {
             List<String> legendOrder = new ArrayList<>();
 
             boolean hasRows = false;
-            int colorIndex = 0;
             while (resultSet.next()) {
                 String biggerGroupValue = resultSet.getString(1);
                 String groupValue = resultSet.getString(2);
@@ -324,16 +320,15 @@ public final class NoteBookChart implements NoteBookValue {
                         .put(groupValue, value);
 
                 if (!legendColors.containsKey(groupValue)) {
-                    if (colors.size() <= colorIndex) {
-                        colors.add(Color.random());
+                    if (!colorMap.containsKey(groupValue)) {
+                        colorMap.put(groupValue, Color.random());
                     }
-                    legendColors.put(groupValue, colors.get(colorIndex++));
+                    legendColors.put(groupValue, colorMap.get(groupValue));
                     legendOrder.add(groupValue);
                 }
 
                 hasRows = true;
             }
-            labels = new ArrayList<>(legendOrder);
 
             if (hasRows) {
                 DataGroup dataGroup = new DataGroup(new Label(title));
@@ -463,12 +458,8 @@ public final class NoteBookChart implements NoteBookValue {
         return percentage;
     }
 
-    public List<Color> getColors() {
-        return colors;
-    }
-
-    public List<String> getColorLabels() {
-        return labels;
+    public Map<String, Color> getColorMap() {
+        return colorMap;
     }
 
     @Override

@@ -123,7 +123,7 @@ public final class ChartSettingsPanel extends SettingSectionPanel implements IRe
                                 shared.data().isIncludeFilters(),
                                 shared.data().isPercentage(),
 
-                                shared.color().getColors());
+                                shared.color().getColorMap());
 
                 return chart;
         }
@@ -156,7 +156,7 @@ public final class ChartSettingsPanel extends SettingSectionPanel implements IRe
                 shared.data().setIncludeFilters(chart.isIncludeFilters());
                 shared.data().setIsPercentage(chart.isPercentage());
 
-                shared.color().setColorLabels(chart.getColors(), chart.getColorLabels());
+                shared.color().setColorMap(chart.getColorMap());
 
                 DataTable table = GUIController.getInstance().getTable().orElse(null);
                 if (table != null && chart.getTable() != null && table.getPath() == chart.getTable().getPath()) {

@@ -44,8 +44,6 @@
 
 ## Why Pangol1?
 
-<img src="docs/DIAPO.gif" alt="Pangol1 Workflow" width="100%"/>
-
 Most reporting tools struggle with very large datasets or generate heavy visual outputs.
 
 Pangol1 is designed to:
