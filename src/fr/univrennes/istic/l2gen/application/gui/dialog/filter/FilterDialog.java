@@ -8,7 +8,6 @@ import fr.univrennes.istic.l2gen.application.core.config.Lang;
 import fr.univrennes.istic.l2gen.application.core.filter.Filter;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterCondition;
 import fr.univrennes.istic.l2gen.application.core.filter.FilterLogic;
-import fr.univrennes.istic.l2gen.application.core.filter.FilterSort;
 import fr.univrennes.istic.l2gen.application.core.table.DataTable;
 import fr.univrennes.istic.l2gen.application.core.table.DataType;
 import fr.univrennes.istic.l2gen.application.gui.dialog.DialogBase;
@@ -36,7 +35,6 @@ public final class FilterDialog extends JDialog {
     private final List<ConditionInputRow> conditionInputRows = new ArrayList<>();
 
     private JPanel filterListPanel;
-    private JLabel sqlPreviewLabel;
 
     private FilterDialog(Frame parent, DataTable table) {
         super(parent, Lang.get("filter.title"), true);
@@ -206,7 +204,6 @@ public final class FilterDialog extends JDialog {
         globalLogicComboBox.addActionListener(event -> {
             globalLogic = globalLogicComboBox.getSelectedIndex() == 0 ? FilterLogic.AND : FilterLogic.OR;
             refreshFilterList();
-            updateSqlPreview();
         });
         panel.add(globalLogicComboBox);
 
@@ -216,9 +213,6 @@ public final class FilterDialog extends JDialog {
     private JPanel buildDialogFooter() {
         JPanel panel = new JPanel(new BorderLayout(8, 0));
         panel.setBorder(new EmptyBorder(8, 12, 8, 12));
-
-        sqlPreviewLabel = new JLabel();
-        sqlPreviewLabel.setForeground(UIManager.getColor("Label.disabledForeground"));
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
 
@@ -234,7 +228,6 @@ public final class FilterDialog extends JDialog {
         buttonPanel.add(cancelButton);
         buttonPanel.add(confirmButton);
 
-        panel.add(sqlPreviewLabel, BorderLayout.CENTER);
         panel.add(buttonPanel, BorderLayout.EAST);
 
         return panel;
@@ -276,7 +269,6 @@ public final class FilterDialog extends JDialog {
         result.add(filter);
         addFilterCard(filter);
         resetBuilder();
-        updateSqlPreview();
     }
 
     private void resetBuilder() {
@@ -297,7 +289,6 @@ public final class FilterDialog extends JDialog {
         result.remove(card.getFilter());
         filterCards.remove(card);
         refreshFilterList();
-        updateSqlPreview();
     }
 
     public void editFilterCard(FilterCardPanel card) {
@@ -332,7 +323,6 @@ public final class FilterDialog extends JDialog {
         result.remove(filter);
         filterCards.remove(card);
         refreshFilterList();
-        updateSqlPreview();
     }
 
     private void refreshFilterList() {
@@ -357,39 +347,11 @@ public final class FilterDialog extends JDialog {
         filterListPanel.repaint();
     }
 
-    private void updateSqlPreview() {
-        if (result.isEmpty()) {
-            sqlPreviewLabel.setText("");
-            return;
-        }
-
-        StringBuilder sql = new StringBuilder("WHERE ");
-        for (int i = 0; i < result.size(); i++) {
-            Filter filter = result.get(i);
-            String columnName = columnNames.get(filter.getColumnIndex());
-            FilterSort sort = filter.getSort();
-
-            if (sort != FilterSort.NONE) {
-                sql.append("ORDER BY ").append(columnName).append(sort == FilterSort.ASCENDING ? " ASC" : " DESC");
-            } else {
-                sql.append("(").append(filter.getSQL(columnName)).append(")");
-            }
-
-            if (i < result.size() - 1) {
-                sql.append(" ").append(globalLogic.name()).append(" ");
-            }
-        }
-
-        sqlPreviewLabel.setText(sql.toString());
-        sqlPreviewLabel.setToolTipText(sql.toString());
-    }
-
     private void loadExistingFilters() {
         for (Filter filter : table.getFilters()) {
             result.add(filter);
             addFilterCard(filter);
         }
-        updateSqlPreview();
     }
 
     private int getSelectedRealColumnIndex() {
